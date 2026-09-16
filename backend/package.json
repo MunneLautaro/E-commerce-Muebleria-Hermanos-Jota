@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Muebleria HJota Backend",
+  "homepage": "https://github.com/MunneLautaro/E-commerce-Muebleria-Hermanos-Jota#readme",
+  "bugs": {
+    "url": "https://github.com/MunneLautaro/E-commerce-Muebleria-Hermanos-Jota/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MunneLautaro/E-commerce-Muebleria-Hermanos-Jota.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
