@@ -1,0 +1,188 @@
+/* Tipografías de marca: Playfair Display (títulos) + Inter (cuerpo/UI).
+   Los @import url() deben ir ANTES de @import "tailwindcss". */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap");
+@import "tailwindcss";
+
+/* ==========================================================
+   HERMANOS JOTA — Tokens de marca (Manual de Marca 2026)
+   Cada token genera clases de Tailwind automáticamente:
+   --color-siena  ->  bg-siena, text-siena, border-siena
+   --font-display ->  font-display
+   --tracking-title -> tracking-title
+   ========================================================== */
+@theme {
+  /* Paleta principal */
+  --color-siena: #a0522d; /* Siena Tostado: color de marca, títulos, CTAs */
+  --color-salvia: #87a96b; /* Verde Salvia: acento secundario, sustentabilidad */
+  --color-alabastro: #f5e6d3; /* Alabastro Cálido: fondos, fotografía */
+  --color-oro: #d4a437; /* Vara de Oro: detalles premium */
+  --color-rosa: #c47a6d; /* Rosa Polvoriento: acentos suaves */
+
+  /* Neutros cálidos (derivados de la paleta) */
+  --color-ink: #3a2622; /* Texto principal / títulos oscuros */
+  --color-ink-soft: #5c4a45; /* Texto secundario */
+  --color-crema: #fdf5ef; /* Superficie clara (fondo del logo) */
+  --color-linea: #f0e4d8; /* Divisores y bordes suaves */
+  --color-superficie: #f4f4f4; /* Contenedores neutros (tablas, índices) */
+
+  /* Estados (solo para errores / usos incorrectos) */
+  --color-error: #dc0000;
+  --color-error-bg: #fff0f0;
+
+  /* Tipografía */
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* Espaciado tipográfico según manual */
+  --tracking-title: 0.1em; /* Títulos principales */
+  --tracking-cta: 0.08em; /* Botones y CTAs */
+  --tracking-caption: 0.02em; /* Leyendas */
+  --leading-body: 1.6; /* Altura de línea del cuerpo */
+
+  /* Sombras suaves y cálidas */
+  --shadow-marca: 0 4px 20px rgb(160 82 45 / 0.1);
+  --shadow-tarjeta: 0 1px 4px rgb(58 38 34 / 0.08);
+
+  /* Radios */
+  --radius-marca: 0.5rem;
+}
+
+/* ==========================================================
+   Utilidades de marca reutilizables (fondos con degradé)
+   ========================================================== */
+
+/* Fondo general de página: alabastro -> blanco -> alabastro */
+@utility bg-marca {
+  background-image: linear-gradient(
+    135deg,
+    #f5e6d3 0%,
+    #fdf5ef 30%,
+    #ffffff 55%,
+    #fdf5ef 80%,
+    #f5e6d3 100%
+  );
+}
+
+/* Panel destacado: degradé horizontal alabastro -> transparente
+   (combinar con border-l-4 border-siena) */
+@utility bg-panel-marca {
+  background-image: linear-gradient(
+    90deg,
+    #f5e6d3 0%,
+    #fdf5ef 55%,
+    transparent 100%
+  );
+}
+
+/* Panel de sustentabilidad: degradé salvia suave */
+@utility bg-panel-salvia {
+  background-image: linear-gradient(
+    90deg,
+    rgb(135 169 107 / 0.22) 0%,
+    rgb(135 169 107 / 0.06) 60%,
+    transparent 100%
+  );
+}
+
+/* ==========================================================
+   Base global
+   ========================================================== */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100svh;
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+    background-color: #ffffff;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-synthesis: none;
+  }
+
+  /* Títulos: Playfair Display, mayúsculas, espaciado 0.1em */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-title);
+    line-height: 1.2;
+    color: var(--color-ink);
+    margin: 0;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    color: var(--color-siena);
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    color: var(--color-salvia);
+    font-family: var(--font-body);
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  a {
+    color: var(--color-siena);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  a:hover {
+    color: var(--color-ink);
+  }
+
+  /* Botones: Inter Medium, mayúsculas, 0.08em */
+  button {
+    font-family: var(--font-body);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-cta);
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--color-alabastro);
+    color: var(--color-siena);
+  }
+
+  /* Foco visible accesible */
+  :focus-visible {
+    outline: 2px solid var(--color-siena);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
