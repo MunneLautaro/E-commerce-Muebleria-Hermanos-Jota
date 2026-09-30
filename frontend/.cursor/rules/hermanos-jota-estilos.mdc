@@ -1,0 +1,115 @@
+---
+description: Estilos y diseño de Hermanos Jota (React + Tailwind v4). Separar Componente.jsx y ComponenteStyles.jsx, usar tokens de marca.
+globs: src/**/*.jsx,src/**/*.css
+alwaysApply: true
+---
+
+# Estilos de Hermanos Jota (React + Vite + Tailwind v4)
+
+Aplicá estas reglas SIEMPRE que crees o modifiques componentes, páginas o estilos del frontend. La fuente de verdad visual es `src/index.css` (tokens en `@theme`) y el Manual de Marca 2026 de Hermanos Jota (muebles artesanales, sustentables, Buenos Aires).
+
+## 1. Estructura obligatoria: código y estilos separados
+
+Cada componente o página vive en su propia carpeta con DOS archivos:
+
+```
+src/components/Layout/
+  Layout.jsx        <- lógica y JSX (sin strings largos de clases)
+  LayoutStyles.jsx  <- clases de Tailwind, exportadas como objeto
+```
+
+`LayoutStyles.jsx`:
+```jsx
+export const layoutStyles = {
+  root: "min-h-screen bg-marca font-body text-ink",
+  header: "flex items-center justify-between border-b border-linea px-6 py-4",
+  main: "mx-auto w-full max-w-6xl px-6 py-12",
+}
+```
+
+`Layout.jsx`:
+```jsx
+import { Outlet } from "react-router-dom"
+import { layoutStyles as s } from "./LayoutStyles"
+
+export const Layout = () => (
+  <div className={s.root}>
+    <header className={s.header}>...</header>
+    <main className={s.main}><Outlet /></main>
+  </div>
+)
+```
+
+Reglas:
+- Nombre del archivo de estilos: `<Componente>Styles.jsx`. Export nombrado en camelCase: `<componente>Styles`.
+- Se importa con alias corto `s`: `import { xStyles as s } from "./XStyles"`.
+- Cada clave describe el ROL del elemento (`root`, `header`, `title`, `card`), no su apariencia.
+- Para clases condicionales, exportá funciones o variantes en el mismo archivo: `button: { base: "...", primary: "...", ghost: "..." }`.
+- Nada de `style={{}}` inline ni CSS por componente. Solo clases de Tailwind.
+- Páginas: `src/pages/Home/HomePage.jsx` + `HomePageStyles.jsx`.
+- Lenguaje: JavaScript/JSX. No usar TypeScript, ni `React.FC`, ni `import React`.
+- Nombres de componentes, variables y textos de la UI en español.
+
+## 2. Tokens de marca (usarlos, nunca hex sueltos)
+
+| Clase Tailwind | Color | Uso |
+|---|---|---|
+| `siena` (#A0522D) | Siena Tostado | Color principal, títulos, CTAs, bordes de acento |
+| `salvia` (#87A96B) | Verde Salvia | Acento secundario, sustentabilidad, subtítulos |
+| `alabastro` (#F5E6D3) | Alabastro Cálido | Fondos, paneles, logo invertido |
+| `oro` (#D4A437) | Vara de Oro | Detalles premium, acentos puntuales |
+| `rosa` (#C47A6D) | Rosa Polvoriento | Acentos suaves |
+| `ink` / `ink-soft` | Marrón oscuro | Texto principal / secundario |
+| `crema`, `linea`, `superficie` | Neutros cálidos | Superficies, divisores, contenedores |
+| `error`, `error-bg` | Rojo | SOLO errores y "usos incorrectos" |
+
+Ejemplos: `bg-siena`, `text-ink`, `border-linea`, `text-salvia`. Nunca usar negro puro, gris frío ni colores fuera de la paleta.
+
+## 3. Tipografía
+
+- Títulos: `font-display` (Playfair Display), `uppercase`, `tracking-title` (0.1em), peso liviano/regular. `h1`/`h2`/`h3` ya traen este estilo desde `index.css`.
+- Cuerpo y UI: `font-body` (Inter), `font-normal`, `leading-[1.6]`.
+- Leyendas: `font-light text-sm tracking-caption`.
+- Botones y CTAs: `font-medium uppercase tracking-cta`.
+- Subtítulos de sección: `font-medium uppercase tracking-widest text-salvia`.
+- Bajadas o introducciones: `italic text-ink`.
+- Pesos permitidos en Inter: 300, 400, 500, 700. En Playfair: 400, 700.
+
+## 4. Patrones visuales de marca
+
+- Fondo de página: `bg-marca`. Fondos suaves: `bg-crema` o `bg-alabastro`.
+- Panel destacado (declaraciones, listas clave): `border-l-4 border-siena bg-panel-marca p-8`.
+- Panel de sustentabilidad: `border-l-4 border-siena bg-panel-salvia p-8`.
+- Título de sección: `h2` con línea inferior `border-b-2 border-siena pb-4`. Divisores suaves: `border-b border-linea`.
+- Tablas: encabezado `bg-siena text-white uppercase text-sm tracking-wide`, filas alternadas `bg-white` / `bg-superficie`, sombra `shadow-tarjeta`.
+- Tarjetas y contenedores: `rounded-marca bg-white shadow-tarjeta`. Contenedores neutros: `rounded-marca bg-superficie`.
+- Botón primario: `bg-siena text-white px-6 py-3 rounded-marca font-medium uppercase tracking-cta hover:bg-ink transition-colors`.
+- Botón secundario: `border border-siena text-siena px-6 py-3 rounded-marca font-medium uppercase tracking-cta hover:bg-alabastro transition-colors`.
+- Errores o "no hacer": `border-l-4 border-error bg-error-bg`.
+
+## 5. Estilo general
+
+- Diseño cálido, artesanal y sofisticado pero accesible; aire generoso (mucho `py-` y `gap-`).
+- Layout limpio con alineación a la izquierda para texto. Contenedor: `mx-auto w-full max-w-6xl px-6`.
+- Mobile first: base para móvil y `md:` / `lg:` para pantallas grandes.
+- Sombras siempre suaves y cálidas (`shadow-marca`, `shadow-tarjeta`). Sin degradés saturados ni efectos llamativos.
+- Movimiento mínimo: solo `transition-colors` o `transition-shadow` en hover/foco. Respetar `prefers-reduced-motion`.
+- Accesibilidad: foco visible (ya definido en `index.css`), contraste suficiente, `alt` en imágenes, HTML semántico.
+
+## 6. Logo
+
+- Sobre fondos claros: color Siena Tostado. Sobre fondos oscuros: Alabastro Cálido. Negro o blanco solo si el color no está disponible.
+- Ancho mínimo: 120px en digital, 25mm en impresión. Respetar espacio libre alrededor.
+- No estirar, no cambiar colores, no agregar sombras/degradés/bordes, no ponerlo sobre fotos o fondos complejos.
+
+## 7. Tono de los textos de interfaz
+
+Cálido pero no empalagoso, conocedor pero no pretencioso, sofisticado pero accesible. Hablar de "historias de manos expertas y materiales nobles", no de "alta calidad". Voseo rioplatense ("descubrí", "explorá"). Botones con verbos claros ("Ver colección", "Guardar cambios").
+
+## 8. Checklist antes de terminar
+
+1. ¿El componente tiene su `XStyles.jsx` y el JSX no tiene strings largos de clases?
+2. ¿Usé solo tokens de marca (sin hex sueltos ni colores fuera de paleta)?
+3. ¿Títulos en `font-display uppercase tracking-title`?
+4. ¿Se ve bien en móvil?
+5. ¿No agregué CSS nuevo ni estilos inline?
