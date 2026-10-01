@@ -3,6 +3,7 @@ import { logger } from "./middlewares/logger.js"
 import cors from "cors"
 import corsOptions from "./config/cors.js"
 import { errorHandler } from "./middlewares/errorHandler.js"
+import { products } from "./data/products.js"
 
 const app = express()
 
@@ -15,6 +16,10 @@ app.get("/", (req, res) => {
   res.send(
     "Este es un endpoint de prueba. La API está funcionando correctamente.",
   )
+})
+
+app.get("/api/productos", (req, res) => {
+  res.json(products)
 })
 
 app.use(errorHandler)

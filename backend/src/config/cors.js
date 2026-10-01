@@ -1,4 +1,4 @@
-const whitelist = (process.env.CORS_WHITELIST || "http://localhost:5173")
+const whitelist = (process.env.CORS_WHITELIST || "http://localhost:5173,http://localhost:5174")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean)
