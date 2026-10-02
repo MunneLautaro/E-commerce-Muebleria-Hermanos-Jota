@@ -22,6 +22,18 @@ app.get("/api/productos", (req, res) => {
   res.json(products)
 })
 
+app.get("/api/productos/:id", (req, res) => {
+  const product = products.find((product) => product.id === req.params.id)
+
+  if (!product) {
+    return res.status(404).json({
+      error: "Producto no encontrado",
+    })
+  }
+
+  res.json(product)
+})
+
 app.use(errorHandler)
 
 export default app

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { Layout } from "../components/Layout/Layout"
 import HomePage from "../pages/Home"
 import ProductsPage from "../pages/products/Products"
+import ProductDetail from "../pages/products/ProductDetail"
 
 export const AppRouter = () => {
   return (
@@ -10,6 +11,7 @@ export const AppRouter = () => {
         <Route path="/" element={<HomePage />} />
 
         <Route path="/productos" element={<ProductsPage />} />
+        <Route path="/productos/:id" element={<ProductDetail />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

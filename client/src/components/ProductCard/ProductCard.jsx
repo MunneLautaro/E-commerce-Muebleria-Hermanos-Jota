@@ -1,7 +1,8 @@
+import { Link } from "react-router-dom"
+
 // Lista de todos los campos opcionales que puede tener un producto.
 // El nombre de la izquierda es el nombre que usamos en el objeto.
 // El nombre de la derecha es el que verá el usuario.
-
 const optionalFields = [
   { key: "caracteristicas", label: "Características" },
   { key: "materiales", label: "Materiales" },
@@ -28,11 +29,9 @@ const optionalFields = [
 
 // ProductCard representa un único producto del catálogo.
 // Recibe un objeto "product".
-
 export const ProductCard = ({ product }) => {
   return (
     <article className="overflow-hidden rounded-lg bg-[#F5E6D3] shadow-md">
-
       {/* Imagen del producto */}
       <img
         src={product.image}
@@ -41,7 +40,6 @@ export const ProductCard = ({ product }) => {
       />
 
       <div className="p-5">
-
         {/* Nombre: todos los productos lo tienen */}
         <h2 className="font-serif text-2xl font-bold text-[#A0522D]">
           {product.nombre}
@@ -57,15 +55,13 @@ export const ProductCard = ({ product }) => {
           <strong>Medidas:</strong> {product.medidas}
         </p>
 
-        {/* 
+        {/*
           Campos opcionales.
-
           Recorremos la lista de campos posibles.
           Si el producto tiene ese campo, lo mostramos.
           Si no lo tiene, no aparece nada.
         */}
         <div className="mt-5 space-y-2 border-t border-[#A0522D]/20 pt-4">
-
           {optionalFields.map(({ key, label }) => {
             const value = product[key]
 
@@ -83,17 +79,15 @@ export const ProductCard = ({ product }) => {
               </p>
             )
           })}
-
         </div>
 
-        {/* Botón para acceder al detalle del producto */}
-        <button
-          type="button"
-          className="mt-6 rounded-md bg-[#A0522D] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+        {/* Enlace para acceder al detalle del producto */}
+        <Link
+          to={`/productos/${product.id}`}
+          className="mt-6 inline-block rounded-md bg-[#A0522D] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
         >
           Ver producto
-        </button>
-
+        </Link>
       </div>
     </article>
   )
