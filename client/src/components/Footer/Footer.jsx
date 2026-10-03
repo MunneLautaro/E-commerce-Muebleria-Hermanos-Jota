@@ -36,6 +36,11 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/contacto" className={s.link}>
+                  Contacto
+                </Link>
+              </li>
+              <li>
                 <Link to="/login" className={s.link}>
                   Ingresar
                 </Link>

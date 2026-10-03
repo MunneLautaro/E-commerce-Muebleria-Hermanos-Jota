@@ -1,4 +1,4 @@
-import { motivosConsulta, useContacto } from "../../contactoHooks/useContacto"
+import { motivosConsulta, useContacto } from "../../hooks/useContacto"
 import { contactFormStyles as s } from "./ContactFormStyles"
 
 export const ContactForm = () => {
@@ -149,9 +149,7 @@ export const ContactForm = () => {
           className={s.textarea(Boolean(errores.mensaje))}
           placeholder="Contanos qué pieza te interesa o en qué podemos ayudarte."
           aria-invalid={Boolean(errores.mensaje)}
-          aria-describedby={
-            errores.mensaje ? "error-mensaje" : "ayuda-mensaje"
-          }
+          aria-describedby={errores.mensaje ? "error-mensaje" : "ayuda-mensaje"}
         />
         {errores.mensaje ? (
           <span id="error-mensaje" className={s.errorCampo}>

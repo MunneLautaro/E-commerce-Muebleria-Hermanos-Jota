@@ -3,6 +3,7 @@ import { Layout } from "../components/Layout/Layout"
 import HomePage from "../pages/Home"
 import ProductsPage from "../pages/products/Products"
 import ProductDetail from "../pages/products/ProductDetail"
+import ContactPage from "../pages/contact/ContactPage"
 
 export const AppRouter = () => {
   return (
@@ -12,7 +13,7 @@ export const AppRouter = () => {
 
         <Route path="/productos" element={<ProductsPage />} />
         <Route path="/productos/:id" element={<ProductDetail />} />
-
+        <Route path="/contacto" element={<ContactPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
