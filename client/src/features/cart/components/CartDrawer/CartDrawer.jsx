@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useCart } from "../hooks/useCart"
+import { useCart } from "../../hooks/useCart"
 import { cartDrawerStyles } from "./CartDrawerStyles"
 
 const TrashIcon = () => (
