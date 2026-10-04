@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import { useCart } from "../../context/CartContext"
 
 const optionalFields = [
   { key: "caracteristicas", label: "Características" },
@@ -27,10 +28,12 @@ const optionalFields = [
 
 export default function ProductDetail() {
   const { id } = useParams()
+  const { addItem } = useCart()
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [quantity, setQuantity] = useState(1)
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -55,6 +58,13 @@ export default function ProductDetail() {
 
     fetchProduct()
   }, [id])
+
+  const handleAddToCart = () => {
+    if (!product) return
+
+    addItem(product, quantity)
+    setQuantity(1)
+  }
 
   if (loading) {
     return (
@@ -96,6 +106,40 @@ export default function ProductDetail() {
             <p className="text-base text-gray-700">
               <strong>Medidas:</strong> {product.medidas}
             </p>
+          </div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="inline-flex items-center overflow-hidden rounded-full border border-[#A0522D]/30 bg-[#F5E6D3]">
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+                className="flex h-11 w-11 items-center justify-center text-lg font-bold text-siena transition-colors hover:bg-[#EAD9C4]"
+                aria-label="Disminuir cantidad"
+              >
+                −
+              </button>
+
+              <span className="min-w-12 text-center text-base font-medium text-ink">
+                {quantity}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => setQuantity((current) => current + 1)}
+                className="flex h-11 w-11 items-center justify-center text-lg font-bold text-siena transition-colors hover:bg-[#EAD9C4]"
+                aria-label="Aumentar cantidad"
+              >
+                +
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="inline-flex items-center justify-center rounded-marca bg-[#A0522D] px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-[#7f4222]"
+            >
+              Agregar al carrito
+            </button>
           </div>
 
           <div className="mt-5 space-y-3 border-t border-[#A0522D]/20 pt-5">

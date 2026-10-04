@@ -10,12 +10,17 @@ export const headerStyles = {
   brandName:
     "hidden font-display text-base font-normal uppercase tracking-[0.25em] text-ink sm:block",
 
-  nav: "hidden items-center gap-9 lg:flex",
+  nav: "hidden items-center gap-8 lg:flex",
   link: {
     base: "relative py-2 text-sm font-medium uppercase tracking-cta transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:scale-x-0 after:bg-siena after:transition-transform after:duration-300 hover:text-siena hover:after:scale-x-100",
     active: "text-siena after:scale-x-100",
     inactive: "text-ink-soft",
   },
+  cartButton:
+    "relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-linea bg-white text-siena transition-colors hover:bg-alabastro",
+  cartIcon: "h-5 w-5",
+  cartBadge:
+    "absolute -right-1.5 -top-1.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-siena px-1 text-[10px] font-bold text-white",
 
   actions: "hidden items-center gap-3 lg:flex",
   buttonPrimary:
@@ -35,4 +40,8 @@ export const headerStyles = {
     inactive: "text-ink-soft",
   },
   mobileActions: "mt-6 flex flex-col gap-3",
+  mobileCartButton:
+    "mt-4 inline-flex items-center justify-center gap-3 rounded-marca border border-siena px-4 py-3 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro",
+  mobileCartBadge:
+    "inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-siena px-1 text-[10px] font-bold text-white",
 }
