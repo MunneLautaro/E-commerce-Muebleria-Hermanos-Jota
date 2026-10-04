@@ -91,6 +91,8 @@ export const ContactForm = () => {
             name="telefono"
             type="tel"
             autoComplete="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
             maxLength={limites.telefonoMax}
             value={valores.telefono}
             onChange={cambiarCampo}

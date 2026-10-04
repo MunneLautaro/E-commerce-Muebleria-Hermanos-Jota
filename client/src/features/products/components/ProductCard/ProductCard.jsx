@@ -1,29 +1,6 @@
 import { Link } from "react-router-dom"
+import { productOptionalFields } from "../../constants/productFields"
 import { productCardStyles } from "./ProductCardStyles"
-
-const optionalFields = [
-  { key: "caracteristicas", label: "Características" },
-  { key: "materiales", label: "Materiales" },
-  { key: "acabado", label: "Acabado" },
-  { key: "peso", label: "Peso" },
-  { key: "capacidad", label: "Capacidad" },
-  { key: "modulares", label: "Modulares" },
-  { key: "carga_maxima", label: "Carga máxima" },
-  { key: "estructura", label: "Estructura" },
-  { key: "tapizado", label: "Tapizado" },
-  { key: "confort", label: "Confort" },
-  { key: "rotacion", label: "Rotación" },
-  { key: "garantia", label: "Garantía" },
-  { key: "relleno", label: "Relleno" },
-  { key: "sostenibilidad", label: "Sostenibilidad" },
-  { key: "extension", label: "Extensión" },
-  { key: "apilables", label: "Apilables" },
-  { key: "incluye", label: "Incluye" },
-  { key: "almacenamiento", label: "Almacenamiento" },
-  { key: "cables", label: "Cables" },
-  { key: "regulacion", label: "Regulación" },
-  { key: "certificacion", label: "Certificación" },
-]
 
 export const ProductCard = ({ product, compact = false }) => {
   return (
@@ -53,7 +30,7 @@ export const ProductCard = ({ product, compact = false }) => {
               </p>
 
               <div className={productCardStyles.optionalFields}>
-                {optionalFields.map(({ key, label }) => {
+                {productOptionalFields.map(({ key, label }) => {
                   const value = product[key]
 
                   if (!value) {

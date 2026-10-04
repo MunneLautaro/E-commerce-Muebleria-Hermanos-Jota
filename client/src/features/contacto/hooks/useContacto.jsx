@@ -11,6 +11,7 @@ const valoresIniciales = {
 }
 
 const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const telefonoValido = /^\d+$/
 
 export const motivosConsulta = [
   { valor: "pieza", etiqueta: "Una pieza de la colección" },
@@ -38,7 +39,9 @@ const validarCampos = (valores) => {
     errores.email = "Revisá el correo: no parece válido."
   }
 
-  if (telefono && telefono.length > limitesConsulta.telefonoMax) {
+  if (telefono && !telefonoValido.test(telefono)) {
+    errores.telefono = "El teléfono solo puede contener números."
+  } else if (telefono && telefono.length > limitesConsulta.telefonoMax) {
     errores.telefono = "El teléfono es demasiado largo."
   }
 
@@ -63,7 +66,9 @@ export const useContacto = () => {
 
   const cambiarCampo = (evento) => {
     const { name, value } = evento.target
-    setValores((previos) => ({ ...previos, [name]: value }))
+    const nuevoValor = name === "telefono" ? value.replace(/\D/g, "") : value
+
+    setValores((previos) => ({ ...previos, [name]: nuevoValor }))
     setErrores((previos) => ({ ...previos, [name]: undefined }))
   }
 

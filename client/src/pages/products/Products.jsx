@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import { ProductList, productService } from "../../features/products"
+import { productsStyles } from "./ProductsStyles"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([])
@@ -28,27 +29,25 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <p>Cargando productos...</p>
+      <section className={productsStyles.loadingSection}>
+        <p className={productsStyles.loadingText}>Cargando productos...</p>
       </section>
     )
   }
 
   if (error) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-red-600">{error}</p>
+      <section className={productsStyles.errorSection}>
+        <p className={productsStyles.errorText}>{error}</p>
       </section>
     )
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-12">
-      <h1 className="font-serif text-3xl font-bold text-[#A0522D]">
-        Productos
-      </h1>
+    <section className={productsStyles.container}>
+      <h1 className={productsStyles.title}>Productos</h1>
 
-      <div className="mt-8">
+      <div className={productsStyles.listWrapper}>
         <ProductList products={products} />
       </div>
     </section>
