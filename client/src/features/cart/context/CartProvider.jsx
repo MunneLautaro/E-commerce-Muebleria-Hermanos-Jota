@@ -1,8 +1,5 @@
-/* eslint-disable react-refresh/only-export-components */
-
-import { createContext, useContext, useMemo, useState } from "react"
-
-const CartContext = createContext(null)
+import { useMemo, useState } from "react"
+import { CartContext } from "./CartContext"
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
@@ -21,7 +18,10 @@ export const CartProvider = ({ children }) => {
         )
       }
 
-      return [...currentCart, { id: product.id, quantity: Math.max(1, quantity) }]
+      return [
+        ...currentCart,
+        { id: product.id, quantity: Math.max(1, quantity) },
+      ]
     })
   }
 
@@ -37,7 +37,9 @@ export const CartProvider = ({ children }) => {
   }
 
   const removeItem = (productId) => {
-    setCart((currentCart) => currentCart.filter((item) => item.id !== productId))
+    setCart((currentCart) =>
+      currentCart.filter((item) => item.id !== productId),
+    )
   }
 
   const clearCart = () => setCart([])
@@ -56,14 +58,4 @@ export const CartProvider = ({ children }) => {
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
-}
-
-export const useCart = () => {
-  const context = useContext(CartContext)
-
-  if (!context) {
-    throw new Error("useCart debe usarse dentro de CartProvider")
-  }
-
-  return context
 }

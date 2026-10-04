@@ -1,4 +1,4 @@
-import { CartProvider } from "../context/CartContext"
+import { CartProvider } from "../features/cart"
 import { AppProviders } from "./providers"
 import { AppRouter } from "./router"
 

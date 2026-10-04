@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useCart } from "../../../../context/CartContext"
+import { useCart } from "../../../cart"
 import { productDetailStyles } from "./ProductDetailStyles"
 
 const optionalFields = [
@@ -95,9 +95,7 @@ export default function ProductDetail() {
         </div>
 
         <div className={productDetailStyles.contentWrapper}>
-          <h1 className={productDetailStyles.title}>
-            {product.nombre}
-          </h1>
+          <h1 className={productDetailStyles.title}>{product.nombre}</h1>
 
           <p className={productDetailStyles.description}>
             {product.descripcion}
