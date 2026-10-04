@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
-import { ProductList } from "../../features/products/components/ProductList/ProductList"
+import { ProductList, productService } from "../../features/products"
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([])
@@ -10,16 +10,9 @@ export default function ProductsPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const loadProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/productos")
-
-        if (!response.ok) {
-          throw new Error("No se pudieron obtener los productos")
-        }
-
-        const data = await response.json()
-
+        const data = await productService.getProducts()
         setProducts(data)
       } catch (error) {
         console.error(error)
@@ -30,7 +23,7 @@ export default function ProductsPage() {
       }
     }
 
-    fetchProducts()
+    loadProducts()
   }, [])
 
   if (loading) {

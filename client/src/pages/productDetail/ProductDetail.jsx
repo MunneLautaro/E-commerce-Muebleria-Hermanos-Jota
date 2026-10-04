@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useCart } from "../../features/cart"
+import { productService } from "../../features/products"
 import { productDetailStyles } from "./ProductDetailStyles"
 
 const optionalFields = [
@@ -38,37 +39,52 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/productos/${id}`,
-        )
+    let isActive = true
 
-        if (!response.ok) {
-          throw new Error("No se pudo obtener el producto")
+    const fetchProduct = async () => {
+      setLoading(true)
+      setProduct(null)
+      setError("")
+      setQuantity(1)
+
+      try {
+        const data = await productService.getProductById(id)
+
+        if (!isActive) return
+
+        if (!data) {
+          throw new Error("El producto no existe")
         }
 
-        const data = await response.json()
         setProduct(data)
+        setError("")
       } catch (error) {
         console.error(error)
-        setError("No se pudo cargar el producto.")
-        toast.error("No se pudo cargar el producto.")
+
+        if (isActive) {
+          setProduct(null)
+          setError("No se pudo cargar el producto.")
+          toast.error("No se pudo cargar el producto.")
+        }
       } finally {
-        setLoading(false)
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
 
     fetchProduct()
+
+    return () => {
+      isActive = false
+    }
   }, [id])
 
   const handleAddToCart = () => {
     if (!product) return
 
     addItem(product, quantity)
-    toast.success(
-      `${product.nombre} (×${quantity}) agregado al carrito`,
-    )
+    toast.success(`${product.nombre} (×${quantity}) agregado al carrito`)
     setQuantity(1)
   }
 
@@ -86,6 +102,10 @@ export default function ProductDetail() {
         <p className={productDetailStyles.errorText}>{error}</p>
       </section>
     )
+  }
+
+  if (!product) {
+    return null
   }
 
   return (
