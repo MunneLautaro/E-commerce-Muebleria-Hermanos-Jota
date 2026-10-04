@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-toastify"
 import { useCart } from "../../hooks/useCart"
+import { fetchApi } from "../../../../services/api"
 import { cartDrawerStyles } from "./CartDrawerStyles"
 
 const TrashIcon = () => (
@@ -65,15 +66,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
       try {
         const products = await Promise.all(
           cart.map(async ({ id, quantity }) => {
-            const response = await fetch(
-              `http://localhost:3000/api/productos/${id}`,
-            )
-
-            if (!response.ok) {
-              throw new Error("No se pudo cargar el producto")
-            }
-
-            const product = await response.json()
+            const product = await fetchApi(`/productos/${id}`)
             return { ...product, quantity }
           }),
         )

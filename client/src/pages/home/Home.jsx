@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { ProductList } from "../../features/products/components/ProductList/ProductList"
+import { fetchApi } from "../../services/api"
 import { homeStyles } from "./HomeStyles"
 
 export default function HomePage() {
@@ -12,13 +13,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/productos")
-
-        if (!response.ok) {
-          throw new Error("No se pudieron obtener los productos destacados")
-        }
-
-        const products = await response.json()
+        const products = await fetchApi("/productos")
 
         const sortedProducts = [...products].sort(
           (a, b) => (b.vendidos ?? 0) - (a.vendidos ?? 0),
