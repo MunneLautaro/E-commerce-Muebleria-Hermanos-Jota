@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ProductList } from "../components/ProductList/ProductList"
+import { ProductList } from "../features/products/components/ProductList/ProductList"
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
