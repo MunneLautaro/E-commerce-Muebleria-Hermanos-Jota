@@ -1,0 +1,90 @@
+.Toastify__toast {
+  font-family: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgb(160 82 45 / 0.12);
+  padding: 14px 18px;
+}
+
+.Toastify__toast--success {
+  background: #f0f6eb;
+  color: #3a2622;
+  border-left: 4px solid #87a96b;
+}
+
+.Toastify__toast--success .Toastify__toast-icon svg {
+  fill: #87a96b;
+}
+
+.Toastify__toast--success .Toastify__close-button {
+  color: #5c4a45;
+}
+
+.Toastify__toast--error {
+  background: #fff0f0;
+  color: #3a2622;
+  border-left: 4px solid #dc0000;
+}
+
+.Toastify__toast--error .Toastify__toast-icon svg {
+  fill: #dc0000;
+}
+
+.Toastify__toast--error .Toastify__close-button {
+  color: #5c4a45;
+}
+
+.Toastify__toast--info {
+  background: #fdf5ef;
+  color: #3a2622;
+  border-left: 4px solid #a0522d;
+}
+
+.Toastify__toast--info .Toastify__toast-icon svg {
+  fill: #a0522d;
+}
+
+.Toastify__toast--info .Toastify__close-button {
+  color: #5c4a45;
+}
+
+.Toastify__toast--warning {
+  background: #fdf8ed;
+  color: #3a2622;
+  border-left: 4px solid #d4a437;
+}
+
+.Toastify__toast--warning .Toastify__toast-icon svg {
+  fill: #d4a437;
+}
+
+.Toastify__toast--warning .Toastify__close-button {
+  color: #5c4a45;
+}
+
+.Toastify__progress-bar--success {
+  background: #87a96b;
+}
+
+.Toastify__progress-bar--error {
+  background: #dc0000;
+}
+
+.Toastify__progress-bar--info {
+  background: #a0522d;
+}
+
+.Toastify__progress-bar--warning {
+  background: #d4a437;
+}
+
+.Toastify__close-button {
+  color: #5c4a45;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.Toastify__close-button:hover {
+  opacity: 1;
+}
