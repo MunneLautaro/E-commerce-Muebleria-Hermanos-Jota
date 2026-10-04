@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
+import { toast } from "react-toastify"
 import { useCart } from "../../features/cart"
 import { productDetailStyles } from "./ProductDetailStyles"
 
@@ -52,6 +53,7 @@ export default function ProductDetail() {
       } catch (error) {
         console.error(error)
         setError("No se pudo cargar el producto.")
+        toast.error("No se pudo cargar el producto.")
       } finally {
         setLoading(false)
       }
@@ -64,6 +66,9 @@ export default function ProductDetail() {
     if (!product) return
 
     addItem(product, quantity)
+    toast.success(
+      `${product.nombre} (×${quantity}) agregado al carrito`,
+    )
     setQuantity(1)
   }
 
