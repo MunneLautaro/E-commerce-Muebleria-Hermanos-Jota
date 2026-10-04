@@ -5,6 +5,7 @@ export const getProductsModel = async () => {
 }
 
 export const getProductByIdModel = async (id) => {
-  return products.find((product) => product.id === id) || null
-}
+  const productId = Number(id)
 
+  return products.find((product) => product.id === productId) || null
+}
