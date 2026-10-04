@@ -121,6 +121,11 @@ npm run dev
 Vite mostrará en la terminal la URL local, normalmente
 `http://localhost:5173`.
 
+## Deploy
+
+- **Frontend:** [E-commerce Mueblería Hermanos Jota](https://e-commerce-muebleria-hermanos-jota-alpha.vercel.app/)
+- **Backend/API:** [API de productos](https://e-commerce-muebleria-hermanos-jota-virid.vercel.app/api/productos)
+
 ## Otros comandos del cliente
 
 Crear una compilación de producción:
