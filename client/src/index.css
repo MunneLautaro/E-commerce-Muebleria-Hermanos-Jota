@@ -1,57 +1,36 @@
-/* Tipografías de marca: Playfair Display (títulos) + Inter (cuerpo/UI).
-   Los @import url() deben ir ANTES de @import "tailwindcss". */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:wght@400;700&display=swap");
 @import "tailwindcss";
 
-/* ==========================================================
-   HERMANOS JOTA — Tokens de marca (Manual de Marca 2026)
-   Cada token genera clases de Tailwind automáticamente:
-   --color-siena  ->  bg-siena, text-siena, border-siena
-   --font-display ->  font-display
-   --tracking-title -> tracking-title
-   ========================================================== */
 @theme {
-  /* Paleta principal */
-  --color-siena: #a0522d; /* Siena Tostado: color de marca, títulos, CTAs */
-  --color-salvia: #87a96b; /* Verde Salvia: acento secundario, sustentabilidad */
-  --color-alabastro: #f5e6d3; /* Alabastro Cálido: fondos, fotografía */
-  --color-oro: #d4a437; /* Vara de Oro: detalles premium */
-  --color-rosa: #c47a6d; /* Rosa Polvoriento: acentos suaves */
+  --color-siena: #a0522d;
+  --color-salvia: #87a96b;
+  --color-alabastro: #f5e6d3;
+  --color-oro: #d4a437;
+  --color-rosa: #c47a6d;
 
-  /* Neutros cálidos (derivados de la paleta) */
-  --color-ink: #3a2622; /* Texto principal / títulos oscuros */
-  --color-ink-soft: #5c4a45; /* Texto secundario */
-  --color-crema: #fdf5ef; /* Superficie clara (fondo del logo) */
-  --color-linea: #f0e4d8; /* Divisores y bordes suaves */
-  --color-superficie: #f4f4f4; /* Contenedores neutros (tablas, índices) */
+  --color-ink: #3a2622;
+  --color-ink-soft: #5c4a45;
+  --color-crema: #fdf5ef;
+  --color-linea: #f0e4d8;
+  --color-superficie: #f4f4f4;
 
-  /* Estados (solo para errores / usos incorrectos) */
   --color-error: #dc0000;
   --color-error-bg: #fff0f0;
 
-  /* Tipografía */
   --font-display: "Playfair Display", Georgia, serif;
   --font-body: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
 
-  /* Espaciado tipográfico según manual */
-  --tracking-title: 0.1em; /* Títulos principales */
-  --tracking-cta: 0.08em; /* Botones y CTAs */
-  --tracking-caption: 0.02em; /* Leyendas */
-  --leading-body: 1.6; /* Altura de línea del cuerpo */
+  --tracking-title: 0.1em;
+  --tracking-cta: 0.08em;
+  --tracking-caption: 0.02em;
+  --leading-body: 1.6;
 
-  /* Sombras suaves y cálidas */
   --shadow-marca: 0 4px 20px rgb(160 82 45 / 0.1);
   --shadow-tarjeta: 0 1px 4px rgb(58 38 34 / 0.08);
 
-  /* Radios */
   --radius-marca: 0.5rem;
 }
 
-/* ==========================================================
-   Utilidades de marca reutilizables (fondos con degradé)
-   ========================================================== */
-
-/* Fondo general de página: alabastro -> blanco -> alabastro */
 @utility bg-marca {
   background-image: linear-gradient(
     135deg,
@@ -63,8 +42,6 @@
   );
 }
 
-/* Panel destacado: degradé horizontal alabastro -> transparente
-   (combinar con border-l-4 border-siena) */
 @utility bg-panel-marca {
   background-image: linear-gradient(
     90deg,
@@ -74,7 +51,6 @@
   );
 }
 
-/* Panel de sustentabilidad: degradé salvia suave */
 @utility bg-panel-salvia {
   background-image: linear-gradient(
     90deg,
@@ -84,9 +60,6 @@
   );
 }
 
-/* ==========================================================
-   Base global
-   ========================================================== */
 @layer base {
   :root {
     color-scheme: light;
@@ -111,7 +84,6 @@
     font-synthesis: none;
   }
 
-  /* Títulos: Playfair Display, mayúsculas, espaciado 0.1em */
   h1,
   h2,
   h3 {
@@ -154,7 +126,6 @@
     color: var(--color-ink);
   }
 
-  /* Botones: Inter Medium, mayúsculas, 0.08em */
   button {
     font-family: var(--font-body);
     font-weight: 500;
@@ -168,7 +139,6 @@
     color: var(--color-siena);
   }
 
-  /* Foco visible accesible */
   :focus-visible {
     outline: 2px solid var(--color-siena);
     outline-offset: 2px;
