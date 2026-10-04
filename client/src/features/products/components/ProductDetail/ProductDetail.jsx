@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useCart } from "../../context/CartContext"
+import { useCart } from "../../../../context/CartContext"
+import { productDetailStyles } from "./ProductDetailStyles"
 
 const optionalFields = [
   { key: "caracteristicas", label: "Características" },
@@ -68,65 +69,67 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <p>Cargando producto...</p>
+      <section className={productDetailStyles.loadingSection}>
+        <p className={productDetailStyles.loadingText}>Cargando producto...</p>
       </section>
     )
   }
 
   if (error) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-red-600">{error}</p>
+      <section className={productDetailStyles.errorSection}>
+        <p className={productDetailStyles.errorText}>{error}</p>
       </section>
     )
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-12">
-      <div className="grid gap-10 md:grid-cols-2">
-        <div className="overflow-hidden rounded-lg bg-[#F5E6D3]">
+    <section className={productDetailStyles.container}>
+      <div className={productDetailStyles.grid}>
+        <div className={productDetailStyles.imageWrapper}>
           <img
             src={product.image}
             alt={product.nombre}
-            className="h-full min-h-[400px] w-full object-cover"
+            className={productDetailStyles.image}
           />
         </div>
 
-        <div className="flex flex-col justify-center">
-          <h1 className="font-serif text-4xl font-bold text-[#A0522D]">
+        <div className={productDetailStyles.contentWrapper}>
+          <h1 className={productDetailStyles.title}>
             {product.nombre}
           </h1>
 
-          <p className="mt-6 text-base leading-7 text-gray-700">
+          <p className={productDetailStyles.description}>
             {product.descripcion}
           </p>
 
-          <div className="mt-6 border-t border-[#A0522D]/20 pt-5">
-            <p className="text-base text-gray-700">
+          <div className={productDetailStyles.measuresWrapper}>
+            <p className={productDetailStyles.measuresText}>
               <strong>Medidas:</strong> {product.medidas}
             </p>
           </div>
 
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="inline-flex items-center overflow-hidden rounded-full border border-[#A0522D]/30 bg-[#F5E6D3]">
+          <div className={productDetailStyles.actionsWrapper}>
+            <div className={productDetailStyles.quantitySelector}>
               <button
                 type="button"
-                onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                className="flex h-11 w-11 items-center justify-center text-lg font-bold text-siena transition-colors hover:bg-[#EAD9C4]"
+                onClick={() =>
+                  setQuantity((current) => Math.max(1, current - 1))
+                }
+                className={productDetailStyles.quantityButton}
                 aria-label="Disminuir cantidad"
               >
                 −
               </button>
 
-              <span className="min-w-12 text-center text-base font-medium text-ink">
+              <span className={productDetailStyles.quantityDisplay}>
                 {quantity}
               </span>
 
               <button
                 type="button"
                 onClick={() => setQuantity((current) => current + 1)}
-                className="flex h-11 w-11 items-center justify-center text-lg font-bold text-siena transition-colors hover:bg-[#EAD9C4]"
+                className={productDetailStyles.quantityButton}
                 aria-label="Aumentar cantidad"
               >
                 +
@@ -136,13 +139,13 @@ export default function ProductDetail() {
             <button
               type="button"
               onClick={handleAddToCart}
-              className="inline-flex items-center justify-center rounded-marca bg-[#A0522D] px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-[#7f4222]"
+              className={productDetailStyles.addToCartButton}
             >
               Agregar al carrito
             </button>
           </div>
 
-          <div className="mt-5 space-y-3 border-t border-[#A0522D]/20 pt-5">
+          <div className={productDetailStyles.optionalFieldsWrapper}>
             {optionalFields.map(({ key, label }) => {
               const value = product[key]
 
@@ -151,7 +154,7 @@ export default function ProductDetail() {
               }
 
               return (
-                <p key={key} className="text-sm leading-6 text-gray-700">
+                <p key={key} className={productDetailStyles.optionalFieldText}>
                   <strong>{label}:</strong> {value}
                 </p>
               )
