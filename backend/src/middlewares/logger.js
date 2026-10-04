@@ -1,12 +1,18 @@
 export const logger = (req, res, next) => {
   const start = Date.now()
 
-  res.on("finish", () => {
+  const log = () => {
     const ms = Date.now() - start
     console.log(
       `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} - ${ms}ms`,
     )
+  }
+
+  res.once("finish", log)
+  res.once("close", () => {
+    if (!res.writableFinished) log()
   })
 
   next()
 }
+
