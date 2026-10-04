@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, NavLink } from "react-router-dom"
-import { CartDrawer } from "../CartDrawer/CartDrawer"
-import { useCart } from "../../context/CartContext"
+import { CartDrawer, useCart } from "../../features/cart"
 import { headerStyles as s } from "./HeaderStyles"
 import logo from "../../assets/logo.svg"
 
@@ -145,7 +144,9 @@ export const Header = () => {
                 }}
               >
                 <span>Carrito</span>
-                {itemCount > 0 && <span className={s.mobileCartBadge}>{itemCount}</span>}
+                {itemCount > 0 && (
+                  <span className={s.mobileCartBadge}>{itemCount}</span>
+                )}
               </button>
 
               <div className={s.mobileActions}>
