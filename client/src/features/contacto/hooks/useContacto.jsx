@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { toast } from "react-toastify"
 import { limitesConsulta } from "../../../datos/contacto"
 
 const valoresIniciales = {
@@ -78,6 +79,7 @@ export const useContacto = () => {
     const erroresLocales = validarCampos(valores)
     if (Object.keys(erroresLocales).length > 0) {
       setErrores(erroresLocales)
+      toast.error("Revisá los campos marcados antes de enviar.")
       return
     }
 
@@ -91,6 +93,7 @@ export const useContacto = () => {
     setErrores({})
     setEnviando(false)
     setExito(true)
+    toast.success("¡Consulta enviada! Te vamos a responder a la brevedad.")
   }
 
   const reiniciar = () => {

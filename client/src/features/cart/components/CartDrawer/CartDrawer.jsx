@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 import { useCart } from "../../hooks/useCart"
 import { cartDrawerStyles } from "./CartDrawerStyles"
 
@@ -41,6 +42,11 @@ export const CartDrawer = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
+  const handleRemoveItem = (product) => {
+    removeItem(product.id)
+    toast.info(`${product.nombre} eliminado del carrito`)
+  }
+
   useEffect(() => {
     let isMounted = true
 
@@ -80,6 +86,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
         if (isMounted) {
           setError("No pudimos cargar tus productos del carrito.")
+          toast.error("No pudimos cargar tus productos del carrito.")
           setCartItems([])
         }
       } finally {
@@ -201,7 +208,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
                   <button
                     type="button"
-                    onClick={() => removeItem(product.id)}
+                    onClick={() => handleRemoveItem(product)}
                     className={cartDrawerStyles.removeButton}
                     aria-label={`Eliminar ${product.nombre} del carrito`}
                   >

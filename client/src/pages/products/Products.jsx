@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
 import { ProductList } from "../../features/products/components/ProductList/ProductList"
 
 export default function ProductsPage() {
@@ -23,6 +24,7 @@ export default function ProductsPage() {
       } catch (error) {
         console.error(error)
         setError("No se pudieron cargar los productos.")
+        toast.error("No se pudieron cargar los productos.")
       } finally {
         setLoading(false)
       }
