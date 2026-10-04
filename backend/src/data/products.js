@@ -11,6 +11,7 @@ export const products = [
     acabado: "Aceite natural ecológico",
     peso: "68 kg",
     capacidad: "6 compartimentos interiores",
+    vendidos: 92,
     image: "/images/kit de imágenes/Aparador Uspallata.png",
   },
 
@@ -24,6 +25,7 @@ export const products = [
     acabado: "Laca mate ecológica",
     capacidad: "45 kg por estante",
     modulares: "5 estantes ajustables",
+    vendidos: 118,
     image: "/images/kit de imágenes/Biblioteca Recoleta.png",
   },
 
@@ -37,6 +39,7 @@ export const products = [
     acabado: "Cera vegetal, tapizado premium",
     tapizado: "Repelente al agua y manchas",
     confort: "Espuma alta densidad",
+    vendidos: 214,
     image: "/images/kit de imágenes/Butaca Mendoza.png",
   },
 
@@ -50,6 +53,7 @@ export const products = [
     acabado: "Cuero anilina premium",
     rotacion: "360° silenciosa y suave",
     garantia: "10 años en estructura",
+    vendidos: 286,
     image: "/images/kit de imágenes/Sillón Copacabana.png",
   },
 
@@ -63,6 +67,7 @@ export const products = [
     acabado: "Mármol pulido, aceite natural en madera",
     peso: "42 kg",
     carga_maxima: "25 kg distribuidos",
+    vendidos: 134,
     image: "/images/kit de imágenes/Mesa de Centro Araucaria.png",
   },
 
@@ -76,6 +81,7 @@ export const products = [
     acabado: "Barniz mate de poliuretano",
     almacenamiento: "1 cajón + repisa inferior",
     caracteristicas: "Cajón con cierre suave",
+    vendidos: 156,
     image: "/images/kit de imágenes/Mesa de Noche Aconcagua.png",
   },
 
@@ -89,6 +95,7 @@ export const products = [
     tapizado: "Lino 100% natural premium",
     relleno: "Espuma HR + plumón reciclado",
     sostenibilidad: "Materiales 100% reciclables",
+    vendidos: 342,
     image: "/images/kit de imágenes/Sofá Patagonia.png",
   },
 
@@ -102,6 +109,7 @@ export const products = [
     acabado: "Aceite-cera natural",
     capacidad: "6-10 comensales",
     extension: "Sistema de mariposa central",
+    vendidos: 238,
     image: "/images/kit de imágenes/Mesa Comedor Pampa.png",
   },
 
@@ -115,6 +123,7 @@ export const products = [
     acabado: "Laca mate, pintura epoxi",
     apilables: "Hasta 6 sillas",
     incluye: "Set de 4 sillas",
+    vendidos: 83,
     image: "/images/kit de imágenes/Sillas Córdoba.png",
   },
 
@@ -128,6 +137,7 @@ export const products = [
     acabado: "Laca mate resistente",
     almacenamiento: "1 cajón con organizador",
     cables: "Pasacables integrado",
+    vendidos: 141,
     image: "/images/kit de imágenes/Escritorio Costa.png",
   },
 
@@ -141,6 +151,7 @@ export const products = [
     acabado: "Base cromada, tapizado premium",
     regulacion: "Altura + inclinación respaldo",
     certificacion: "Ergonomía europea EN 1335",
+    vendidos: 198,
     image: "/images/kit de imágenes/Silla de Trabajo Belgrano.png",
   },
 ]
