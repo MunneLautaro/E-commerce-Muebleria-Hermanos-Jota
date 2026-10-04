@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { ProductList } from "../features/products/components/ProductList/ProductList"
+import { ProductList } from "../../features/products/components/ProductList/ProductList"
+import { homeStyles } from "./HomeStyles"
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -35,34 +36,34 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-[#A0522D]">Cargando productos destacados...</p>
+      <main className={homeStyles.loadingContainer}>
+        <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
       </main>
     )
   }
 
   if (error) {
     return (
-      <main className="mx-auto max-w-7xl px-6 py-12">
-        <p className="text-red-600">{error}</p>
+      <main className={homeStyles.errorContainer}>
+        <p className={homeStyles.errorText}>{error}</p>
       </main>
     )
   }
 
   return (
-    <main className="mx-auto max-w-[1280px] px-4 py-6 md:px-6 md:py-8">
-      <section className="mb-6 md:mb-8">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#A0522D] md:text-sm">
+    <main className={homeStyles.container}>
+      <section className={homeStyles.heroSection}>
+        <p className={homeStyles.subtitle}>
           Diseños que perduran
         </p>
-        <h1 className="mt-2 font-serif text-3xl font-bold text-[#A0522D] md:text-4xl lg:text-5xl">
+        <h1 className={homeStyles.title}>
           Hermanos Jota
         </h1>
       </section>
 
-      <section className="min-h-0">
-        <div className="mb-4 md:mb-5">
-          <h2 className="font-serif text-2xl font-bold text-[#A0522D] md:text-3xl">
+      <section className={homeStyles.productsSection}>
+        <div className={homeStyles.sectionHeader}>
+          <h2 className={homeStyles.sectionTitle}>
             Productos destacados
           </h2>
         </div>

@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import { Layout } from "../components/Layout/Layout"
-import HomePage from "../pages/Home"
+import HomePage from "../pages/home/Home"
 import ProductsPage from "../pages/products/Products"
-import ProductDetail from "../features/products/components/ProductDetail/ProductDetail"
+import ProductDetail from "../pages/productDetail/ProductDetail"
 import ContactPage from "../pages/contact/ContactPage"
 
 export const AppRouter = () => {

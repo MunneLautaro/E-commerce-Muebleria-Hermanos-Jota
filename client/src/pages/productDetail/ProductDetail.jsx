@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useCart } from "../../../cart"
+import { useCart } from "../../features/cart"
 import { productDetailStyles } from "./ProductDetailStyles"
 
 const optionalFields = [
