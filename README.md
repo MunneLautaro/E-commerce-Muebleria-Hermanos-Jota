@@ -218,6 +218,9 @@ features:
   layout, header y footer.
 - **`features/`** agrupa la lógica propia de cada dominio, como productos,
   carrito y contacto.
+- El estado del carrito se gestiona con **React Context**, para compartirlo de
+  forma clara y consistente entre los componentes que lo necesitan. Lo integramos de esta forma
+  ya que todos contamos con los conocimientos para realizarlo de esta forma.
 - **`services/`** centraliza las peticiones HTTP a la API.
 - **`styles/`** contiene estilos globales y ajustes de terceros.
 
