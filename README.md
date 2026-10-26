@@ -67,12 +67,17 @@ El servidor admite las siguientes variables de entorno:
 | ---------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
 | `PORT`           | `3000`                                        | Puerto en el que se inicia la API.                                          |
 | `CORS_WHITELIST` | `http://localhost:5173,http://localhost:5174` | Orígenes permitidos para realizar peticiones a la API, separados por comas. |
+| `MONGODB_URI`    | —                                             | Cadena de conexión de MongoDB para usuarios y autenticación.               |
+| `JWT_SECRET`     | —                                             | Clave secreta utilizada para firmar los tokens JWT.                         |
+| `JWT_EXPIRES_IN` | `1d`                                          | Tiempo de expiración de los tokens JWT.                                     |
 
 Para cambiar estos valores, crear un archivo `backend/.env`:
 
 ```env
 PORT=3000
 CORS_WHITELIST=http://localhost:5173
+MONGODB_URI=mongodb://127.0.0.1:27017/hermanos-jota
+JWT_SECRET=una-clave-secreta-larga-y-segura
 ```
 
 ### URL de la API en el cliente
@@ -155,6 +160,9 @@ La API utiliza el prefijo `/api`.
 | ------ | -------------------- | ------------------------------------------ |
 | `GET`  | `/api/productos`     | Devuelve el listado completo de productos. |
 | `GET`  | `/api/productos/:id` | Devuelve un producto por su identificador. |
+| `POST` | `/api/auth/register` | Registra un usuario y devuelve un JWT. |
+| `POST` | `/api/auth/login` | Autentica un usuario y devuelve un JWT. |
+| `GET`  | `/api/auth/me` | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`. |
 
 Ejemplo:
 
