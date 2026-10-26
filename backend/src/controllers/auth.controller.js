@@ -1,0 +1,104 @@
+import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import User from "../models/User.js"
+
+const publicUser = (user) => ({
+  id: user._id,
+  email: user.email,
+  isActive: user.isActive,
+  orders: user.orders,
+  phone: user.phone,
+  address: user.address,
+})
+
+const getJwtSecret = () => {
+  if (!process.env.JWT_SECRET) {
+    const error = new Error("JWT_SECRET no está configurado")
+    error.status = 500
+    throw error
+  }
+
+  return process.env.JWT_SECRET
+}
+
+const createToken = (user) => {
+  return jwt.sign({ sub: user._id.toString(), email: user.email }, getJwtSecret(), {
+    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+  })
+}
+
+const handleDatabaseError = (error) => {
+  if (error?.code === 11000) {
+    const duplicateError = new Error("El email ya está registrado")
+    duplicateError.status = 409
+    return duplicateError
+  }
+
+  if (error?.name === "MongooseError" && error.message.includes("Cannot call")) {
+    const databaseError = new Error("La base de datos no está disponible")
+    databaseError.status = 503
+    return databaseError
+  }
+
+  return error
+}
+
+export const register = async (req, res, next) => {
+  try {
+    getJwtSecret()
+    const { email, password, phone, address } = req.body
+    const existingUser = await User.findOne({ email }).lean()
+
+    if (existingUser) {
+      return res.status(409).json({ error: "El email ya está registrado" })
+    }
+
+    const user = await User.create({
+      email,
+      password: await bcrypt.hash(password, 12),
+      phone,
+      address,
+      isActive: true,
+      orders: [],
+    })
+
+    const token = createToken(user)
+    return res.status(201).json({ token, user: publicUser(user) })
+  } catch (error) {
+    next(handleDatabaseError(error))
+  }
+}
+
+export const login = async (req, res, next) => {
+  try {
+    getJwtSecret()
+    const { email, password } = req.body
+    const user = await User.findOne({ email }).select("+password")
+
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(401).json({ error: "Email o contraseña incorrectos" })
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: "El usuario está inactivo" })
+    }
+
+    return res.json({ token: createToken(user), user: publicUser(user) })
+  } catch (error) {
+    next(handleDatabaseError(error))
+  }
+}
+
+export const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.sub)
+
+    if (!user || !user.isActive) {
+      return res.status(401).json({ error: "Usuario no disponible" })
+    }
+
+    return res.json({ user: publicUser(user) })
+  } catch (error) {
+    next(handleDatabaseError(error))
+  }
+}
