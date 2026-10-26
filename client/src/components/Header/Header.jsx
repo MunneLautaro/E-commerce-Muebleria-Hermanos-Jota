@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, NavLink } from "react-router-dom"
 import { CartDrawer, useCart } from "../../features/cart"
+import { useAuth } from "../../features/auth"
 import { headerStyles as s } from "./HeaderStyles"
 import logo from "../../assets/logo.svg"
 
@@ -15,6 +16,7 @@ export const Header = () => {
   const [cartOpen, setCartOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { itemCount } = useCart()
+  const { user, isAuthenticated, logout } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -86,12 +88,43 @@ export const Header = () => {
           </nav>
 
           <div className={s.actions}>
-            <Link to="/login" className={s.buttonSecondary}>
-              Ingresar
-            </Link>
-            <Link to="/register" className={s.buttonPrimary}>
-              Registrarse
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <span className={s.userBadge} title={user?.email}>
+                  <svg
+                    className={s.userIcon}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
+                  </svg>
+                  <span className="truncate">{user?.email}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={s.buttonLogout}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className={s.buttonSecondary}>
+                  Ingresar
+                </Link>
+                <Link to="/register" className={s.buttonPrimary}>
+                  Registrarse
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -150,20 +183,54 @@ export const Header = () => {
               </button>
 
               <div className={s.mobileActions}>
-                <Link
-                  to="/login"
-                  className={s.buttonSecondary}
-                  onClick={closeMenu}
-                >
-                  Ingresar
-                </Link>
-                <Link
-                  to="/register"
-                  className={s.buttonPrimary}
-                  onClick={closeMenu}
-                >
-                  Registrarse
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <div className={s.mobileUserInfo}>
+                      <svg
+                        className={s.userIcon}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
+                      </svg>
+                      <span className="truncate">{user?.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout()
+                        closeMenu()
+                      }}
+                      className={s.buttonLogout}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className={s.buttonSecondary}
+                      onClick={closeMenu}
+                    >
+                      Ingresar
+                    </Link>
+                    <Link
+                      to="/register"
+                      className={s.buttonPrimary}
+                      onClick={closeMenu}
+                    >
+                      Registrarse
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>
