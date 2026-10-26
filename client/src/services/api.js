@@ -11,8 +11,14 @@ export async function fetchApi(endpoint, options = {}) {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
+    const details = Array.isArray(errorData.details)
+      ? errorData.details.join(". ")
+      : null
     throw new Error(
-      errorData.message || `Error ${response.status}: ${response.statusText}`,
+      details ||
+        errorData.error ||
+        errorData.message ||
+        `Error ${response.status}: ${response.statusText}`,
     )
   }
 

@@ -27,6 +27,11 @@ export const headerStyles = {
     "inline-flex items-center justify-center rounded-marca bg-siena px-6 py-2.5 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
   buttonSecondary:
     "inline-flex items-center justify-center rounded-marca border border-siena px-6 py-2.5 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro",
+  userBadge:
+    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-marca bg-alabastro/70 border border-linea text-xs font-medium text-ink truncate max-w-[200px]",
+  userIcon: "h-3.5 w-3.5 shrink-0 text-siena",
+  buttonLogout:
+    "inline-flex items-center justify-center rounded-marca border border-siena/40 px-4 py-2 text-xs font-medium uppercase tracking-cta text-siena transition-colors hover:bg-siena hover:text-white",
 
   menuButton:
     "inline-flex h-11 w-11 items-center justify-center rounded-marca border border-linea text-siena transition-colors hover:bg-alabastro lg:hidden",
@@ -40,6 +45,8 @@ export const headerStyles = {
     inactive: "text-ink-soft",
   },
   mobileActions: "mt-6 flex flex-col gap-3",
+  mobileUserInfo:
+    "flex items-center gap-2 px-1 py-1 text-sm font-medium text-ink truncate",
   mobileCartButton:
     "mt-4 inline-flex items-center justify-center gap-3 rounded-marca border border-siena px-4 py-3 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro",
   mobileCartBadge:
