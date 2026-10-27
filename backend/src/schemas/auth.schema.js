@@ -23,3 +23,11 @@ export const loginSchema = yup.object({
   email,
   password,
 })
+
+export const googleAuthSchema = yup.object({
+  credential: yup
+    .string()
+    .trim()
+    .max(4096, "El token de Google no es válido")
+    .required("El token de Google (credential) es obligatorio"),
+})

@@ -1,10 +1,14 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import { OAuth2Client } from "google-auth-library"
 import User from "../models/User.js"
 
 const publicUser = (user) => ({
   id: user._id,
   email: user.email,
+  name: user.name || "",
+  picture: user.picture || "",
+  authProvider: user.authProvider || "local",
   isActive: user.isActive,
   orders: user.orders,
   phone: user.phone,
@@ -19,6 +23,16 @@ const getJwtSecret = () => {
   }
 
   return process.env.JWT_SECRET
+}
+
+const getGoogleClient = () => {
+  if (!process.env.GOOGLE_CLIENT_ID) {
+    const error = new Error("GOOGLE_CLIENT_ID no está configurado")
+    error.status = 500
+    throw error
+  }
+
+  return new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 }
 
 const createToken = (user) => {
@@ -84,6 +98,64 @@ export const login = async (req, res, next) => {
     }
 
     return res.json({ token: createToken(user), user: publicUser(user) })
+  } catch (error) {
+    next(handleDatabaseError(error))
+  }
+}
+
+export const googleLogin = async (req, res, next) => {
+  try {
+    getJwtSecret()
+    const { credential } = req.body
+    const client = getGoogleClient()
+
+    let ticket
+    try {
+      ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      })
+    } catch {
+      return res.status(401).json({ error: "Token de Google inválido o expirado" })
+    }
+
+    const payload = ticket.getPayload()
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      return res.status(400).json({ error: "No se pudo obtener la información de Google" })
+    }
+
+    const { sub: googleId, email, name, picture } = payload
+    const normalizedEmail = email.toLowerCase().trim()
+
+    let user = await User.findOne({ googleId })
+
+    if (!user) {
+      user = await User.findOne({ email: normalizedEmail })
+
+      if (user) {
+        user.googleId = googleId
+        if (!user.name && name) user.name = name
+        if (!user.picture && picture) user.picture = picture
+        await user.save()
+      } else {
+        user = await User.create({
+          email: normalizedEmail,
+          googleId,
+          name: name || "",
+          picture: picture || "",
+          authProvider: "google",
+          isActive: true,
+          orders: [],
+        })
+      }
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: "El usuario está inactivo" })
+    }
+
+    const token = createToken(user)
+    return res.json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
   }
