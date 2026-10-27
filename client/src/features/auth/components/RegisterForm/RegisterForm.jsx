@@ -1,11 +1,36 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { GoogleLogin } from "@react-oauth/google"
+import { toast } from "react-toastify"
+import { useAuth } from "../../hooks/useAuth"
 import { useRegisterForm } from "../../hooks/useRegisterForm"
 import { registerFormStyles as s } from "./RegisterFormStyles"
 
 export const RegisterForm = () => {
   const [mostrarPassword, setMostrarPassword] = useState(false)
+  const [cargandoGoogle, setCargandoGoogle] = useState(false)
   const { register, handleSubmit, errors, cargando } = useRegisterForm()
+  const { loginWithGoogle } = useAuth()
+  const navigate = useNavigate()
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setCargandoGoogle(true)
+      await loginWithGoogle(credentialResponse.credential)
+      toast.success("¡Cuenta lista! Bienvenido/a a Hermanos Jota.")
+      navigate("/")
+    } catch (error) {
+      toast.error(error.message || "Error al registrarse con Google")
+    } finally {
+      setCargandoGoogle(false)
+    }
+  }
+
+  const handleGoogleError = () => {
+    toast.error("No se pudo conectar con Google. Por favor, intentá nuevamente.")
+  }
+
+  const estaBloqueado = cargando || cargandoGoogle
 
   return (
     <form className={s.form} onSubmit={handleSubmit} noValidate>
@@ -14,6 +39,31 @@ export const RegisterForm = () => {
           {errors.root.message}
         </div>
       ) : null}
+
+      {/* Botón de Google */}
+      <div className="flex flex-col items-center justify-center gap-3">
+        <div className="w-full flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap={false}
+            text="signup_with"
+            shape="rectangular"
+            theme="outline"
+            size="large"
+            width="100%"
+          />
+        </div>
+
+        {/* Separador */}
+        <div className="w-full flex items-center my-1 gap-3">
+          <div className="h-px flex-1 bg-linea" />
+          <span className="text-xs uppercase tracking-cta text-ink-soft font-medium">
+            o completá tus datos
+          </span>
+          <div className="h-px flex-1 bg-linea" />
+        </div>
+      </div>
 
       <div className={s.campo}>
         <label className={s.etiqueta} htmlFor="register-email">
@@ -28,7 +78,7 @@ export const RegisterForm = () => {
           className={s.control(Boolean(errors.email))}
           aria-invalid={Boolean(errors.email)}
           aria-describedby={errors.email ? "error-register-email" : undefined}
-          disabled={cargando}
+          disabled={estaBloqueado}
         />
         {errors.email ? (
           <span id="error-register-email" className={s.errorCampo}>
@@ -53,7 +103,7 @@ export const RegisterForm = () => {
             aria-describedby={
               errors.phone ? "error-register-phone" : undefined
             }
-            disabled={cargando}
+            disabled={estaBloqueado}
           />
           {errors.phone ? (
             <span id="error-register-phone" className={s.errorCampo}>
@@ -77,7 +127,7 @@ export const RegisterForm = () => {
             aria-describedby={
               errors.address ? "error-register-address" : undefined
             }
-            disabled={cargando}
+            disabled={estaBloqueado}
           />
           {errors.address ? (
             <span id="error-register-address" className={s.errorCampo}>
@@ -104,7 +154,7 @@ export const RegisterForm = () => {
               aria-describedby={
                 errors.password ? "error-register-password" : "ayuda-password"
               }
-              disabled={cargando}
+              disabled={estaBloqueado}
             />
             <button
               type="button"
@@ -179,7 +229,7 @@ export const RegisterForm = () => {
                 ? "error-register-confirm-password"
                 : undefined
             }
-            disabled={cargando}
+            disabled={estaBloqueado}
           />
           {errors.confirmPassword ? (
             <span id="error-register-confirm-password" className={s.errorCampo}>
@@ -190,7 +240,7 @@ export const RegisterForm = () => {
       </div>
 
       <div className={s.acciones}>
-        <button className={s.boton} type="submit" disabled={cargando}>
+        <button className={s.boton} type="submit" disabled={estaBloqueado}>
           {cargando ? "Creando cuenta…" : "Registrarme"}
         </button>
 

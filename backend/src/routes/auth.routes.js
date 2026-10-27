@@ -1,17 +1,23 @@
 import { Router } from "express"
 import {
   getCurrentUser,
+  googleLogin,
   login,
   register,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middlewares/auth.js"
 import { validate } from "../middlewares/validate.js"
-import { loginSchema, registerSchema } from "../schemas/auth.schema.js"
+import {
+  googleAuthSchema,
+  loginSchema,
+  registerSchema,
+} from "../schemas/auth.schema.js"
 
 const router = Router()
 
 router.post("/register", validate(registerSchema), register)
 router.post("/login", validate(loginSchema), login)
+router.post("/google", validate(googleAuthSchema), googleLogin)
 router.get("/me", requireAuth, getCurrentUser)
 
 export default router
