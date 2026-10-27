@@ -15,6 +15,13 @@ export const authService = {
     })
   },
 
+  async googleLogin(credential) {
+    return fetchApi("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    })
+  },
+
   async getMe(token) {
     return fetchApi("/auth/me", {
       method: "GET",
@@ -24,4 +31,3 @@ export const authService = {
     })
   },
 }
-

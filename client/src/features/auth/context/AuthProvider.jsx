@@ -33,8 +33,7 @@ export const AuthProvider = ({ children }) => {
           setUser(response.user)
           localStorage.setItem(USER_KEY, JSON.stringify(response.user))
         }
-      } catch (err) {
-        console.warn("Sesión caducada o inválida:", err.message)
+      } catch {
         if (isMounted) {
           setToken(null)
           setUser(null)
@@ -71,6 +70,15 @@ export const AuthProvider = ({ children }) => {
     [saveSession],
   )
 
+  const loginWithGoogle = useCallback(
+    async (credential) => {
+      const data = await authService.googleLogin(credential)
+      saveSession(data.token, data.user)
+      return data
+    },
+    [saveSession],
+  )
+
   const register = useCallback(
     async ({ email, password, phone, address }) => {
       const data = await authService.register({
@@ -99,12 +107,12 @@ export const AuthProvider = ({ children }) => {
       isAuthenticated: Boolean(token && user),
       loading,
       login,
+      loginWithGoogle,
       register,
       logout,
     }),
-    [user, token, loading, login, register, logout],
+    [user, token, loading, login, loginWithGoogle, register, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
-
