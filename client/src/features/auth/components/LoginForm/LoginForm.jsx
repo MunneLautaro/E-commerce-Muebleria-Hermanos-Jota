@@ -26,7 +26,9 @@ export const LoginForm = () => {
     }
   }
   const handleGoogleError = () => {
-    toast.error("No se pudo conectar con Google. Por favor, intentá nuevamente.")
+    toast.error(
+      "No se pudo conectar con Google. Por favor, intentá nuevamente.",
+    )
   }
 
   const estaBloqueado = cargando || cargandoGoogle
@@ -39,7 +41,6 @@ export const LoginForm = () => {
         </div>
       ) : null}
 
-      {/* Botón de Google */}
       <div className="flex flex-col items-center justify-center gap-3">
         <div className="w-full flex justify-center">
           <GoogleLogin
@@ -54,7 +55,6 @@ export const LoginForm = () => {
           />
         </div>
 
-        {/* Separador */}
         <div className="w-full flex items-center my-1 gap-3">
           <div className="h-px flex-1 bg-linea" />
           <span className="text-xs uppercase tracking-cta text-ink-soft font-medium">
