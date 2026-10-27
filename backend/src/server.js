@@ -3,7 +3,6 @@ import mongoose from "mongoose"
 import app from "./index.js"
 import dns from "node:dns"
 
-// Forzar servidores DNS públicos para resolver registros SRV de MongoDB Atlas
 dns.setServers(["8.8.8.8", "8.8.4.4"])
 
 const PORT = process.env.PORT || 3000
