@@ -70,14 +70,16 @@ El servidor admite las siguientes variables de entorno:
 | `MONGODB_URI`    | —                                             | Cadena de conexión de MongoDB para usuarios y autenticación.               |
 | `JWT_SECRET`     | —                                             | Clave secreta utilizada para firmar los tokens JWT.                         |
 | `JWT_EXPIRES_IN` | `1d`                                          | Tiempo de expiración de los tokens JWT.                                     |
+| `N8N_CHAT_WEBHOOK_URL` | —                                       | URL del webhook de chat de n8n utilizado por el asistente.                  |
 
 Para cambiar estos valores, crear un archivo `backend/.env`:
 
 ```env
 PORT=3000
-CORS_WHITELIST=http://localhost:5173
+CORS_WHITELIST=http://localhost:5173,http://127.0.0.1:5173
 MONGODB_URI=mongodb://127.0.0.1:27017/hermanos-jota
 JWT_SECRET=una-clave-secreta-larga-y-segura
+N8N_CHAT_WEBHOOK_URL=http://localhost:5678/webhook/tu-webhook/chat
 ```
 
 ### URL de la API en el cliente
