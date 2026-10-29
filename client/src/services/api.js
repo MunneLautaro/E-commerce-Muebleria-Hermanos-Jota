@@ -1,13 +1,20 @@
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
 export async function fetchApi(endpoint, options = {}) {
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    ...options,
-  })
+  let response
+  try {
+    response = await fetch(`${BASE_URL}${endpoint}`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      ...options,
+    })
+  } catch {
+    throw new Error(
+      "No se pudo conectar con el backend. Verificá que esté ejecutándose en el puerto 3000.",
+    )
+  }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}))
@@ -24,4 +31,3 @@ export async function fetchApi(endpoint, options = {}) {
 
   return response.json()
 }
-
