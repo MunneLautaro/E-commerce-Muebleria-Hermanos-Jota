@@ -1,41 +1,9 @@
 import { useEffect, useState } from "react"
+import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react"
 import { toast } from "react-toastify"
 import { useCart } from "../../hooks/useCart"
 import { fetchApi } from "../../../../services/api"
 import { cartDrawerStyles } from "./CartDrawerStyles"
-
-const TrashIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    className={cartDrawerStyles.trashIcon}
-    aria-hidden="true"
-  >
-    <path d="M3 6h18" strokeLinecap="round" />
-    <path
-      d="M8 6V4.5A1.5 1.5 0 0 1 9.5 3h5A1.5 1.5 0 0 1 16 4.5V6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path d="M6 6l1 14h10l1-14" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M10 10v6M14 10v6" strokeLinecap="round" />
-  </svg>
-)
-
-const CloseIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.8"
-    className={cartDrawerStyles.closeIcon}
-    aria-hidden="true"
-  >
-    <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
-  </svg>
-)
 
 export const CartDrawer = ({ isOpen, onClose }) => {
   const { cart, removeItem, updateQuantity } = useCart()
@@ -44,7 +12,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
   const [error, setError] = useState("")
 
   const handleRemoveItem = (product) => {
-    removeItem(product.id)
+    removeItem(product._id)
     toast.info(`${product.nombre} eliminado del carrito`)
   }
 
@@ -121,7 +89,10 @@ export const CartDrawer = ({ isOpen, onClose }) => {
             className={cartDrawerStyles.closeButton}
             aria-label="Cerrar carrito"
           >
-            <CloseIcon />
+            <X
+              className={cartDrawerStyles.closeIcon}
+              aria-hidden="true"
+            />
           </button>
         </div>
 
@@ -135,22 +106,10 @@ export const CartDrawer = ({ isOpen, onClose }) => {
           ) : cartItems.length === 0 ? (
             <div className={cartDrawerStyles.emptyContainer}>
               <div className={cartDrawerStyles.emptyIconWrapper}>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
+                <ShoppingCart
                   className={cartDrawerStyles.emptyIcon}
                   aria-hidden="true"
-                >
-                  <path
-                    d="M3 4h2l2.4 9.4a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L19 6H7"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="10" cy="17.5" r="1.25" />
-                  <circle cx="17" cy="17.5" r="1.25" />
-                </svg>
+                />
               </div>
               <p className={cartDrawerStyles.emptyTitle}>
                 Tu carrito está vacío
@@ -162,9 +121,9 @@ export const CartDrawer = ({ isOpen, onClose }) => {
           ) : (
             <ul className={cartDrawerStyles.itemList}>
               {cartItems.map((product) => (
-                <li key={product.id} className={cartDrawerStyles.itemCard}>
+                <li key={product._id} className={cartDrawerStyles.itemCard}>
                   <img
-                    src={product.image}
+                    src={product.imagenUrl}
                     alt={product.nombre}
                     className={cartDrawerStyles.itemImage}
                   />
@@ -177,11 +136,11 @@ export const CartDrawer = ({ isOpen, onClose }) => {
                     <div className={cartDrawerStyles.quantityControls}>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product.id, -1)}
+                        onClick={() => updateQuantity(product._id, -1)}
                         className={cartDrawerStyles.quantityButton}
                         aria-label={`Quitar una unidad de ${product.nombre}`}
                       >
-                        -
+                        <Minus className="h-4 w-4" aria-hidden="true" />
                       </button>
 
                       <span className={cartDrawerStyles.quantityText}>
@@ -190,11 +149,11 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product.id, 1)}
+                        onClick={() => updateQuantity(product._id, 1)}
                         className={cartDrawerStyles.quantityButton}
                         aria-label={`Agregar una unidad de ${product.nombre}`}
                       >
-                        +
+                        <Plus className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -205,7 +164,10 @@ export const CartDrawer = ({ isOpen, onClose }) => {
                     className={cartDrawerStyles.removeButton}
                     aria-label={`Eliminar ${product.nombre} del carrito`}
                   >
-                    <TrashIcon />
+                    <Trash2
+                      className={cartDrawerStyles.trashIcon}
+                      aria-hidden="true"
+                    />
                   </button>
                 </li>
               ))}
