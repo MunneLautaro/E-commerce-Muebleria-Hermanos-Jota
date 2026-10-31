@@ -92,7 +92,7 @@ export default function ProductDetail() {
       <div className={productDetailStyles.grid}>
         <div className={productDetailStyles.imageWrapper}>
           <img
-            src={product.image}
+            src={product.imagenUrl}
             alt={product.nombre}
             className={productDetailStyles.image}
           />

@@ -5,14 +5,14 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
 
   const addItem = (product, quantity = 1) => {
-    if (!product || !product.id) return
+    if (!product || !product._id) return
 
     setCart((currentCart) => {
-      const existingItem = currentCart.find((item) => item.id === product.id)
+      const existingItem = currentCart.find((item) => item.id === product._id)
 
       if (existingItem) {
         return currentCart.map((item) =>
-          item.id === product.id
+          item.id === product._id
             ? { ...item, quantity: item.quantity + Math.max(1, quantity) }
             : item,
         )
@@ -20,7 +20,7 @@ export const CartProvider = ({ children }) => {
 
       return [
         ...currentCart,
-        { id: product.id, quantity: Math.max(1, quantity) },
+        { id: product._id, quantity: Math.max(1, quantity) },
       ]
     })
   }
