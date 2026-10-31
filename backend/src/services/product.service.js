@@ -1,12 +1,14 @@
-import {
-  getProductsModel,
-  getProductByIdModel,
-} from "../models/product.model.js"
+import mongoose from "mongoose"
+import Product from "../models/product.model.js"
 
 export const getProductsService = async () => {
-  return await getProductsModel()
+  return Product.find({ isActive: true }).lean()
 }
 
 export const getProductByIdService = async (id) => {
-  return await getProductByIdModel(id)
+  if (!mongoose.isValidObjectId(id)) {
+    return null
+  }
+
+  return Product.findOne({ _id: id, isActive: true }).lean()
 }

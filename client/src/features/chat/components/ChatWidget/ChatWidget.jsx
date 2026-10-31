@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { MessageCircle, X } from "lucide-react"
 import { sendChatMessage } from "../../services/chatService"
 import { chatWidgetStyles as s } from "./ChatWidgetStyles"
 
@@ -63,9 +64,7 @@ export const ChatWidget = () => {
         onClick={() => setIsOpen(true)}
         aria-label="Abrir asistente de Hermanos Jota"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-6 w-6" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h8M8 14h5m7-2a8 8 0 01-8 8 8.5 8.5 0 01-3.5-.75L4 20l.75-3.5A8.5 8.5 0 014 12a8 8 0 018-8 8 8 0 018 8z" />
-        </svg>
+        <MessageCircle className="h-6 w-6" aria-hidden="true" />
       </button>
     )
   }
@@ -75,7 +74,7 @@ export const ChatWidget = () => {
       <header className={s.header}>
         <h2 className={s.title}>Asistente Hermanos Jota</h2>
         <button type="button" className={s.close} onClick={() => setIsOpen(false)} aria-label="Cerrar asistente">
-          <span aria-hidden="true" className="text-xl leading-none">×</span>
+          <X aria-hidden="true" className="h-5 w-5" />
         </button>
       </header>
 

@@ -1,11 +1,50 @@
-import { products } from "../data/products.js"
+import mongoose from "mongoose"
 
-export const getProductsModel = async () => {
-  return products
-}
+const productSchema = new mongoose.Schema(
+  {
+    sku: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      uppercase: true,
+    },
+    nombre: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    descripcion: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    precio: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    stock: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    imagenUrl: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+)
 
-export const getProductByIdModel = async (id) => {
-  const productId = Number(id)
+const Product =
+  mongoose.models.Product || mongoose.model("Product", productSchema)
 
-  return products.find((product) => product.id === productId) || null
-}
+export default Product

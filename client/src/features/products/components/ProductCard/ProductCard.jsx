@@ -5,13 +5,13 @@ import { productCardStyles } from "./ProductCardStyles"
 export const ProductCard = ({ product, compact = false }) => {
   return (
     <Link
-      to={`/productos/${product.id}`}
+      to={`/productos/${product._id}`}
       className={productCardStyles.link}
       aria-label={`Ver detalle del producto ${product.nombre}`}
     >
       <article className={productCardStyles.card}>
         <img
-          src={product.image}
+          src={product.imagenUrl}
           alt={product.nombre}
           className={productCardStyles.image(compact)}
         />

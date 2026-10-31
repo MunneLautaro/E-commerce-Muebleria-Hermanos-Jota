@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library"
-import User from "../models/User.js"
+import User from "../models/user.model.js"
 
 const publicUser = (user) => ({
   id: user._id,
