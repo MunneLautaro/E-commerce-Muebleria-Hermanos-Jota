@@ -4,6 +4,7 @@ export async function fetchApi(endpoint, options = {}) {
   let response
   try {
     response = await fetch(`${BASE_URL}${endpoint}`, {
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
         ...options.headers,
