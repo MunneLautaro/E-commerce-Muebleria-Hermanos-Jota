@@ -3,6 +3,7 @@ import {
   getCurrentUser,
   googleLogin,
   login,
+  logout,
   register,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middlewares/auth.js"
@@ -18,6 +19,7 @@ const router = Router()
 router.post("/register", validate(registerSchema), register)
 router.post("/login", validate(loginSchema), login)
 router.post("/google", validate(googleAuthSchema), googleLogin)
+router.post("/logout", logout)
 router.get("/me", requireAuth, getCurrentUser)
 
 export default router

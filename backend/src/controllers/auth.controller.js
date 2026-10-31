@@ -3,6 +3,20 @@ import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library"
 import User from "../models/user.model.js"
 
+const AUTH_COOKIE = "hjAuthToken"
+
+const authCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 24 * 60 * 60 * 1000,
+  path: "/",
+}
+
+const setAuthCookie = (res, token) => {
+  res.cookie(AUTH_COOKIE, token, authCookieOptions)
+}
+
 const publicUser = (user) => ({
   id: user._id,
   email: user.email,
@@ -77,6 +91,7 @@ export const register = async (req, res, next) => {
     })
 
     const token = createToken(user)
+    setAuthCookie(res, token)
     return res.status(201).json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
@@ -97,7 +112,9 @@ export const login = async (req, res, next) => {
       return res.status(403).json({ error: "El usuario está inactivo" })
     }
 
-    return res.json({ token: createToken(user), user: publicUser(user) })
+    const token = createToken(user)
+    setAuthCookie(res, token)
+    return res.json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
   }
@@ -155,6 +172,7 @@ export const googleLogin = async (req, res, next) => {
     }
 
     const token = createToken(user)
+    setAuthCookie(res, token)
     return res.json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
@@ -173,4 +191,15 @@ export const getCurrentUser = async (req, res, next) => {
   } catch (error) {
     next(handleDatabaseError(error))
   }
+}
+
+export const logout = (req, res) => {
+  res.clearCookie(AUTH_COOKIE, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+  })
+
+  return res.json({ message: "Sesión cerrada correctamente" })
 }

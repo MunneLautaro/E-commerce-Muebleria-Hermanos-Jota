@@ -22,12 +22,15 @@ export const authService = {
     })
   },
 
-  async getMe(token) {
+  async getMe() {
     return fetchApi("/auth/me", {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    })
+  },
+
+  async logout() {
+    return fetchApi("/auth/logout", {
+      method: "POST",
     })
   },
 }
