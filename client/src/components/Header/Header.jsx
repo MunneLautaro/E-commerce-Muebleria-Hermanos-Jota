@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, NavLink } from "react-router-dom"
+import { Menu, ShoppingCart, UserRound, X } from "lucide-react"
 import { CartDrawer, useCart } from "../../features/cart"
 import { useAuth } from "../../features/auth"
 import { headerStyles as s } from "./HeaderStyles"
@@ -66,20 +67,10 @@ export const Header = () => {
               className={s.cartButton}
               onClick={() => setCartOpen(true)}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <ShoppingCart
                 className={s.cartIcon}
                 aria-hidden="true"
-              >
-                <circle cx="9" cy="18" r="1.5" />
-                <circle cx="17" cy="18" r="1.5" />
-                <path d="M3 4h2l2.2 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7" />
-              </svg>
+              />
 
               {itemCount > 0 && (
                 <span className={s.cartBadge}>{itemCount}</span>
@@ -91,20 +82,10 @@ export const Header = () => {
             {isAuthenticated ? (
               <>
                 <span className={s.userBadge} title={user?.email}>
-                  <svg
+                  <UserRound
                     className={s.userIcon}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
                     aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                    />
-                  </svg>
+                  />
                   <span className="truncate">{user?.email}</span>
                 </span>
                 <button
@@ -135,21 +116,11 @@ export const Header = () => {
             aria-controls="menu-movil"
             aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
           >
-            <svg
-              className={s.menuIcon}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              {menuOpen ? (
-                <path d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              )}
-            </svg>
+            {menuOpen ? (
+              <X className={s.menuIcon} aria-hidden="true" />
+            ) : (
+              <Menu className={s.menuIcon} aria-hidden="true" />
+            )}
           </button>
         </div>
 
@@ -186,20 +157,10 @@ export const Header = () => {
                 {isAuthenticated ? (
                   <>
                     <div className={s.mobileUserInfo}>
-                      <svg
+                      <UserRound
                         className={s.userIcon}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
                         aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
+                      />
                       <span className="truncate">{user?.email}</span>
                     </div>
                     <button
