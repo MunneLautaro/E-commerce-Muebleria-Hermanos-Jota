@@ -1,3 +1,4 @@
+
 import { useMemo, useState } from "react"
 import { CartContext } from "./CartContext"
 
@@ -7,31 +8,63 @@ export const CartProvider = ({ children }) => {
   const addItem = (product, quantity = 1) => {
     if (!product || !product._id) return
 
+    const stock = Number(product.stock)
+    const amount = Number(quantity)
+
+    if (
+      !Number.isFinite(stock) ||
+      stock <= 0 ||
+      !Number.isInteger(amount) ||
+      amount < 1
+    ) {
+      return
+    }
+
     setCart((currentCart) => {
-      const existingItem = currentCart.find((item) => item.id === product._id)
+      const existingItem = currentCart.find(
+        (item) => item.id === product._id,
+      )
+
+      const currentQuantity = existingItem?.quantity ?? 0
+
+      if (currentQuantity + amount > stock) {
+        return currentCart
+      }
 
       if (existingItem) {
         return currentCart.map((item) =>
           item.id === product._id
-            ? { ...item, quantity: item.quantity + Math.max(1, quantity) }
+            ? { ...item, quantity: currentQuantity + amount }
             : item,
         )
       }
 
-      return [
-        ...currentCart,
-        { id: product._id, quantity: Math.max(1, quantity) },
-      ]
+      return [...currentCart, { id: product._id, quantity: amount }]
     })
   }
 
-  const updateQuantity = (productId, delta) => {
+  const updateQuantity = (productId, delta, stock) => {
+    const availableStock = Number(stock)
+
+    if (!Number.isFinite(availableStock) || availableStock < 0) {
+      return
+    }
+
+    if (!Number.isInteger(delta)) {
+      return
+    }
+
     setCart((currentCart) =>
       currentCart.flatMap((item) => {
         if (item.id !== productId) return [item]
 
         const nextQuantity = item.quantity + delta
-        return nextQuantity > 0 ? [{ ...item, quantity: nextQuantity }] : []
+
+        if (nextQuantity <= 0) return []
+
+        if (nextQuantity > availableStock) return [item]
+
+        return [{ ...item, quantity: nextQuantity }]
       }),
     )
   }

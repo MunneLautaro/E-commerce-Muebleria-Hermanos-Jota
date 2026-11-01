@@ -2,6 +2,7 @@ import {
   createProductService,
   getProductsService,
   getProductByIdService,
+  updateProductService,
 } from "../services/product.service.js"
 
 export const createProduct = async (req, res, next) => {
@@ -36,5 +37,19 @@ export const getProductById = async (req, res) => {
     res
       .status(error.statusCode || 500)
       .json({ error: error.message || "Error al obtener el producto" })
+  }
+}
+
+export const updateProduct = async (req, res, next) => {
+  try {
+    const product = await updateProductService(req.params.id, req.body)
+
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" })
+    }
+
+    return res.json(product)
+  } catch (error) {
+    return next(error)
   }
 }
