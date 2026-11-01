@@ -3,16 +3,17 @@ import { contactFormStyles as s } from "./ContactFormStyles"
 
 export const ContactForm = () => {
   const {
-    valores,
-    errores,
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
     enviando,
     exito,
     limites,
-    cambiarCampo,
-    validarCampo,
-    enviar,
     reiniciar,
+    enviar,
   } = useContacto()
+  const mensaje = watch("mensaje", "")
 
   if (exito) {
     return (
@@ -29,99 +30,66 @@ export const ContactForm = () => {
     )
   }
 
+  const errorMessage = (field) =>
+    errors[field] ? (
+      <span className={s.errorCampo}>{errors[field].message}</span>
+    ) : null
+
   return (
-    <form className={s.form} onSubmit={enviar} noValidate>
+    <form className={s.form} onSubmit={handleSubmit(enviar)} noValidate>
       <div className={s.fila}>
         <div className={s.campo}>
-          <label className={s.etiqueta} htmlFor="nombre">
-            Nombre
-          </label>
+          <label className={s.etiqueta} htmlFor="nombre">Nombre</label>
           <input
             id="nombre"
-            name="nombre"
+            {...register("nombre")}
             type="text"
             autoComplete="name"
             maxLength={limites.nombreMax}
-            value={valores.nombre}
-            onChange={cambiarCampo}
-            onBlur={validarCampo}
-            className={s.control(Boolean(errores.nombre))}
-            aria-invalid={Boolean(errores.nombre)}
-            aria-describedby={errores.nombre ? "error-nombre" : undefined}
+            className={s.control(Boolean(errors.nombre))}
+            aria-invalid={Boolean(errors.nombre)}
           />
-          {errores.nombre ? (
-            <span id="error-nombre" className={s.errorCampo}>
-              {errores.nombre}
-            </span>
-          ) : null}
+          {errorMessage("nombre")}
         </div>
-
         <div className={s.campo}>
-          <label className={s.etiqueta} htmlFor="email">
-            Correo electrónico
-          </label>
+          <label className={s.etiqueta} htmlFor="email">Correo electrónico</label>
           <input
             id="email"
-            name="email"
+            {...register("email")}
             type="email"
             autoComplete="email"
             maxLength={limites.emailMax}
-            value={valores.email}
-            onChange={cambiarCampo}
-            onBlur={validarCampo}
-            className={s.control(Boolean(errores.email))}
-            aria-invalid={Boolean(errores.email)}
-            aria-describedby={errores.email ? "error-email" : undefined}
+            className={s.control(Boolean(errors.email))}
+            aria-invalid={Boolean(errors.email)}
           />
-          {errores.email ? (
-            <span id="error-email" className={s.errorCampo}>
-              {errores.email}
-            </span>
-          ) : null}
+          {errorMessage("email")}
         </div>
       </div>
 
       <div className={s.fila}>
         <div className={s.campo}>
           <label className={s.etiqueta} htmlFor="telefono">
-            Teléfono
-            <span className={s.opcional}>(opcional)</span>
+            Teléfono <span className={s.opcional}>(opcional)</span>
           </label>
           <input
             id="telefono"
-            name="telefono"
+            {...register("telefono")}
             type="tel"
             autoComplete="tel"
             inputMode="numeric"
-            pattern="[0-9]*"
             maxLength={limites.telefonoMax}
-            value={valores.telefono}
-            onChange={cambiarCampo}
-            onBlur={validarCampo}
-            className={s.control(Boolean(errores.telefono))}
-            aria-invalid={Boolean(errores.telefono)}
-            aria-describedby={errores.telefono ? "error-telefono" : undefined}
+            className={s.control(Boolean(errors.telefono))}
+            aria-invalid={Boolean(errors.telefono)}
           />
-          {errores.telefono ? (
-            <span id="error-telefono" className={s.errorCampo}>
-              {errores.telefono}
-            </span>
-          ) : null}
+          {errorMessage("telefono")}
         </div>
-
         <div className={s.campo}>
-          <label className={s.etiqueta} htmlFor="motivo">
-            Motivo
-          </label>
+          <label className={s.etiqueta} htmlFor="motivo">Motivo</label>
           <select
             id="motivo"
-            name="motivo"
-            value={valores.motivo}
-            onChange={cambiarCampo}
-            onBlur={validarCampo}
-            className={s.control(Boolean(errores.motivo))}
-            aria-invalid={Boolean(errores.motivo)}
-            aria-describedby={errores.motivo ? "error-motivo" : undefined}
+            {...register("motivo")}
+            className={s.control(Boolean(errors.motivo))}
+            aria-invalid={Boolean(errors.motivo)}
           >
             <option value="">Elegí una opción</option>
             {motivosConsulta.map((motivo) => (
@@ -130,37 +98,25 @@ export const ContactForm = () => {
               </option>
             ))}
           </select>
-          {errores.motivo ? (
-            <span id="error-motivo" className={s.errorCampo}>
-              {errores.motivo}
-            </span>
-          ) : null}
+          {errorMessage("motivo")}
         </div>
       </div>
 
       <div className={s.campo}>
-        <label className={s.etiqueta} htmlFor="mensaje">
-          Mensaje
-        </label>
+        <label className={s.etiqueta} htmlFor="mensaje">Mensaje</label>
         <textarea
           id="mensaje"
-          name="mensaje"
-          value={valores.mensaje}
-          onChange={cambiarCampo}
-          onBlur={validarCampo}
+          {...register("mensaje")}
           maxLength={limites.mensajeMax}
-          className={s.textarea(Boolean(errores.mensaje))}
+          className={s.textarea(Boolean(errors.mensaje))}
           placeholder="Contanos qué pieza te interesa o en qué podemos ayudarte."
-          aria-invalid={Boolean(errores.mensaje)}
-          aria-describedby={errores.mensaje ? "error-mensaje" : "ayuda-mensaje"}
+          aria-invalid={Boolean(errors.mensaje)}
         />
-        {errores.mensaje ? (
-          <span id="error-mensaje" className={s.errorCampo}>
-            {errores.mensaje}
-          </span>
+        {errors.mensaje ? (
+          errorMessage("mensaje")
         ) : (
-          <span id="ayuda-mensaje" className={s.ayuda}>
-            {valores.mensaje.trim().length}/{limites.mensajeMax} caracteres
+          <span className={s.ayuda}>
+            {mensaje.trim().length}/{limites.mensajeMax} caracteres
           </span>
         )}
       </div>

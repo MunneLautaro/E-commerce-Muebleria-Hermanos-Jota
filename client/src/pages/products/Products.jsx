@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   ChevronLeft,
   ChevronRight,
@@ -10,64 +10,64 @@ import { toast } from "react-toastify"
 import { ProductList, productService } from "../../features/products"
 import { productsStyles } from "./ProductsStyles"
 
-const PRODUCTS_PER_PAGE = 12
-
 export default function ProductsPage() {
   const [products, setProducts] = useState([])
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 12,
+    total: 0,
+    totalPages: 0,
+  })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [searchTerm, setSearchTerm] = useState("")
   const [minPrice, setMinPrice] = useState("")
   const [maxPrice, setMaxPrice] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
+  const [productsPerPage, setProductsPerPage] = useState(12)
 
   useEffect(() => {
-    const loadProducts = async () => {
+    let ignore = false
+    const invalidRange =
+      minPrice !== "" && maxPrice !== "" && Number(minPrice) > Number(maxPrice)
+
+    if (invalidRange) {
+      return () => {
+        ignore = true
+      }
+    }
+
+    const timeoutId = setTimeout(async () => {
       try {
-        const data = await productService.getProducts()
-        setProducts(data)
+        const data = await productService.getProducts({
+          page: currentPage,
+          limit: productsPerPage,
+          order: "name_asc",
+          ...(searchTerm.trim() && { q: searchTerm.trim() }),
+          ...(minPrice !== "" && { minPrice }),
+          ...(maxPrice !== "" && { maxPrice }),
+        })
+        if (ignore) return
+        setError("")
+        setProducts(data.items)
+        setPagination(data.pagination)
       } catch (error) {
+        if (ignore) return
         console.error(error)
         setError("No se pudieron cargar los productos.")
         toast.error("No se pudieron cargar los productos.")
       } finally {
-        setLoading(false)
+        if (!ignore) setLoading(false)
       }
+    }, 300)
+
+    return () => {
+      ignore = true
+      clearTimeout(timeoutId)
     }
+  }, [currentPage, productsPerPage, searchTerm, minPrice, maxPrice])
 
-    loadProducts()
-  }, [])
-
-  const filteredProducts = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLocaleLowerCase("es")
-    const minimum = minPrice === "" ? null : Number(minPrice)
-    const maximum = maxPrice === "" ? null : Number(maxPrice)
-
-    return products.filter((product) => {
-      const name = String(product.nombre ?? "").toLocaleLowerCase("es")
-      const price =
-        product.precio === null ||
-        product.precio === undefined ||
-        product.precio === ""
-          ? Number.NaN
-          : Number(product.precio)
-
-      return (
-        name.includes(normalizedSearch) &&
-        (minimum === null || (Number.isFinite(price) && price >= minimum)) &&
-        (maximum === null || (Number.isFinite(price) && price <= maximum))
-      )
-    })
-  }, [products, searchTerm, minPrice, maxPrice])
-
-  const pageCount = Math.max(
-    1,
-    Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE),
-  )
-  const pageProducts = filteredProducts.slice(
-    (currentPage - 1) * PRODUCTS_PER_PAGE,
-    currentPage * PRODUCTS_PER_PAGE,
-  )
+  const pageCount = Math.max(1, pagination.totalPages)
   const invalidPriceRange =
     minPrice !== "" && maxPrice !== "" && Number(minPrice) > Number(maxPrice)
   const hasFilters = searchTerm !== "" || minPrice !== "" || maxPrice !== ""
@@ -125,8 +125,8 @@ export default function ProductsPage() {
             </h2>
           </div>
           <p className={productsStyles.resultCount} aria-live="polite">
-            {filteredProducts.length}{" "}
-            {filteredProducts.length === 1 ? "producto" : "productos"}
+            {pagination.total}{" "}
+            {pagination.total === 1 ? "producto" : "productos"}
           </p>
         </div>
 
@@ -193,6 +193,20 @@ export default function ProductsPage() {
               El precio mínimo no puede superar al máximo.
             </p>
           )}
+          <label>
+            Productos por página
+            <select
+              value={productsPerPage}
+              onChange={(event) => {
+                setProductsPerPage(Number(event.target.value))
+                setCurrentPage(1)
+              }}
+            >
+              <option value={12}>12</option>
+              <option value={15}>15</option>
+              <option value={20}>20</option>
+            </select>
+          </label>
           {hasFilters && (
             <button
               type="button"
@@ -210,12 +224,12 @@ export default function ProductsPage() {
         className={productsStyles.listWrapper}
         aria-label="Lista de productos"
       >
-        {pageProducts.length > 0 ? (
-          <ProductList products={pageProducts} />
+        {products.length > 0 ? (
+          <ProductList products={products} />
         ) : (
           <div className={productsStyles.emptyState}>
             <h2 className={productsStyles.emptyStateTitle}>
-              {products.length === 0
+              {pagination.total === 0
                 ? "Todavía no hay productos disponibles"
                 : "No encontramos productos"}
             </h2>

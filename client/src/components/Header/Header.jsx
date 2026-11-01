@@ -61,6 +61,15 @@ export const Header = () => {
               </NavLink>
             ))}
 
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={desktopLinkClass}
+              >
+                Admin
+              </NavLink>
+            )}
+
             <button
               type="button"
               aria-label="Abrir carrito de compras"
@@ -138,6 +147,16 @@ export const Header = () => {
                   {label}
                 </NavLink>
               ))}
+
+              {user?.role === "admin" && (
+                <NavLink
+                  to="/admin"
+                  className={mobileLinkClass}
+                  onClick={closeMenu}
+                >
+                  Admin
+                </NavLink>
+              )}
 
               <button
                 type="button"
