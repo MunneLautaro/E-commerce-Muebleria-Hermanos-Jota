@@ -1,8 +1,18 @@
 import {
+  createProductService,
   getProductsService,
   getProductByIdService,
   updateProductService,
 } from "../services/product.service.js"
+
+export const createProduct = async (req, res, next) => {
+  try {
+    const product = await createProductService(req.body)
+    return res.status(201).json(product)
+  } catch (error) {
+    return next(error)
+  }
+}
 
 export const getProducts = async (req, res) => {
   try {

@@ -67,7 +67,7 @@ El servidor admite las siguientes variables de entorno:
 | ---------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
 | `PORT`           | `3000`                                        | Puerto en el que se inicia la API.                                          |
 | `CORS_WHITELIST` | `http://localhost:5173,http://localhost:5174` | Orígenes permitidos para realizar peticiones a la API, separados por comas. |
-| `MONGODB_URI`    | —                                             | Cadena de conexión de MongoDB para usuarios y autenticación.               |
+| `MONGODB_URI`    | —                                             | Cadena de conexión de MongoDB para usuarios, autenticación y consultas de contacto. |
 | `JWT_SECRET`     | —                                             | Clave secreta utilizada para firmar los tokens JWT.                         |
 | `JWT_EXPIRES_IN` | `1d`                                          | Tiempo de expiración de los tokens JWT.                                     |
 | `N8N_CHAT_WEBHOOK_URL` | —                                       | URL del webhook de chat de n8n utilizado por el asistente.                  |
@@ -162,6 +162,8 @@ La API utiliza el prefijo `/api`.
 | ------ | -------------------- | ------------------------------------------ |
 | `GET`  | `/api/productos`     | Devuelve el listado completo de productos. |
 | `GET`  | `/api/productos/:id` | Devuelve un producto por su identificador. |
+| `POST` | `/api/productos` | Crea un producto con SKU, nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. No requiere autenticación actualmente. |
+| `POST` | `/api/contacto`      | Valida y guarda una consulta de contacto en MongoDB. |
 | `POST` | `/api/auth/register` | Registra un usuario y devuelve un JWT. |
 | `POST` | `/api/auth/login` | Autentica un usuario y devuelve un JWT. |
 | `GET`  | `/api/auth/me` | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`. |
@@ -239,6 +241,7 @@ Las rutas principales son:
 - `/` — Inicio.
 - `/productos` — Catálogo.
 - `/productos/:id` — Detalle de producto.
+- `/admin/crear-producto` — Formulario para cargar productos y atributos personalizados.
 - `/contacto` — Formulario de contacto.
 
 ## Decisiones tomadas

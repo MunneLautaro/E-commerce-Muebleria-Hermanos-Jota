@@ -6,6 +6,7 @@ import ProductDetail from "../pages/productDetail/ProductDetail"
 import ContactPage from "../pages/contact/ContactPage"
 import LoginPage from "../pages/login/LoginPage"
 import RegisterPage from "../pages/register/RegisterPage"
+import CreateProductPage from "../pages/admin/CreateProductPage"
 
 export const AppRouter = () => {
   return (
@@ -15,9 +16,11 @@ export const AppRouter = () => {
 
         <Route path="/productos" element={<ProductsPage />} />
         <Route path="/productos/:id" element={<ProductDetail />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/admin/crear-producto" element={<CreateProductPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

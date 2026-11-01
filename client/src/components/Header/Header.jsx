@@ -9,7 +9,7 @@ import logo from "../../assets/logo.svg"
 const navLinks = [
   { to: "/", label: "Inicio" },
   { to: "/productos", label: "Productos" },
-  { to: "/contacto", label: "Contacto" },
+  { to: "/contact", label: "Contacto" },
 ]
 
 export const Header = () => {

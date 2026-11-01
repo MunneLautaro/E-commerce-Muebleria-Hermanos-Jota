@@ -65,6 +65,7 @@ export const ContactForm = () => {
             name="email"
             type="email"
             autoComplete="email"
+            maxLength={limites.emailMax}
             value={valores.email}
             onChange={cambiarCampo}
             onBlur={validarCampo}
