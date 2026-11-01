@@ -13,7 +13,8 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const products = await fetchApi("/products")
+        const response = await fetchApi("/products?limit=12&order=name_asc")
+        const products = response.items
 
         const sortedProducts = [...products].sort(
           (a, b) => (b.vendidos ?? 0) - (a.vendidos ?? 0),

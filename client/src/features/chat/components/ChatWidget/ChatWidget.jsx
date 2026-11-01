@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { useForm } from "react-hook-form"
 import { MessageCircle, X } from "lucide-react"
 import { sendChatMessage } from "../../services/chatService"
 import { chatWidgetStyles as s } from "./ChatWidgetStyles"
@@ -15,23 +16,24 @@ function createSessionId() {
 
 export const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [input, setInput] = useState("")
   const [messages, setMessages] = useState([initialMessage])
   const [sessionId] = useState(createSessionId)
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState("")
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: { message: "" },
+  })
   const messagesEndRef = useRef(null)
 
   useEffect(() => {
     if (isOpen) messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [isOpen, messages, isSending])
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    const message = input.trim()
+  const handleSend = async ({ message: rawMessage }) => {
+    const message = rawMessage.trim()
     if (!message || isSending) return
 
-    setInput("")
+    reset()
     setError("")
     setMessages((current) => [
       ...current,
@@ -90,19 +92,18 @@ export const ChatWidget = () => {
 
       {error && <p className={s.error} role="alert">{error}</p>}
 
-      <form className={s.form} onSubmit={handleSubmit}>
+      <form className={s.form} onSubmit={handleSubmit(handleSend)}>
         <label htmlFor="chat-message" className="sr-only">Escribí tu mensaje</label>
         <textarea
           id="chat-message"
           className={s.input}
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
+          {...register("message", { required: true, maxLength: 2000 })}
           placeholder="Escribí tu consulta..."
           rows="2"
           maxLength="2000"
           disabled={isSending}
         />
-        <button type="submit" className={s.submit} disabled={isSending || !input.trim()}>
+        <button type="submit" className={s.submit} disabled={isSending}>
           {isSending ? "Enviando..." : "Enviar mensaje"}
         </button>
       </form>

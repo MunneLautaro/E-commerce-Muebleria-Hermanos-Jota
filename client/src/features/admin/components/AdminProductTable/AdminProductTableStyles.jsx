@@ -1,0 +1,25 @@
+export const adminProductTableStyles = {
+  wrapper: "overflow-x-auto",
+  table: "w-full min-w-[680px] text-left text-sm",
+  head: "bg-crema/70 text-xs uppercase tracking-wide text-ink-soft",
+  headCell: "px-4 py-3",
+  firstHeadCell: "px-5 py-3 sm:px-7",
+  actionHeadCell: "px-4 py-3 text-right sm:px-7",
+  body: "divide-y divide-linea",
+  row: "transition hover:bg-crema/30",
+  productCell: "px-5 py-4 sm:px-7",
+  productInfo: "flex items-center gap-3",
+  image: "h-12 w-12 rounded-lg border border-linea bg-crema object-contain p-1",
+  name: "font-semibold text-ink",
+  sku: "mt-1 text-xs text-ink-soft",
+  cell: "px-4 py-4",
+  priceCell: "px-4 py-4 font-medium",
+  statusCell: "px-4 py-4",
+  activeStatus: "text-ink",
+  inactiveStatus: "rounded-full bg-ink/10 px-2 py-1 text-xs text-ink-soft",
+  actionCell: "px-4 py-4 text-right sm:px-7",
+  editButton:
+    "inline-flex items-center gap-2 rounded-lg border border-siena/25 px-3 py-2 text-xs font-semibold text-siena transition hover:bg-crema",
+  deleteButton:
+    "ml-2 inline-flex items-center gap-2 rounded-lg border border-error/25 px-3 py-2 text-xs font-semibold text-error transition hover:bg-error-bg",
+}
