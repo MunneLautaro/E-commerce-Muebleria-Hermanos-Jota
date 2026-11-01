@@ -42,9 +42,11 @@ export const ProductCard = ({ product, compact = false }) => {
                 {product.descripcion}
               </p>
 
-              <p className={productCardStyles.measures}>
-                <strong>Medidas:</strong> {product.medidas}
-              </p>
+              {product.medidas && (
+                <p className={productCardStyles.measures}>
+                  <strong>Medidas:</strong> {product.medidas}
+                </p>
+              )}
 
               <div className={productCardStyles.optionalFields}>
                 {productOptionalFields.map(({ key, label }) => {
