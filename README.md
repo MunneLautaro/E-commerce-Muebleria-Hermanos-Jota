@@ -162,11 +162,28 @@ La API utiliza el prefijo `/api`.
 | ------ | -------------------- | ------------------------------------------ |
 | `GET`  | `/api/productos`     | Devuelve el listado completo de productos. |
 | `GET`  | `/api/productos/:id` | Devuelve un producto por su identificador. |
-| `POST` | `/api/productos` | Crea un producto con SKU, nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. No requiere autenticación actualmente. |
+| `POST` | `/api/productos` | Crea un producto con nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. El SKU se genera automáticamente con prefijo `HJ-`. Requiere un usuario autenticado con rol `admin`. |
+| `PUT`  | `/api/productos/:id` | Actualiza un producto. Requiere un usuario autenticado con rol `admin`. |
+| `DELETE` | `/api/productos/:id` | Desactiva un producto del catálogo sin eliminar sus datos. Requiere un usuario autenticado con rol `admin`. |
 | `POST` | `/api/contacto`      | Valida y guarda una consulta de contacto en MongoDB. |
 | `POST` | `/api/auth/register` | Registra un usuario y devuelve un JWT. |
 | `POST` | `/api/auth/login` | Autentica un usuario y devuelve un JWT. |
 | `GET`  | `/api/auth/me` | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`. |
+
+Para habilitar el panel de carga, registrá primero el usuario y asignale el rol `admin` directamente en MongoDB:
+
+```js
+db.users.updateOne(
+  { email: "admin@ejemplo.com" },
+  { $set: { role: "admin" } },
+)
+```
+
+Luego iniciá sesión con ese usuario y accedé a `/admin`. Desde allí podés
+crear productos o editar los existentes.
+
+Los precios aceptan puntos como separadores de miles (`500.000`) y coma para centavos
+(`500.000,50`). También se acepta el formato decimal técnico (`500.50`).
 
 Ejemplo:
 
