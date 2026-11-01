@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -8,9 +9,15 @@ import {
 } from "../../features/products"
 import { productDetailStyles } from "./ProductDetailStyles"
 
+const formatPrice = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  maximumFractionDigits: 0,
+})
+
 export default function ProductDetail() {
   const { id } = useParams()
-  const { addItem } = useCart()
+  const { cart, addItem } = useCart()
 
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -36,7 +43,6 @@ export default function ProductDetail() {
         }
 
         setProduct(data)
-        setError("")
       } catch (error) {
         console.error(error)
 
@@ -59,18 +65,44 @@ export default function ProductDetail() {
     }
   }, [id])
 
+  const stock = Number(product?.stock) || 0
+
+  const alreadyInCart = cart.find(
+    (item) => item.id === product?._id,
+  )?.quantity || 0
+
+  const availableToAdd = Math.max(0, stock - alreadyInCart)
+
+  const selectedQuantity =
+    availableToAdd > 0
+      ? Math.min(quantity, availableToAdd)
+      : 0
+
   const handleAddToCart = () => {
     if (!product) return
 
-    addItem(product, quantity)
-    toast.success(`${product.nombre} (×${quantity}) agregado al carrito`)
+    if (
+      !Number.isInteger(selectedQuantity) ||
+      selectedQuantity < 1 ||
+      selectedQuantity > availableToAdd
+    ) {
+      toast.error("No hay stock suficiente para esa cantidad.")
+      return
+    }
+
+    addItem(product, selectedQuantity)
+    toast.success(
+      `${product.nombre} (×${selectedQuantity}) agregado al carrito`,
+    )
     setQuantity(1)
   }
 
   if (loading) {
     return (
       <section className={productDetailStyles.loadingSection}>
-        <p className={productDetailStyles.loadingText}>Cargando producto...</p>
+        <p className={productDetailStyles.loadingText}>
+          Cargando producto...
+        </p>
       </section>
     )
   }
@@ -99,17 +131,33 @@ export default function ProductDetail() {
         </div>
 
         <div className={productDetailStyles.contentWrapper}>
-          <h1 className={productDetailStyles.title}>{product.nombre}</h1>
+          <h1 className={productDetailStyles.title}>
+            {product.nombre}
+          </h1>
 
           <p className={productDetailStyles.description}>
             {product.descripcion}
           </p>
 
-          <div className={productDetailStyles.measuresWrapper}>
-            <p className={productDetailStyles.measuresText}>
-              <strong>Medidas:</strong> {product.medidas}
-            </p>
-          </div>
+          <p className={productDetailStyles.description}>
+            <strong>SKU:</strong> {product.sku}
+          </p>
+
+          <p className={productDetailStyles.description}>
+            <strong>Precio:</strong> {formatPrice.format(Number(product.precio) || 0)}
+          </p>
+
+          <p className={productDetailStyles.description}>
+            <strong>Stock disponible:</strong> {stock}
+          </p>
+
+          {product.medidas && (
+            <div className={productDetailStyles.measuresWrapper}>
+              <p className={productDetailStyles.measuresText}>
+                <strong>Medidas:</strong> {product.medidas}
+              </p>
+            </div>
+          )}
 
           <div className={productDetailStyles.actionsWrapper}>
             <div className={productDetailStyles.quantitySelector}>
@@ -118,6 +166,7 @@ export default function ProductDetail() {
                 onClick={() =>
                   setQuantity((current) => Math.max(1, current - 1))
                 }
+                disabled={selectedQuantity <= 1}
                 className={productDetailStyles.quantityButton}
                 aria-label="Disminuir cantidad"
               >
@@ -125,12 +174,17 @@ export default function ProductDetail() {
               </button>
 
               <span className={productDetailStyles.quantityDisplay}>
-                {quantity}
+                {selectedQuantity}
               </span>
 
               <button
                 type="button"
-                onClick={() => setQuantity((current) => current + 1)}
+                onClick={() =>
+                  setQuantity((current) =>
+                    Math.min(current + 1, availableToAdd),
+                  )
+                }
+                disabled={selectedQuantity >= availableToAdd}
                 className={productDetailStyles.quantityButton}
                 aria-label="Aumentar cantidad"
               >
@@ -141,22 +195,38 @@ export default function ProductDetail() {
             <button
               type="button"
               onClick={handleAddToCart}
+              disabled={availableToAdd <= 0}
               className={productDetailStyles.addToCartButton}
             >
-              Agregar al carrito
+              {availableToAdd > 0
+                ? "Agregar al carrito"
+                : "Sin stock disponible"}
             </button>
           </div>
+
+          {availableToAdd <= 0 && (
+            <p className={productDetailStyles.errorText}>
+              Ya no hay unidades disponibles para agregar al carrito.
+            </p>
+          )}
 
           <div className={productDetailStyles.optionalFieldsWrapper}>
             {productOptionalFields.map(({ key, label }) => {
               const value = product[key]
 
-              if (!value) {
+              if (
+                value === undefined ||
+                value === null ||
+                value === ""
+              ) {
                 return null
               }
 
               return (
-                <p key={key} className={productDetailStyles.optionalFieldText}>
+                <p
+                  key={key}
+                  className={productDetailStyles.optionalFieldText}
+                >
                   <strong>{label}:</strong> {value}
                 </p>
               )

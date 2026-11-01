@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react"
 import { toast } from "react-toastify"
@@ -136,7 +137,9 @@ export const CartDrawer = ({ isOpen, onClose }) => {
                     <div className={cartDrawerStyles.quantityControls}>
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product._id, -1)}
+                        onClick={() =>
+                          updateQuantity(product._id, -1, product.stock)
+                        }
                         className={cartDrawerStyles.quantityButton}
                         aria-label={`Quitar una unidad de ${product.nombre}`}
                       >
@@ -149,13 +152,20 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
                       <button
                         type="button"
-                        onClick={() => updateQuantity(product._id, 1)}
-                        className={cartDrawerStyles.quantityButton}
+                        disabled={product.quantity >= product.stock}
+                        onClick={() =>
+                          updateQuantity(product._id, 1, product.stock)
+                        }
+                        className={`${cartDrawerStyles.quantityButton} disabled:cursor-not-allowed disabled:opacity-40`}
                         aria-label={`Agregar una unidad de ${product.nombre}`}
                       >
                         <Plus className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </div>
+
+                    <p className="mt-1 text-xs text-gray-500">
+                      Stock disponible: {product.stock}
+                    </p>
                   </div>
 
                   <button
