@@ -32,3 +32,11 @@ export const requireAuth = (req, res, next) => {
     next(error)
   }
 }
+
+export const requireAdmin = (req, res, next) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ error: "Se requieren permisos de administrador" })
+  }
+
+  next()
+}

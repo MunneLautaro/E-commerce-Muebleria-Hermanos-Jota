@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
     orders: {
       type: [mongoose.Schema.Types.Mixed],
       default: [],
@@ -48,11 +53,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
+      maxlength: 30,
     },
     address: {
       type: String,
       trim: true,
       default: "",
+      maxlength: 200,
     },
   },
   {
