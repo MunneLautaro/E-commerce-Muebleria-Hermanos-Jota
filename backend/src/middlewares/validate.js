@@ -1,6 +1,6 @@
-export const validate = (schema) => async (req, res, next) => {
+export const validate = (schema, property = "body") => async (req, res, next) => {
   try {
-    req.body = await schema.validate(req.body, {
+    req[property] = await schema.validate(req[property], {
       abortEarly: false,
       stripUnknown: true,
     })
