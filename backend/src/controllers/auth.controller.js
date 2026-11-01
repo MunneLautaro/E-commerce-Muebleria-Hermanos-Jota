@@ -23,8 +23,8 @@ const publicUser = (user) => ({
   name: user.name || "",
   picture: user.picture || "",
   authProvider: user.authProvider || "local",
+  role: user.role || "user",
   isActive: user.isActive,
-  orders: user.orders,
   phone: user.phone,
   address: user.address,
 })
@@ -50,9 +50,13 @@ const getGoogleClient = () => {
 }
 
 const createToken = (user) => {
-  return jwt.sign({ sub: user._id.toString(), email: user.email }, getJwtSecret(), {
-    expiresIn: process.env.JWT_EXPIRES_IN || "1d",
-  })
+  return jwt.sign(
+    { sub: user._id.toString(), email: user.email, role: user.role || "user" },
+    getJwtSecret(),
+    {
+      expiresIn: process.env.JWT_EXPIRES_IN || "1d",
+    },
+  )
 }
 
 const handleDatabaseError = (error) => {

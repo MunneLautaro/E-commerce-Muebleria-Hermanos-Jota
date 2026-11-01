@@ -1,10 +1,7 @@
 import "dotenv/config"
-import dns from "node:dns"
 import mongoose from "mongoose"
 import Product from "../models/product.model.js"
 import { products } from "../data/products.js"
-
-dns.setServers(["1.1.1.1", "8.8.8.8"])
 
 const prices = [
   780000, 620000, 450000, 890000, 560000, 320000, 1000000, 940000, 390000,

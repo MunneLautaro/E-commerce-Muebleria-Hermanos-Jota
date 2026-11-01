@@ -1,7 +1,10 @@
 import {
   createProductService,
   getProductsService,
+  getAdminProductsService,
   getProductByIdService,
+  getAdminProductByIdService,
+  deleteProductService,
   updateProductService,
 } from "../services/product.service.js"
 
@@ -14,16 +17,25 @@ export const createProduct = async (req, res, next) => {
   }
 }
 
-export const getProducts = async (req, res) => {
+export const getProducts = async (req, res, next) => {
   try {
-    const products = await getProductsService()
-    res.json(products)
+    const products = await getProductsService(req.validatedQuery)
+    return res.json(products)
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener los productos" })
+    return next(error)
   }
 }
 
-export const getProductById = async (req, res) => {
+export const getAdminProducts = async (req, res, next) => {
+  try {
+    const products = await getAdminProductsService(req.validatedQuery)
+    return res.json(products)
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params
     const product = await getProductByIdService(id)
@@ -32,17 +44,43 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ error: "Producto no encontrado" })
     }
 
-    res.json(product)
+    return res.json(product)
   } catch (error) {
-    res
-      .status(error.statusCode || 500)
-      .json({ error: error.message || "Error al obtener el producto" })
+    return next(error)
+  }
+}
+
+export const getAdminProductById = async (req, res, next) => {
+  try {
+    const product = await getAdminProductByIdService(req.params.id)
+
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" })
+    }
+
+    return res.json(product)
+  } catch (error) {
+    return next(error)
   }
 }
 
 export const updateProduct = async (req, res, next) => {
   try {
     const product = await updateProductService(req.params.id, req.body)
+
+    if (!product) {
+      return res.status(404).json({ error: "Producto no encontrado" })
+    }
+
+    return res.json(product)
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const deleteProduct = async (req, res, next) => {
+  try {
+    const product = await deleteProductService(req.params.id)
 
     if (!product) {
       return res.status(404).json({ error: "Producto no encontrado" })
