@@ -162,6 +162,7 @@ La API utiliza el prefijo `/api`.
 | ------ | -------------------- | ------------------------------------------ |
 | `GET`  | `/api/productos`     | Devuelve el listado completo de productos. |
 | `GET`  | `/api/productos/:id` | Devuelve un producto por su identificador. |
+| `POST` | `/api/productos` | Crea un producto con SKU, nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. No requiere autenticación actualmente. |
 | `POST` | `/api/contacto`      | Valida y guarda una consulta de contacto en MongoDB. |
 | `POST` | `/api/auth/register` | Registra un usuario y devuelve un JWT. |
 | `POST` | `/api/auth/login` | Autentica un usuario y devuelve un JWT. |
@@ -240,6 +241,7 @@ Las rutas principales son:
 - `/` — Inicio.
 - `/productos` — Catálogo.
 - `/productos/:id` — Detalle de producto.
+- `/admin/crear-producto` — Formulario para cargar productos y atributos personalizados.
 - `/contacto` — Formulario de contacto.
 
 ## Decisiones tomadas

@@ -1,5 +1,21 @@
 import mongoose from "mongoose"
 
+const productAttributeSchema = new mongoose.Schema(
+  {
+    clave: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    valor: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+  },
+  { _id: false },
+)
+
 const productSchema = new mongoose.Schema(
   {
     sku: {
@@ -19,6 +35,11 @@ const productSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    medidas: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     precio: {
       type: Number,
       required: true,
@@ -33,6 +54,10 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
       trim: true,
+    },
+    atributos: {
+      type: [productAttributeSchema],
+      default: [],
     },
     isActive: {
       type: Boolean,

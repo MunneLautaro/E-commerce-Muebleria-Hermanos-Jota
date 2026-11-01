@@ -16,6 +16,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(cors(corsOptions))
 
+app.use("/api/products", productRoutes)
 app.use("/api/productos", productRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/chat", chatRoutes)

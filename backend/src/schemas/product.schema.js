@@ -30,11 +30,21 @@ export const createProductSchema = yup.object({
   sku: yup.string().trim().uppercase().required("El SKU es obligatorio"),
   nombre: yup.string().trim().required("El nombre es obligatorio"),
   descripcion: yup.string().trim(),
+  medidas: yup.string().trim(),
   precio: price,
   stock: yup
     .number()
     .typeError("El stock debe ser numérico")
     .min(0, "El stock no puede ser negativo"),
   imagenUrl: yup.string().trim(),
+  atributos: yup
+    .array()
+    .of(
+      yup.object({
+        clave: yup.string().trim().required("El nombre del atributo es obligatorio"),
+        valor: yup.string().trim().required("El valor del atributo es obligatorio"),
+      }),
+    )
+    .default([]),
   isActive: yup.boolean().typeError("isActive debe ser booleano"),
 })

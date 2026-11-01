@@ -161,6 +161,14 @@ export default function ProductDetail() {
                 </p>
               )
             })}
+            {product.atributos?.map(({ clave, valor }, index) => (
+              <p
+                key={`${clave}-${index}`}
+                className={productDetailStyles.optionalFieldText}
+              >
+                <strong>{clave}:</strong> {valor}
+              </p>
+            ))}
           </div>
         </div>
       </div>

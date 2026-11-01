@@ -27,6 +27,22 @@ const skus = [
   "HJ-011",
 ]
 
+const getAttributes = (product) =>
+  Object.entries(product)
+    .filter(
+      ([key, value]) =>
+        !["id", "nombre", "descripcion", "medidas", "vendidos", "image"].includes(
+          key,
+        ) &&
+        value !== undefined &&
+        value !== null &&
+        value !== "",
+    )
+    .map(([clave, valor]) => ({
+      clave: clave.replaceAll("_", " "),
+      valor: String(valor),
+    }))
+
 const seedProducts = async () => {
   if (!process.env.MONGODB_URI) {
     throw new Error("MONGODB_URI no está configurado")
@@ -43,9 +59,11 @@ const seedProducts = async () => {
         sku: skus[index],
         nombre: product.nombre,
         descripcion: product.descripcion,
+        medidas: product.medidas || "",
         precio: prices[index],
         stock: stocks[index],
         imagenUrl: product.image,
+        atributos: getAttributes(product),
         isActive: true,
       },
       {

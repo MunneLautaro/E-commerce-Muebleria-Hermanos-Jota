@@ -46,6 +46,14 @@ export const ProductCard = ({ product, compact = false }) => {
                     </p>
                   )
                 })}
+                {product.atributos?.map(({ clave, valor }, index) => (
+                  <p
+                    key={`${clave}-${index}`}
+                    className={productCardStyles.optionalField}
+                  >
+                    <strong>{clave}:</strong> {valor}
+                  </p>
+                ))}
               </div>
             </>
           )}
