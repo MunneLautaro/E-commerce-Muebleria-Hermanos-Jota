@@ -7,6 +7,7 @@ import { errorHandler } from "./middlewares/errorHandler.js"
 import productRoutes from "./routes/product.router.js"
 import authRoutes from "./routes/auth.routes.js"
 import chatRoutes from "./routes/chat.routes.js"
+import contactRoutes from "./routes/contact.routes.js"
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.use(cors(corsOptions))
 app.use("/api/productos", productRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
+app.use("/api/contacto", contactRoutes)
 
 app.use(errorHandler)
 

@@ -9,6 +9,7 @@ export const datosContacto = {
 export const limitesConsulta = {
   nombreMin: 2,
   nombreMax: 80,
+  emailMax: 254,
   mensajeMin: 10,
   mensajeMax: 1000,
   telefonoMax: 30,

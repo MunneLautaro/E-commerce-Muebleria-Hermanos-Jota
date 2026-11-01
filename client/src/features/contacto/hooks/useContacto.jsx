@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { toast } from "react-toastify"
 import { limitesConsulta } from "../../../datos/contacto"
+import { contactService } from "../services/contactService"
 
 const valoresIniciales = {
   nombre: "",
@@ -37,6 +38,8 @@ const validarCampos = (valores) => {
     errores.email = "Ingresá tu correo electrónico."
   } else if (!emailValido.test(email)) {
     errores.email = "Revisá el correo: no parece válido."
+  } else if (email.length > limitesConsulta.emailMax) {
+    errores.email = "El correo no puede superar los 254 caracteres."
   }
 
   if (telefono && !telefonoValido.test(telefono)) {
@@ -45,7 +48,7 @@ const validarCampos = (valores) => {
     errores.telefono = "El teléfono es demasiado largo."
   }
 
-  if (!motivo) {
+  if (!motivo || !motivosConsulta.some((opcion) => opcion.valor === motivo)) {
     errores.motivo = "Elegí el motivo de tu consulta."
   }
 
@@ -90,15 +93,24 @@ export const useContacto = () => {
 
     setEnviando(true)
 
-    await new Promise((resolver) => {
-      window.setTimeout(resolver, 700)
-    })
+    try {
+      await contactService.sendInquiry({
+        ...valores,
+        nombre: valores.nombre.trim(),
+        email: valores.email.trim().toLowerCase(),
+        telefono: valores.telefono.trim(),
+        mensaje: valores.mensaje.trim(),
+      })
 
-    setValores(valoresIniciales)
-    setErrores({})
-    setEnviando(false)
-    setExito(true)
-    toast.success("¡Consulta enviada! Te vamos a responder a la brevedad.")
+      setValores(valoresIniciales)
+      setErrores({})
+      setExito(true)
+      toast.success("¡Consulta enviada! Te vamos a responder a la brevedad.")
+    } catch (error) {
+      toast.error(error.message || "No se pudo enviar la consulta.")
+    } finally {
+      setEnviando(false)
+    }
   }
 
   const reiniciar = () => {

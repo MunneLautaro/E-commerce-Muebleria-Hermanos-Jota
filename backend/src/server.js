@@ -19,7 +19,7 @@ const startServer = async () => {
     }
   } else {
     console.warn(
-      "MONGODB_URI no está configurado; las rutas de autenticación no estarán disponibles",
+      "MONGODB_URI no está configurado; las rutas que requieren persistencia no estarán disponibles",
     )
   }
 
