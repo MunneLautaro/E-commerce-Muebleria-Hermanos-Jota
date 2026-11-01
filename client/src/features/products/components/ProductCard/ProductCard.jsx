@@ -2,7 +2,15 @@ import { Link } from "react-router-dom"
 import { productOptionalFields } from "../../constants/productFields"
 import { productCardStyles } from "./ProductCardStyles"
 
+const formatPrice = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  maximumFractionDigits: 0,
+})
+
 export const ProductCard = ({ product, compact = false }) => {
+  const price = Number(product.precio)
+
   return (
     <Link
       to={`/productos/${product._id}`}
@@ -21,6 +29,15 @@ export const ProductCard = ({ product, compact = false }) => {
 
           {!compact && (
             <>
+              {product.precio !== null &&
+                product.precio !== undefined &&
+                product.precio !== "" &&
+                Number.isFinite(price) && (
+                  <p className={productCardStyles.price}>
+                    {formatPrice.format(price)}
+                  </p>
+                )}
+
               <p className={productCardStyles.description}>
                 {product.descripcion}
               </p>
