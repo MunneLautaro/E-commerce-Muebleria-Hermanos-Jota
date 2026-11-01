@@ -7,6 +7,7 @@ import {
   register,
 } from "../controllers/auth.controller.js"
 import { requireAuth } from "../middlewares/auth.js"
+import { authRateLimit } from "../middlewares/rateLimit.js"
 import { validate } from "../middlewares/validate.js"
 import {
   googleAuthSchema,
@@ -16,9 +17,9 @@ import {
 
 const router = Router()
 
-router.post("/register", validate(registerSchema), register)
-router.post("/login", validate(loginSchema), login)
-router.post("/google", validate(googleAuthSchema), googleLogin)
+router.post("/register", authRateLimit, validate(registerSchema), register)
+router.post("/login", authRateLimit, validate(loginSchema), login)
+router.post("/google", authRateLimit, validate(googleAuthSchema), googleLogin)
 router.post("/logout", logout)
 router.get("/me", requireAuth, getCurrentUser)
 
