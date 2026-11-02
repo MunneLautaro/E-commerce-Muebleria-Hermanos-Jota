@@ -8,7 +8,6 @@ agregar productos a un carrito y enviar consultas desde la sección de contacto.
 
 - Munné Lautaro
 - Fabricio Ibarra
-- Giovinazzo Sofia Belén
 - Ariadna Luz Chiapin
 - Guido Sut
 
