@@ -19,7 +19,7 @@ const router = Router()
 
 router.post(
   "/",
-  requireAuth,
+  //requireAuth,
   // requireAdmin,
   productWriteRateLimit,
   validate(createProductSchema),
@@ -28,21 +28,21 @@ router.post(
 router.get("/", validateQuery(productQuerySchema), getProducts)
 router.get(
   "/admin",
-  requireAuth,
+  //requireAuth,
   // requireAdmin,
   validateQuery(productQuerySchema),
   getAdminProducts,
 )
 router.get(
   "/admin/:id",
-  requireAuth,
+  //requireAuth,
   // requireAdmin,
   getAdminProductById,
 )
 router.get("/:id", getProductById)
 router.put(
   "/:id",
-  requireAuth,
+  //requireAuth,
   // requireAdmin,
   productWriteRateLimit,
   validate(updateProductSchema),
@@ -50,7 +50,7 @@ router.put(
 )
 router.delete(
   "/:id",
-  requireAuth,
+  //requireAuth,
   // requireAdmin,
   productWriteRateLimit,
   deleteProduct,
