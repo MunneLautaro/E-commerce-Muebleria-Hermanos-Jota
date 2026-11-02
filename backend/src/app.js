@@ -9,6 +9,7 @@ import productRoutes from "./routes/product.router.js"
 import authRoutes from "./routes/auth.routes.js"
 import chatRoutes from "./routes/chat.routes.js"
 import contactRoutes from "./routes/contact.routes.js"
+import { connectDB } from "./db.js"
 
 const app = express()
 
@@ -18,7 +19,12 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" })
 })
 
-app.get("/ready", (req, res) => {
+app.get("/ready", async (req, res) => {
+  try {
+    await connectDB()
+  } catch (error) {
+    console.error("Error conectando a MongoDB:", error.message)
+  }
   const ready = mongoose.connection.readyState === 1
   return res.status(ready ? 200 : 503).json({
     status: ready ? "ready" : "not_ready",
@@ -30,6 +36,17 @@ app.use(logger)
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors(corsOptions))
+
+app.use("/api", async (req, res, next) => {
+  if (req.method === "OPTIONS") return next()
+  try {
+    await connectDB()
+    next()
+  } catch (error) {
+    console.error("Error conectando a MongoDB:", error.message)
+    res.status(503).json({ error: "Base de datos no disponible" })
+  }
+})
 
 app.use("/api/products", productRoutes)
 app.use("/api/productos", productRoutes)
