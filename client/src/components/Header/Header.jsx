@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
 import { Link, NavLink } from "react-router-dom"
+import { Menu, ShoppingCart, UserRound, X } from "lucide-react"
 import { CartDrawer, useCart } from "../../features/cart"
+import { useAuth } from "../../features/auth"
 import { headerStyles as s } from "./HeaderStyles"
 import logo from "../../assets/logo.svg"
 
 const navLinks = [
   { to: "/", label: "Inicio" },
   { to: "/productos", label: "Productos" },
-  { to: "/contacto", label: "Contacto" },
+  { to: "/contact", label: "Contacto" },
 ]
 
 export const Header = () => {
@@ -15,6 +17,7 @@ export const Header = () => {
   const [cartOpen, setCartOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { itemCount } = useCart()
+  const { user, isAuthenticated, logout } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -58,26 +61,25 @@ export const Header = () => {
               </NavLink>
             ))}
 
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={desktopLinkClass}
+              >
+                Admin
+              </NavLink>
+            )}
+
             <button
               type="button"
               aria-label="Abrir carrito de compras"
               className={s.cartButton}
               onClick={() => setCartOpen(true)}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <ShoppingCart
                 className={s.cartIcon}
                 aria-hidden="true"
-              >
-                <circle cx="9" cy="18" r="1.5" />
-                <circle cx="17" cy="18" r="1.5" />
-                <path d="M3 4h2l2.2 9.2a1 1 0 0 0 1 .8h8.7a1 1 0 0 0 1-.8L20 7H7" />
-              </svg>
+              />
 
               {itemCount > 0 && (
                 <span className={s.cartBadge}>{itemCount}</span>
@@ -86,12 +88,33 @@ export const Header = () => {
           </nav>
 
           <div className={s.actions}>
-            <Link to="/login" className={s.buttonSecondary}>
-              Ingresar
-            </Link>
-            <Link to="/register" className={s.buttonPrimary}>
-              Registrarse
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <span className={s.userBadge} title={user?.email}>
+                  <UserRound
+                    className={s.userIcon}
+                    aria-hidden="true"
+                  />
+                  <span className="truncate">{user?.email}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className={s.buttonLogout}
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className={s.buttonSecondary}>
+                  Ingresar
+                </Link>
+                <Link to="/register" className={s.buttonPrimary}>
+                  Registrarse
+                </Link>
+              </>
+            )}
           </div>
 
           <button
@@ -102,21 +125,11 @@ export const Header = () => {
             aria-controls="menu-movil"
             aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
           >
-            <svg
-              className={s.menuIcon}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              {menuOpen ? (
-                <path d="M6 6l12 12M18 6L6 18" />
-              ) : (
-                <path d="M4 7h16M4 12h16M4 17h16" />
-              )}
-            </svg>
+            {menuOpen ? (
+              <X className={s.menuIcon} aria-hidden="true" />
+            ) : (
+              <Menu className={s.menuIcon} aria-hidden="true" />
+            )}
           </button>
         </div>
 
@@ -135,6 +148,16 @@ export const Header = () => {
                 </NavLink>
               ))}
 
+              {user?.role === "admin" && (
+                <NavLink
+                  to="/admin"
+                  className={mobileLinkClass}
+                  onClick={closeMenu}
+                >
+                  Admin
+                </NavLink>
+              )}
+
               <button
                 type="button"
                 className={s.mobileCartButton}
@@ -150,20 +173,44 @@ export const Header = () => {
               </button>
 
               <div className={s.mobileActions}>
-                <Link
-                  to="/login"
-                  className={s.buttonSecondary}
-                  onClick={closeMenu}
-                >
-                  Ingresar
-                </Link>
-                <Link
-                  to="/register"
-                  className={s.buttonPrimary}
-                  onClick={closeMenu}
-                >
-                  Registrarse
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <div className={s.mobileUserInfo}>
+                      <UserRound
+                        className={s.userIcon}
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{user?.email}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout()
+                        closeMenu()
+                      }}
+                      className={s.buttonLogout}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className={s.buttonSecondary}
+                      onClick={closeMenu}
+                    >
+                      Ingresar
+                    </Link>
+                    <Link
+                      to="/register"
+                      className={s.buttonPrimary}
+                      onClick={closeMenu}
+                    >
+                      Registrarse
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </div>

@@ -13,7 +13,8 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const products = await fetchApi("/productos")
+        const response = await fetchApi("/products?limit=12&order=name_asc")
+        const products = response.items
 
         const sortedProducts = [...products].sort(
           (a, b) => (b.vendidos ?? 0) - (a.vendidos ?? 0),
@@ -63,7 +64,7 @@ export default function HomePage() {
               <Link to="/productos" className={homeStyles.primaryButton}>
                 Ver colección
               </Link>
-              <Link to="/contacto" className={homeStyles.secondaryButton}>
+              <Link to="/contact" className={homeStyles.secondaryButton}>
                 Hablemos de tu espacio
               </Link>
             </div>
@@ -124,7 +125,7 @@ export default function HomePage() {
 
       <section className={homeStyles.contactCta}>
         <div><p className={homeStyles.eyebrow}>¿Tenés un proyecto en mente?</p><h2 className={homeStyles.ctaTitle}>Hagámoslo realidad.</h2></div>
-        <Link to="/contacto" className={homeStyles.ctaButton}>Contactanos</Link>
+        <Link to="/contact" className={homeStyles.ctaButton}>Contactanos</Link>
       </section>
     </main>
   )

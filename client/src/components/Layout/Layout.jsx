@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom"
 import { Header } from "../Header/Header"
 import { Footer } from "../Footer/Footer"
 import { layoutStyles as s } from "./LayoutStyles"
+import { ChatWidget } from "../../features/chat/components/ChatWidget/ChatWidget"
 
 export const Layout = () => (
   <div className={s.root}>
@@ -13,5 +14,6 @@ export const Layout = () => (
       <Outlet />
     </main>
     <Footer />
+    <ChatWidget />
   </div>
 )
