@@ -8,7 +8,6 @@ agregar productos a un carrito y enviar consultas desde la sección de contacto.
 
 - Munné Lautaro
 - Fabricio Ibarra
-- Giovinazzo Sofia Belén
 - Ariadna Luz Chiapin
 - Guido Sut
 
@@ -263,9 +262,9 @@ La API utiliza el prefijo `/api`.
 | -------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`    | `/api/productos`     | Devuelve el listado completo de productos.                                                                                                                                                                       |
 | `GET`    | `/api/productos/:id` | Devuelve un producto por su identificador.                                                                                                                                                                       |
-| `POST`   | `/api/productos`     | Crea un producto con nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. El SKU se genera automáticamente con prefijo `HJ-`. Requiere un usuario autenticado con rol `admin`. |
-| `PUT`    | `/api/productos/:id` | Actualiza un producto. Requiere un usuario autenticado con rol `admin`.                                                                                                                                          |
-| `DELETE` | `/api/productos/:id` | Desactiva un producto del catálogo sin eliminar sus datos. Requiere un usuario autenticado con rol `admin`.                                                                                                      |
+| `POST`   | `/api/productos`     | Crea un producto con nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. El SKU se genera automáticamente con prefijo `HJ-`. La protección por rol está temporalmente desactivada. |
+| `PUT`    | `/api/productos/:id` | Actualiza un producto. La protección por rol está temporalmente desactivada.                                                                                                                                        |
+| `DELETE` | `/api/productos/:id` | Desactiva un producto del catálogo sin eliminar sus datos. La protección por rol está temporalmente desactivada.                                                                                                    |
 | `POST`   | `/api/contacto`      | Valida y guarda una consulta de contacto en MongoDB.                                                                                                                                                             |
 | `POST`   | `/api/auth/register` | Registra un usuario y devuelve un JWT.                                                                                                                                                                           |
 | `POST`   | `/api/auth/login`    | Autentica un usuario y devuelve un JWT.                                                                                                                                                                          |
@@ -279,7 +278,9 @@ db.users.updateOne({ email: "admin@ejemplo.com" }, { $set: { role: "admin" } })
 ```
 
 Luego iniciá sesión con ese usuario y accedé a `/admin`. Desde allí podés
-crear productos o editar los existentes.
+crear productos o editar los existentes. Para futuras entregas se volverá a
+habilitar completamente el control de roles y estas operaciones requerirán
+nuevamente un usuario autenticado con rol `admin`.
 
 Los precios aceptan puntos como separadores de miles (`500.000`) y coma para centavos
 (`500.000,50`). También se acepta el formato decimal técnico (`500.50`).
@@ -380,9 +381,11 @@ Las rutas principales son:
   validación en el backend.
 - **Autenticación con JWT y Google OAuth:** permite autenticación local y
   federada, con roles para distinguir usuarios administradores.
-- **Panel de administración protegido por rol:** las operaciones de alta,
-  edición y desactivación de productos requieren un usuario autenticado con
-  rol `admin`.
+- **Panel de administración:** la protección por rol se encuentra
+  temporalmente desactivada para esta entrega. En futuras entregas se
+  habilitará completamente el control de roles para que las operaciones de
+  alta, edición y desactivación requieran un usuario autenticado con rol
+  `admin`.
 - **Arquitectura por capas en el backend:** routes, controllers, services,
   models y schemas separan responsabilidades y facilitan el mantenimiento.
 - **Controles de seguridad en el backend:** se combinan CORS explícito,

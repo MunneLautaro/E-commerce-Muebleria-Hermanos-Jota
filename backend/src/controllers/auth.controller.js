@@ -4,11 +4,12 @@ import { OAuth2Client } from "google-auth-library"
 import User from "../models/user.model.js"
 
 const AUTH_COOKIE = "hjAuthToken"
+const isProduction = process.env.NODE_ENV === "production"
 
 const authCookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: 24 * 60 * 60 * 1000,
   path: "/",
 }
@@ -200,8 +201,8 @@ export const getCurrentUser = async (req, res, next) => {
 export const logout = (req, res) => {
   res.clearCookie(AUTH_COOKIE, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
   })
 
