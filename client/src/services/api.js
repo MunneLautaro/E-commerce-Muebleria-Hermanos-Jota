@@ -1,15 +1,29 @@
+import { tokenStorage } from "./tokenStorage"
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
+const buildHeaders = (customHeaders = {}) => {
+  const headers = {
+    "Content-Type": "application/json",
+    ...customHeaders,
+  }
+
+  const token = tokenStorage.get()
+  if (token && !headers.Authorization) {
+    headers.Authorization = `Bearer ${token}`
+  }
+
+  return headers
+}
+
 export async function fetchApi(endpoint, options = {}) {
+  const { headers: customHeaders, ...fetchOptions } = options
+
   let response
   try {
     response = await fetch(`${BASE_URL}${endpoint}`, {
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
-      ...options,
+      ...fetchOptions,
+      headers: buildHeaders(customHeaders),
     })
   } catch {
     throw new Error(
