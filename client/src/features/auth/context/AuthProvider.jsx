@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { tokenStorage } from "../../../services/tokenStorage"
 import { authService } from "../services/authService"
 import { AuthContext } from "./AuthContext"
 
@@ -10,12 +11,24 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true
 
     const verifySession = async () => {
+      // Sin token guardado no hay sesión que verificar.
+      if (!tokenStorage.get()) {
+        if (isMounted) setLoading(false)
+        return
+      }
+
       try {
         const response = await authService.getMe()
         if (isMounted && response?.user) {
           setUser(response.user)
         }
-      } catch {
+      } catch (error) {
+        // Solo un 401 indica token inválido o expirado: se descarta para no
+        // reenviarlo. Ante errores de red o del servidor se conserva el token
+        // y la sesión se reintenta en la próxima carga.
+        if (error.status === 401) {
+          tokenStorage.clear()
+        }
         if (isMounted) {
           setUser(null)
         }
@@ -33,14 +46,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
-  const saveSession = useCallback((newUser) => {
+  const saveSession = useCallback(({ token, user: newUser }) => {
+    if (token) {
+      tokenStorage.set(token)
+    }
     setUser(newUser)
   }, [])
 
   const login = useCallback(
     async ({ email, password }) => {
       const data = await authService.login({ email, password })
-      saveSession(data.user)
+      saveSession(data)
       return data
     },
     [saveSession],
@@ -49,30 +65,24 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = useCallback(
     async (credential) => {
       const data = await authService.googleLogin(credential)
-      saveSession(data.user)
+      saveSession(data)
       return data
     },
     [saveSession],
   )
 
-  const register = useCallback(
-    async ({ email, password, phone, address }) => {
-      const data = await authService.register({
-        email,
-        password,
-        phone,
-        address,
-      })
-      saveSession(data.user)
-      return data
-    },
-    [saveSession],
-  )
+  // El registro no inicia sesión: solo crea la cuenta y el usuario debe loguearse.
+  const register = useCallback(async ({ email, password, phone, address }) => {
+    return authService.register({ email, password, phone, address })
+  }, [])
 
   const logout = useCallback(async () => {
     try {
       await authService.logout()
+    } catch {
+      // El logout es local: aunque el backend no responda, se cierra la sesión.
     } finally {
+      tokenStorage.clear()
       setUser(null)
     }
   }, [])

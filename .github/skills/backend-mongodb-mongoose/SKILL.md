@@ -18,7 +18,7 @@ The persistence layer is **MongoDB accessed through Mongoose**. Do not introduce
 - Node.js with ES modules (`"type": "module"`).
 - Express `^5.3.0`.
 - MongoDB with Mongoose `^9.11.4`.
-- Authentication and security: `bcrypt ^6.0.0`, `jsonwebtoken ^9.0.3`, `google-auth-library ^11.3.1`, `cookie-parser ^1.4.7`, and `express-rate-limit ^8.7.1`.
+- Authentication and security: `bcrypt ^6.0.0`, `jsonwebtoken ^9.0.3`, `google-auth-library ^11.3.1`, and `express-rate-limit ^8.7.1`.
 - Configuration and HTTP: `dotenv ^18.0.9`, `cors ^2.8.6`, and Express.
 - Validation: `yup ^1.7.1`.
 
@@ -58,5 +58,5 @@ The persistence layer is **MongoDB accessed through Mongoose**. Do not introduce
 - Hash passwords with bcrypt and compare hashes with bcrypt; never compare or store plaintext passwords.
 - Require configured secrets and OAuth identifiers explicitly; do not use insecure hardcoded defaults.
 - Keep JWT creation and verification aligned with the existing claims and expiration configuration.
-- Apply authentication, authorization, CORS, cookies, and rate limiting consistently with existing middleware.
+- Apply authentication (JWT sent as `Authorization: Bearer <token>`, stored client-side in `localStorage`), authorization, CORS, and rate limiting consistently with existing middleware.
 - Validate and sanitize request bodies before using them in MongoDB queries or writes.

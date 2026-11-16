@@ -119,8 +119,9 @@
                   "});",
                   "",
                   "if (pm.response.code === 201) {",
-                  "    const json = pm.response.json();",
-                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.test('El registro no devuelve token', function () {",
+                  "        pm.expect(pm.response.json()).to.not.have.property('token');",
+                  "    });",
                   "}"
                 ]
               }
