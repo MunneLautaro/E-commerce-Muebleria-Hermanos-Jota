@@ -16,7 +16,6 @@ The backend uses:
 - Express `^5.3.0`
 - MongoDB and Mongoose `^9.11.4`
 - `bcrypt ^6.0.0`
-- `cookie-parser ^1.4.7`
 - `cors ^2.8.6`
 - `dotenv ^18.0.9`
 - `express-rate-limit ^8.7.1`
