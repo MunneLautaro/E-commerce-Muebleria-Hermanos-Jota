@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "./useAuth"
 import { loginSchema } from "../schemas/auth.schema"
@@ -8,6 +8,8 @@ import { loginSchema } from "../schemas/auth.schema"
 export const useLoginForm = () => {
   const { login } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const emailPrecargado = location.state?.email || ""
 
   const {
     register,
@@ -17,7 +19,7 @@ export const useLoginForm = () => {
   } = useForm({
     resolver: yupResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: emailPrecargado,
       password: "",
     },
     mode: "onBlur",
