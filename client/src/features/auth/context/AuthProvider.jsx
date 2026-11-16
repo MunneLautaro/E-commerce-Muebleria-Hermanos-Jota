@@ -22,9 +22,13 @@ export const AuthProvider = ({ children }) => {
         if (isMounted && response?.user) {
           setUser(response.user)
         }
-      } catch {
-        // Token inválido o expirado: se descarta para no reenviarlo.
-        tokenStorage.clear()
+      } catch (error) {
+        // Solo un 401 indica token inválido o expirado: se descarta para no
+        // reenviarlo. Ante errores de red o del servidor se conserva el token
+        // y la sesión se reintenta en la próxima carga.
+        if (error.status === 401) {
+          tokenStorage.clear()
+        }
         if (isMounted) {
           setUser(null)
         }

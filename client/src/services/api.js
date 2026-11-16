@@ -36,12 +36,14 @@ export async function fetchApi(endpoint, options = {}) {
     const details = Array.isArray(errorData.details)
       ? errorData.details.join(". ")
       : null
-    throw new Error(
+    const error = new Error(
       details ||
         errorData.error ||
         errorData.message ||
         `Error ${response.status}: ${response.statusText}`,
     )
+    error.status = response.status
+    throw error
   }
 
   return response.json()
