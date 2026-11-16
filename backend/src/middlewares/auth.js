@@ -12,10 +12,9 @@ const getSecret = () => {
 
 export const requireAuth = (req, res, next) => {
   const authorization = req.headers.authorization
-  const bearerToken = authorization?.startsWith("Bearer ")
-    ? authorization.slice(7)
+  const token = authorization?.startsWith("Bearer ")
+    ? authorization.slice(7).trim()
     : null
-  const token = req.cookies?.hjAuthToken || bearerToken
 
   if (!token) {
     return res.status(401).json({ error: "Token de autenticación requerido" })

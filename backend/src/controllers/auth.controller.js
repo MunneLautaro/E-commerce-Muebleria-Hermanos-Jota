@@ -3,21 +3,6 @@ import jwt from "jsonwebtoken"
 import { OAuth2Client } from "google-auth-library"
 import User from "../models/user.model.js"
 
-const AUTH_COOKIE = "hjAuthToken"
-const isProduction = process.env.NODE_ENV === "production"
-
-const authCookieOptions = {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? "none" : "lax",
-  maxAge: 24 * 60 * 60 * 1000,
-  path: "/",
-}
-
-const setAuthCookie = (res, token) => {
-  res.cookie(AUTH_COOKIE, token, authCookieOptions)
-}
-
 const publicUser = (user) => ({
   id: user._id,
   email: user.email,
@@ -67,7 +52,10 @@ const handleDatabaseError = (error) => {
     return duplicateError
   }
 
-  if (error?.name === "MongooseError" && error.message.includes("Cannot call")) {
+  if (
+    error?.name === "MongooseError" &&
+    error.message.includes("Cannot call")
+  ) {
     const databaseError = new Error("La base de datos no está disponible")
     databaseError.status = 503
     return databaseError
@@ -76,9 +64,9 @@ const handleDatabaseError = (error) => {
   return error
 }
 
+// El registro no inicia sesión: el usuario debe autenticarse luego en /login.
 export const register = async (req, res, next) => {
   try {
-    getJwtSecret()
     const { email, password, phone, address } = req.body
     const existingUser = await User.findOne({ email }).lean()
 
@@ -88,16 +76,17 @@ export const register = async (req, res, next) => {
 
     const user = await User.create({
       email,
-      password: await bcrypt.hash(password, 12),
+      password: await bcrypt.hash(password, 10),
       phone,
       address,
       isActive: true,
       orders: [],
     })
 
-    const token = createToken(user)
-    setAuthCookie(res, token)
-    return res.status(201).json({ token, user: publicUser(user) })
+    return res.status(201).json({
+      message: "Cuenta creada correctamente. Iniciá sesión para continuar.",
+      user: publicUser(user),
+    })
   } catch (error) {
     next(handleDatabaseError(error))
   }
@@ -118,7 +107,6 @@ export const login = async (req, res, next) => {
     }
 
     const token = createToken(user)
-    setAuthCookie(res, token)
     return res.json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
@@ -138,12 +126,16 @@ export const googleLogin = async (req, res, next) => {
         audience: process.env.GOOGLE_CLIENT_ID,
       })
     } catch {
-      return res.status(401).json({ error: "Token de Google inválido o expirado" })
+      return res
+        .status(401)
+        .json({ error: "Token de Google inválido o expirado" })
     }
 
     const payload = ticket.getPayload()
     if (!payload?.sub || !payload.email || payload.email_verified !== true) {
-      return res.status(400).json({ error: "No se pudo obtener la información de Google" })
+      return res
+        .status(400)
+        .json({ error: "No se pudo obtener la información de Google" })
     }
 
     const { sub: googleId, email, name, picture } = payload
@@ -177,7 +169,6 @@ export const googleLogin = async (req, res, next) => {
     }
 
     const token = createToken(user)
-    setAuthCookie(res, token)
     return res.json({ token, user: publicUser(user) })
   } catch (error) {
     next(handleDatabaseError(error))
@@ -198,13 +189,9 @@ export const getCurrentUser = async (req, res, next) => {
   }
 }
 
+// La sesión vive en el token que guarda el cliente (localStorage), por lo que
+// el logout es stateless: el cliente descarta el token y este endpoint solo
+// confirma la operación.
 export const logout = (req, res) => {
-  res.clearCookie(AUTH_COOKIE, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    path: "/",
-  })
-
   return res.json({ message: "Sesión cerrada correctamente" })
 }
