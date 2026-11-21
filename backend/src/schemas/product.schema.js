@@ -105,6 +105,8 @@ const imageUrl = yup
     "image-url",
     "La imagen debe ser una URL HTTP/HTTPS o una ruta relativa válida",
     (value) => {
+      // Ausente: lo decide .required()/.notRequired() de cada schema.
+      if (value === undefined) return true
       if (!value) return false
       if (value.startsWith("/")) return true
 

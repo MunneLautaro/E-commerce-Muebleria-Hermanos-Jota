@@ -28,7 +28,7 @@ agregar productos a un carrito y enviar consultas desde la sección de contacto.
 - MongoDB con Mongoose
 - JWT y Google OAuth
 - Yup
-- CORS, cookies y rate limiting
+- CORS y rate limiting
 
 ### Chatbot
 
@@ -266,10 +266,11 @@ La API utiliza el prefijo `/api`.
 | `PUT`    | `/api/productos/:id` | Actualiza un producto. La protección por rol está temporalmente desactivada.                                                                                                                                        |
 | `DELETE` | `/api/productos/:id` | Desactiva un producto del catálogo sin eliminar sus datos. La protección por rol está temporalmente desactivada.                                                                                                    |
 | `POST`   | `/api/contacto`      | Valida y guarda una consulta de contacto en MongoDB.                                                                                                                                                             |
-| `POST`   | `/api/auth/register` | Registra un usuario y devuelve un JWT.                                                                                                                                                                           |
-| `POST`   | `/api/auth/login`    | Autentica un usuario y devuelve un JWT.                                                                                                                                                                          |
+| `POST`   | `/api/auth/register` | Registra un usuario y devuelve sus datos públicos. No inicia sesión: el cliente debe autenticarse luego con `/api/auth/login`.                                                                                   |
+| `POST`   | `/api/auth/login`    | Autentica un usuario y devuelve un JWT en el cuerpo de la respuesta. El cliente lo guarda en `localStorage`.                                                                                                      |
 | `POST`   | `/api/chat`          | Envía un mensaje al workflow de n8n y devuelve la respuesta del asistente.                                                                                                                                       |
 | `GET`    | `/api/auth/me`       | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`.                                                                                                                                       |
+| `POST`   | `/api/auth/logout`   | Confirma el cierre de sesión. La sesión es stateless: el cliente elimina el token de `localStorage`.                                                                                                             |
 
 Para habilitar el panel de carga, registrá primero el usuario y asignale el rol `admin` directamente en MongoDB:
 
@@ -389,8 +390,8 @@ Las rutas principales son:
 - **Arquitectura por capas en el backend:** routes, controllers, services,
   models y schemas separan responsabilidades y facilitan el mantenimiento.
 - **Controles de seguridad en el backend:** se combinan CORS explícito,
-  validación de entradas, autenticación, cookies, rate limiting y un manejo
-  centralizado de errores.
+  validación de entradas, autenticación con JWT por header `Authorization`,
+  rate limiting y un manejo centralizado de errores.
 - **Integración del chatbot mediante n8n:** el backend funciona como frontera
   de la API y no expone públicamente la URL del workflow al cliente. n8n
   procesa el mensaje y persiste el historial en MongoDB Atlas.
