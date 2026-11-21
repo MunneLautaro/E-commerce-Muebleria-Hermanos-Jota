@@ -11,7 +11,6 @@ export const AuthProvider = ({ children }) => {
     let isMounted = true
 
     const verifySession = async () => {
-      // Sin token guardado no hay sesión que verificar.
       if (!tokenStorage.get()) {
         if (isMounted) setLoading(false)
         return
@@ -71,7 +70,6 @@ export const AuthProvider = ({ children }) => {
     [saveSession],
   )
 
-  // El registro no inicia sesión: solo crea la cuenta y el usuario debe loguearse.
   const register = useCallback(async ({ email, password, phone, address }) => {
     return authService.register({ email, password, phone, address })
   }, [])
