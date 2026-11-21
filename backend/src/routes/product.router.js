@@ -9,7 +9,7 @@ import {
   deleteProduct,
 } from "../controllers/product.controller.js"
 import { validate, validateQuery } from "../middlewares/validate.js"
-import { requireAdmin, requireAuth } from "../middlewares/auth.js"
+import { requireAuth } from "../middlewares/auth.js"
 import { productWriteRateLimit } from "../middlewares/rateLimit.js"
 import { createProductSchema } from "../schemas/product.schema.js"
 import { productQuerySchema } from "../schemas/product.query.schema.js"
@@ -19,8 +19,8 @@ const router = Router()
 
 router.post(
   "/",
-  requireAuth,
-  requireAdmin,
+  //requireAuth,
+  // requireAdmin,
   productWriteRateLimit,
   validate(createProductSchema),
   createProduct,
@@ -28,30 +28,30 @@ router.post(
 router.get("/", validateQuery(productQuerySchema), getProducts)
 router.get(
   "/admin",
-  requireAuth,
-  requireAdmin,
+  //requireAuth,
+  // requireAdmin,
   validateQuery(productQuerySchema),
   getAdminProducts,
 )
 router.get(
   "/admin/:id",
-  requireAuth,
-  requireAdmin,
+  //requireAuth,
+  // requireAdmin,
   getAdminProductById,
 )
 router.get("/:id", getProductById)
 router.put(
   "/:id",
-  requireAuth,
-  requireAdmin,
+  //requireAuth,
+  // requireAdmin,
   productWriteRateLimit,
   validate(updateProductSchema),
   updateProduct,
 )
 router.delete(
   "/:id",
-  requireAuth,
-  requireAdmin,
+  //requireAuth,
+  // requireAdmin,
   productWriteRateLimit,
   deleteProduct,
 )

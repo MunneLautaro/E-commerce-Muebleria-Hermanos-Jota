@@ -27,18 +27,16 @@ export const useRegisterForm = () => {
   })
 
   const onSubmit = async (data) => {
-    const email = data.email.trim().toLowerCase()
-
     try {
       await registerUser({
-        email,
+        email: data.email.trim().toLowerCase(),
         password: data.password,
         phone: data.phone.trim(),
         address: data.address.trim(),
       })
 
-      toast.success("¡Cuenta creada! Ingresá con tu email y contraseña.")
-      navigate("/login", { replace: true, state: { email } })
+      toast.success("¡Cuenta creada exitosamente! Bienvenido/a.")
+      navigate("/")
     } catch (error) {
       const mensaje = error.message || "Error al crear la cuenta."
       setError("root", { type: "server", message: mensaje })

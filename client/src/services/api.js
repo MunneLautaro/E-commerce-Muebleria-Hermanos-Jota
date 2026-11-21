@@ -1,29 +1,15 @@
-import { tokenStorage } from "./tokenStorage"
-
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000/api"
 
-const buildHeaders = (customHeaders = {}) => {
-  const headers = {
-    "Content-Type": "application/json",
-    ...customHeaders,
-  }
-
-  const token = tokenStorage.get()
-  if (token && !headers.Authorization) {
-    headers.Authorization = `Bearer ${token}`
-  }
-
-  return headers
-}
-
 export async function fetchApi(endpoint, options = {}) {
-  const { headers: customHeaders, ...fetchOptions } = options
-
   let response
   try {
     response = await fetch(`${BASE_URL}${endpoint}`, {
-      ...fetchOptions,
-      headers: buildHeaders(customHeaders),
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      ...options,
     })
   } catch {
     throw new Error(
@@ -36,14 +22,12 @@ export async function fetchApi(endpoint, options = {}) {
     const details = Array.isArray(errorData.details)
       ? errorData.details.join(". ")
       : null
-    const error = new Error(
+    throw new Error(
       details ||
         errorData.error ||
         errorData.message ||
         `Error ${response.status}: ${response.statusText}`,
     )
-    error.status = response.status
-    throw error
   }
 
   return response.json()
