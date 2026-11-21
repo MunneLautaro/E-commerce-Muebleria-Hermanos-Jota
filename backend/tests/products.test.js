@@ -186,6 +186,62 @@ describe("GET /api/products/admin", () => {
     expect(res.status).toBe(200)
     expect(res.body.isActive).toBe(false)
   })
+
+  it("devuelve 404 si el producto no existe", async () => {
+    const res = await adminApi().get(`/api/products/admin/${missingId()}`)
+
+    expect(res.status).toBe(404)
+  })
+
+  it("devuelve 400 con un ID inválido", async () => {
+    const res = await adminApi().get("/api/products/admin/no-es-un-id")
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("El ID del producto no es válido")
+  })
+
+  it("pagina el listado contando también los inactivos", async () => {
+    for (let i = 0; i < 13; i += 1) {
+      await createProduct({
+        nombre: `Producto ${String(i).padStart(2, "0")}`,
+        isActive: i % 2 === 0,
+      })
+    }
+
+    const res = await adminApi().get("/api/products/admin?page=2&limit=12")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(["Producto 12"])
+    expect(res.body.pagination).toEqual({
+      page: 2,
+      limit: 12,
+      total: 13,
+      totalPages: 2,
+    })
+  })
+
+  it("filtra por búsqueda y precio incluyendo los inactivos", async () => {
+    await createProduct({ nombre: "Mesa activa", precio: 300 })
+    await createProduct({ nombre: "Mesa inactiva", precio: 400, isActive: false })
+    await createProduct({ nombre: "Mesa cara", precio: 5000, isActive: false })
+    await createProduct({ nombre: "Silla", precio: 300 })
+
+    const res = await adminApi().get("/api/products/admin?q=mesa&maxPrice=1000")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual([
+      "Mesa activa",
+      "Mesa inactiva",
+    ])
+  })
+
+  it("devuelve 400 con parámetros inválidos", async () => {
+    const res = await adminApi().get("/api/products/admin?limit=100")
+
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe("Parámetros inválidos")
+    expect(res.body.details).toContain("limit debe ser 12, 15 o 20")
+  })
 })
 
 describe("POST /api/products", () => {
