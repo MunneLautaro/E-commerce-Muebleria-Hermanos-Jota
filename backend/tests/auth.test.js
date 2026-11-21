@@ -163,6 +163,22 @@ describe("POST /api/auth/login", () => {
     expect(res.body.error).toBe("Email o contraseña incorrectos")
   })
 
+  it("devuelve 401 si la cuenta solo tiene acceso con Google", async () => {
+    await User.create({
+      email: "cliente@example.com",
+      googleId: "google-123",
+      authProvider: "google",
+    })
+
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({ email: "cliente@example.com", password: DEFAULT_PASSWORD })
+
+    expect(res.status).toBe(401)
+    expect(res.body.error).toBe("Email o contraseña incorrectos")
+    expect(res.body).not.toHaveProperty("token")
+  })
+
   it("devuelve 403 si el usuario está inactivo", async () => {
     await createUser({ isActive: false })
 
