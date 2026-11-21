@@ -98,7 +98,13 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body
     const user = await User.findOne({ email }).select("+password")
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    // Una cuenta creada con Google no tiene contraseña: bcrypt.compare lanzaría
+    // una excepción, así que se responde el mismo 401 que con una clave errónea.
+    if (
+      !user ||
+      !user.password ||
+      !(await bcrypt.compare(password, user.password))
+    ) {
       return res.status(401).json({ error: "Email o contraseña incorrectos" })
     }
 
