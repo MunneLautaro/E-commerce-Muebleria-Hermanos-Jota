@@ -244,6 +244,38 @@ describe("GET /api/products/admin", () => {
   })
 })
 
+describe("rutas de admin en el alias /api/productos", () => {
+  it("crea, edita y borra un producto", async () => {
+    const created = await adminApi()
+      .post("/api/productos")
+      .send(validProductBody())
+    expect(created.status).toBe(201)
+
+    const id = created.body._id
+    const updated = await adminApi()
+      .put(`/api/productos/${id}`)
+      .send({ nombre: "Mesa Recoleta" })
+    expect(updated.status).toBe(200)
+    expect(updated.body.nombre).toBe("Mesa Recoleta")
+
+    const deleted = await adminApi().delete(`/api/productos/${id}`)
+    expect(deleted.status).toBe(200)
+    expect((await Product.findById(id)).isActive).toBe(false)
+  })
+
+  it("también exige ser admin", async () => {
+    const user = await createUser({ email: "user@example.com" })
+
+    const res = await request(app)
+      .post("/api/productos")
+      .set("Authorization", `Bearer ${tokenFor(user)}`)
+      .send(validProductBody())
+
+    expect(res.status).toBe(403)
+    expect(await Product.countDocuments()).toBe(0)
+  })
+})
+
 describe("POST /api/products", () => {
   it("crea el producto con un SKU generado por el servidor", async () => {
     const res = await adminApi().post("/api/products").send(validProductBody())
