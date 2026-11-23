@@ -58,7 +58,7 @@ export default function ProductDetail() {
       }
     }
 
-    fetchProduct()
+    void fetchProduct()
 
     return () => {
       isActive = false

@@ -56,7 +56,7 @@ export default function CreateProductPage() {
       }
     }
 
-    loadProduct()
+    void loadProduct()
     return () => {
       ignore = true
     }

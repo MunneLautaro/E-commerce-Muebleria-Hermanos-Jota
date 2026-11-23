@@ -58,7 +58,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
       }
     }
 
-    loadProducts()
+    void loadProducts()
 
     return () => {
       isMounted = false

@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    verifySession()
+    void verifySession()
 
     return () => {
       isMounted = false
