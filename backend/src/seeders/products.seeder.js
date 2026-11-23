@@ -47,30 +47,32 @@ const seedProducts = async () => {
 
   await mongoose.connect(process.env.MONGODB_URI)
 
-  for (const [index, product] of products.entries()) {
-    await Product.findOneAndUpdate(
-      {
-        $or: [{ sku: skus[index] }, { nombre: product.nombre }],
-      },
-      {
-        sku: skus[index],
-        nombre: product.nombre,
-        descripcion: product.descripcion,
-        medidas: product.medidas || "",
-        precio: prices[index],
-        stock: stocks[index],
-        imagenUrl: product.image,
-        atributos: getAttributes(product),
-        isActive: true,
-      },
-      {
-        upsert: true,
-        returnDocument: "after",
-        runValidators: true,
-        setDefaultsOnInsert: true,
-      },
-    )
-  }
+  await Promise.all(
+    products.map((product, index) =>
+      Product.findOneAndUpdate(
+        {
+          $or: [{ sku: skus[index] }, { nombre: product.nombre }],
+        },
+        {
+          sku: skus[index],
+          nombre: product.nombre,
+          descripcion: product.descripcion,
+          medidas: product.medidas || "",
+          precio: prices[index],
+          stock: stocks[index],
+          imagenUrl: product.image,
+          atributos: getAttributes(product),
+          isActive: true,
+        },
+        {
+          upsert: true,
+          returnDocument: "after",
+          runValidators: true,
+          setDefaultsOnInsert: true,
+        },
+      ),
+    ),
+  )
 
   console.log(`${products.length} productos sembrados correctamente`)
 }
