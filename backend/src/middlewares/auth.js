@@ -43,7 +43,7 @@ export const requireAdmin = async (req, res, next) => {
       ? await User.findById(userId).select("role isActive").lean()
       : null
 
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       return res.status(401).json({ error: "Usuario no disponible" })
     }
 
