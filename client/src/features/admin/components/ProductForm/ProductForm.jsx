@@ -46,6 +46,7 @@ export function ProductForm({
   }, [initialValues, reset])
 
   const imageError = imageErrorUrl !== "" && imageErrorUrl === imageUrl
+  const submitLabel = isEditing ? "Guardar cambios" : "Guardar producto"
 
   const handleValidSubmit = (values) => {
     onSubmit({
@@ -72,7 +73,7 @@ export function ProductForm({
 
         <div className={styles.fields}>
           <label className={styles.label}>
-            Nombre *
+            <span>Nombre *</span>
             <input
               {...register("nombre")}
               className={styles.input}
@@ -86,7 +87,7 @@ export function ProductForm({
           </label>
 
           <label className={styles.wideLabel}>
-            Descripción
+            <span>Descripción</span>
             <textarea
               {...register("descripcion")}
               className={`${styles.input} ${styles.textarea}`}
@@ -102,7 +103,7 @@ export function ProductForm({
           </label>
 
           <label className={styles.label}>
-            Medidas
+            <span>Medidas</span>
             <input
               {...register("medidas")}
               className={styles.input}
@@ -112,7 +113,7 @@ export function ProductForm({
           </label>
 
           <label className={styles.label}>
-            Precio (ARS) *
+            <span>Precio (ARS) *</span>
             <input
               {...register("precio")}
               className={styles.input}
@@ -132,7 +133,7 @@ export function ProductForm({
           </label>
 
           <label className={styles.label}>
-            Stock disponible *
+            <span>Stock disponible *</span>
             <input
               {...register("stock")}
               className={styles.input}
@@ -147,7 +148,7 @@ export function ProductForm({
           </label>
 
           <label className={styles.wideLabel}>
-            URL de la imagen
+            <span>URL de la imagen</span>
             <input
               {...register("imagenUrl", {
                 onChange: () => setImageErrorUrl(""),
@@ -180,9 +181,9 @@ export function ProductForm({
           )}
 
           {imageUrl && imageError && (
-            <p className={styles.imageError} role="status">
+            <output className={styles.imageError}>
               No se pudo cargar la vista previa de esta URL.
-            </p>
+            </output>
           )}
 
           <label className={styles.activeToggle}>
@@ -191,7 +192,7 @@ export function ProductForm({
               className={styles.checkbox}
               type="checkbox"
             />
-            Producto activo y visible en el catálogo
+            <span>Producto activo y visible en el catálogo</span>
           </label>
         </div>
       </section>
@@ -232,7 +233,7 @@ export function ProductForm({
             {fields.map((field, index) => (
               <div key={field.id} className={styles.attributeRow}>
                 <label className={styles.label}>
-                  Nombre del campo
+                  <span>Nombre del campo</span>
                   <input
                     {...register(`atributos.${index}.clave`)}
                     className={styles.input}
@@ -248,7 +249,7 @@ export function ProductForm({
                   )}
                 </label>
                 <label className={styles.label}>
-                  Valor
+                  <span>Valor</span>
                   <input
                     {...register(`atributos.${index}.valor`)}
                     className={styles.input}
@@ -287,11 +288,7 @@ export function ProductForm({
           disabled={isSubmitting}
           className={styles.submitButton}
         >
-          {isSubmitting
-            ? "Guardando..."
-            : isEditing
-              ? "Guardar cambios"
-              : "Guardar producto"}
+          {isSubmitting ? "Guardando..." : submitLabel}
         </button>
       </div>
     </form>

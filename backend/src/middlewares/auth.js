@@ -26,7 +26,10 @@ export const requireAuth = (req, res, next) => {
     req.user = jwt.verify(token, getSecret())
     next()
   } catch (error) {
-    if (error.name === "TokenExpiredError" || error.name === "JsonWebTokenError") {
+    if (
+      error.name === "TokenExpiredError" ||
+      error.name === "JsonWebTokenError"
+    ) {
       return res.status(401).json({ error: "Token inválido o expirado" })
     }
 
@@ -34,8 +37,6 @@ export const requireAuth = (req, res, next) => {
   }
 }
 
-// El rol se lee de la base y no del token: así un admin desactivado, borrado
-// o degradado pierde el acceso de inmediato y no recién cuando vence su JWT.
 export const requireAdmin = async (req, res, next) => {
   try {
     const userId = req.user?.sub
@@ -43,7 +44,7 @@ export const requireAdmin = async (req, res, next) => {
       ? await User.findById(userId).select("role isActive").lean()
       : null
 
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       return res.status(401).json({ error: "Usuario no disponible" })
     }
 

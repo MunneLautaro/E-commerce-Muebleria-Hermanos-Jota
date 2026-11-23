@@ -6,7 +6,7 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([])
 
   const addItem = (product, quantity = 1) => {
-    if (!product || !product._id) return
+    if (!product?._id) return
 
     const stock = Number(product.stock)
     const amount = Number(quantity)

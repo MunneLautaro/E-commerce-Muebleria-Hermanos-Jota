@@ -12,6 +12,8 @@ import { connectDB } from "./db.js"
 
 const app = express()
 
+app.disable("x-powered-by")
+
 app.set("trust proxy", 1)
 
 app.get("/health", (req, res) => {
