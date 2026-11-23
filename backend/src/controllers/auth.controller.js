@@ -199,9 +199,6 @@ export const getCurrentUser = async (req, res, next) => {
   }
 }
 
-// La sesión vive en el token que guarda el cliente (localStorage), por lo que
-// el logout es stateless: el cliente descarta el token y este endpoint solo
-// confirma la operación.
 export const logout = (req, res) => {
   return res.json({ message: "Sesión cerrada correctamente" })
 }

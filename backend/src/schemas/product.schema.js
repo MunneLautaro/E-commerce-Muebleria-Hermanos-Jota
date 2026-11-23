@@ -63,9 +63,7 @@ const stock = yup
     }
 
     const normalizedValue = originalValue.trim()
-    return /^\d+$/.test(normalizedValue)
-      ? Number(normalizedValue)
-      : Number.NaN
+    return /^\d+$/.test(normalizedValue) ? Number(normalizedValue) : Number.NaN
   })
   .typeError("El stock debe ser un entero no negativo")
   .integer("El stock debe ser un entero")
@@ -105,7 +103,6 @@ const imageUrl = yup
     "image-url",
     "La imagen debe ser una URL HTTP/HTTPS o una ruta relativa válida",
     (value) => {
-      // Ausente: lo decide .required()/.notRequired() de cada schema.
       if (value === undefined) return true
       if (!value) return false
       if (value.startsWith("/")) return true
@@ -132,18 +129,20 @@ export const createProductSchema = yup.object({
   atributos: attributes.default([]),
   isActive: yup.boolean().typeError("isActive debe ser booleano"),
 })
-export const updateProductSchema = yup.object({
-  sku: yup.string().trim().uppercase(),
-  nombre: yup.string().trim(),
-  descripcion: yup.string().trim(),
-  medidas: yup.string().trim(),
-  precio: price.notRequired(),
-  stock,
-  imagenUrl: imageUrl.notRequired(),
-  atributos: attributes,
-  isActive: yup.boolean(),
-}).test(
-  "at-least-one-field",
-  "Debe enviar al menos un campo para actualizar",
-  (value) => Object.keys(value || {}).length > 0,
-)
+export const updateProductSchema = yup
+  .object({
+    sku: yup.string().trim().uppercase(),
+    nombre: yup.string().trim(),
+    descripcion: yup.string().trim(),
+    medidas: yup.string().trim(),
+    precio: price.notRequired(),
+    stock,
+    imagenUrl: imageUrl.notRequired(),
+    atributos: attributes,
+    isActive: yup.boolean(),
+  })
+  .test(
+    "at-least-one-field",
+    "Debe enviar al menos un campo para actualizar",
+    (value) => Object.keys(value || {}).length > 0,
+  )
