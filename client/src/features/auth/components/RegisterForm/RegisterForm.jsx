@@ -7,6 +7,16 @@ import { useAuth } from "../../hooks/useAuth"
 import { useRegisterForm } from "../../hooks/useRegisterForm"
 import { registerFormStyles as s } from "./RegisterFormStyles"
 
+const describedBy = (error, errorId, fallbackId) =>
+  error ? errorId : fallbackId
+
+const FieldError = ({ id, error }) =>
+  error ? (
+    <span id={id} className={s.errorCampo}>
+      {error.message}
+    </span>
+  ) : null
+
 export const RegisterForm = () => {
   const [mostrarPassword, setMostrarPassword] = useState(false)
   const [cargandoGoogle, setCargandoGoogle] = useState(false)
@@ -78,14 +88,10 @@ export const RegisterForm = () => {
           {...register("email")}
           className={s.control(Boolean(errors.email))}
           aria-invalid={Boolean(errors.email)}
-          aria-describedby={errors.email ? "error-register-email" : undefined}
+          aria-describedby={describedBy(errors.email, "error-register-email")}
           disabled={estaBloqueado}
         />
-        {errors.email ? (
-          <span id="error-register-email" className={s.errorCampo}>
-            {errors.email.message}
-          </span>
-        ) : null}
+        <FieldError id="error-register-email" error={errors.email} />
       </div>
 
       <div className={s.fila}>
@@ -101,14 +107,10 @@ export const RegisterForm = () => {
             {...register("phone")}
             className={s.control(Boolean(errors.phone))}
             aria-invalid={Boolean(errors.phone)}
-            aria-describedby={errors.phone ? "error-register-phone" : undefined}
+            aria-describedby={describedBy(errors.phone, "error-register-phone")}
             disabled={estaBloqueado}
           />
-          {errors.phone ? (
-            <span id="error-register-phone" className={s.errorCampo}>
-              {errors.phone.message}
-            </span>
-          ) : null}
+          <FieldError id="error-register-phone" error={errors.phone} />
         </div>
 
         <div className={s.campo}>
@@ -123,16 +125,10 @@ export const RegisterForm = () => {
             {...register("address")}
             className={s.control(Boolean(errors.address))}
             aria-invalid={Boolean(errors.address)}
-            aria-describedby={
-              errors.address ? "error-register-address" : undefined
-            }
+            aria-describedby={describedBy(errors.address, "error-register-address")}
             disabled={estaBloqueado}
           />
-          {errors.address ? (
-            <span id="error-register-address" className={s.errorCampo}>
-              {errors.address.message}
-            </span>
-          ) : null}
+          <FieldError id="error-register-address" error={errors.address} />
         </div>
       </div>
 
@@ -150,9 +146,11 @@ export const RegisterForm = () => {
               {...register("password")}
               className={`${s.control(Boolean(errors.password))} pr-11`}
               aria-invalid={Boolean(errors.password)}
-              aria-describedby={
-                errors.password ? "error-register-password" : "ayuda-password"
-              }
+              aria-describedby={describedBy(
+                errors.password,
+                "error-register-password",
+                "ayuda-password",
+              )}
               disabled={estaBloqueado}
             />
             <button
@@ -194,18 +192,10 @@ export const RegisterForm = () => {
             {...register("confirmPassword")}
             className={s.control(Boolean(errors.confirmPassword))}
             aria-invalid={Boolean(errors.confirmPassword)}
-            aria-describedby={
-              errors.confirmPassword
-                ? "error-register-confirm-password"
-                : undefined
-            }
+            aria-describedby={describedBy(errors.confirmPassword, "error-register-confirm-password")}
             disabled={estaBloqueado}
           />
-          {errors.confirmPassword ? (
-            <span id="error-register-confirm-password" className={s.errorCampo}>
-              {errors.confirmPassword.message}
-            </span>
-          ) : null}
+          <FieldError id="error-register-confirm-password" error={errors.confirmPassword} />
         </div>
       </div>
 
