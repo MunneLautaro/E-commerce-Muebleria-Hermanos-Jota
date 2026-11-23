@@ -24,7 +24,7 @@ const normalizePrice = (value) => {
   }
 
   if (/^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$/.test(normalizedValue)) {
-    return Number(normalizedValue.replace(/\./g, "").replace(",", "."))
+    return Number(normalizedValue.replaceAll(".", "").replace(",", "."))
   }
 
   if (/^\d+(?:,\d{1,2})?$/.test(normalizedValue)) {
