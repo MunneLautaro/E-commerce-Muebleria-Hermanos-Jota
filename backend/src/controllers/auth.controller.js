@@ -113,6 +113,40 @@ export const login = async (req, res, next) => {
   }
 }
 
+const linkGoogleAccount = async (user, { googleId, name, picture }) => {
+  user.googleId = googleId
+  if (!user.name && name) user.name = name
+  if (!user.picture && picture) user.picture = picture
+  await user.save()
+  return user
+}
+
+const findOrCreateGoogleUser = async ({
+  sub: googleId,
+  email,
+  name,
+  picture,
+}) => {
+  const userByGoogleId = await User.findOne({ googleId })
+  if (userByGoogleId) return userByGoogleId
+
+  const normalizedEmail = email.toLowerCase().trim()
+  const userByEmail = await User.findOne({ email: normalizedEmail })
+  if (userByEmail) {
+    return linkGoogleAccount(userByEmail, { googleId, name, picture })
+  }
+
+  return User.create({
+    email: normalizedEmail,
+    googleId,
+    name: name || "",
+    picture: picture || "",
+    authProvider: "google",
+    isActive: true,
+    orders: [],
+  })
+}
+
 export const googleLogin = async (req, res, next) => {
   try {
     getJwtSecret()
@@ -138,31 +172,7 @@ export const googleLogin = async (req, res, next) => {
         .json({ error: "No se pudo obtener la información de Google" })
     }
 
-    const { sub: googleId, email, name, picture } = payload
-    const normalizedEmail = email.toLowerCase().trim()
-
-    let user = await User.findOne({ googleId })
-
-    if (!user) {
-      user = await User.findOne({ email: normalizedEmail })
-
-      if (user) {
-        user.googleId = googleId
-        if (!user.name && name) user.name = name
-        if (!user.picture && picture) user.picture = picture
-        await user.save()
-      } else {
-        user = await User.create({
-          email: normalizedEmail,
-          googleId,
-          name: name || "",
-          picture: picture || "",
-          authProvider: "google",
-          isActive: true,
-          orders: [],
-        })
-      }
-    }
+    const user = await findOrCreateGoogleUser(payload)
 
     if (!user.isActive) {
       return res.status(403).json({ error: "El usuario está inactivo" })
