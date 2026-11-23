@@ -11,7 +11,10 @@ const initialMessage = {
 }
 
 function createSessionId() {
-  return window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`
+  if (window.crypto.randomUUID) return window.crypto.randomUUID()
+
+  const bytes = window.crypto.getRandomValues(new Uint8Array(16))
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")
 }
 
 export const ChatWidget = () => {

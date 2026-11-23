@@ -7,7 +7,7 @@ const price = yup
 
     const normalized = originalValue.trim().replace(/\s/g, "")
     if (/^\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?$/.test(normalized)) {
-      return Number(normalized.replace(/\./g, "").replace(",", "."))
+      return Number(normalized.replaceAll(".", "").replace(",", "."))
     }
 
     if (/^\d+(?:[.,]\d{1,2})?$/.test(normalized)) {

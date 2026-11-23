@@ -1,9 +1,13 @@
 import { fetchApi } from "../../../services/api"
 
+const withQuery = (path, params) => {
+  const query = new URLSearchParams(params).toString()
+  return query ? `${path}?${query}` : path
+}
+
 export const productService = {
   async getProducts(params = {}) {
-    const query = new URLSearchParams(params).toString()
-    return fetchApi(`/products${query ? `?${query}` : ""}`)
+    return fetchApi(withQuery("/products", params))
   },
 
   async getProductById(id) {
@@ -15,8 +19,7 @@ export const productService = {
   },
 
   async getAdminProducts(params = {}) {
-    const query = new URLSearchParams(params).toString()
-    return fetchApi(`/products/admin${query ? `?${query}` : ""}`)
+    return fetchApi(withQuery("/products/admin", params))
   },
 
   async createProduct(product) {

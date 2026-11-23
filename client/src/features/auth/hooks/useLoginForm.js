@@ -33,7 +33,7 @@ export const useLoginForm = () => {
       })
 
       toast.success("¡Bienvenido/a de nuevo!")
-      navigate("/")
+      void navigate("/")
     } catch (error) {
       const mensaje = error.message || "Error al iniciar sesión."
       setError("root", { type: "server", message: mensaje })

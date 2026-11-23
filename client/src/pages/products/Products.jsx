@@ -194,7 +194,7 @@ export default function ProductsPage() {
             </p>
           )}
           <label>
-            Productos por página
+            <span>Productos por página</span>
             <select
               value={productsPerPage}
               onChange={(event) => {

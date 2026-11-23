@@ -14,6 +14,7 @@ export const contactFormStyles = {
   errorCampo: "font-light text-sm tracking-caption text-error",
   ayuda: "font-light text-sm tracking-caption text-ink-soft",
   alertaExito: "flex flex-col gap-4 border-l-4 border-siena bg-panel-salvia p-8",
+  mensajeExito: "flex flex-col gap-4",
   tituloExito: "font-display uppercase tracking-title text-siena text-xl",
   textoExito: "text-ink leading-[1.6]",
   acciones: "pt-2",

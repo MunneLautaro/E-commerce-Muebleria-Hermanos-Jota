@@ -19,7 +19,7 @@ export const LoginForm = () => {
       setCargandoGoogle(true)
       await loginWithGoogle(credentialResponse.credential)
       toast.success("¡Bienvenido/a de nuevo!")
-      navigate("/")
+      void navigate("/")
     } catch (error) {
       toast.error(error.message || "Error al iniciar sesión con Google")
     } finally {

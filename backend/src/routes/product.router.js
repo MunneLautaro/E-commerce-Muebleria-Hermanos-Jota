@@ -11,9 +11,11 @@ import {
 import { validate, validateQuery } from "../middlewares/validate.js"
 import { requireAdmin, requireAuth } from "../middlewares/auth.js"
 import { productWriteRateLimit } from "../middlewares/rateLimit.js"
-import { createProductSchema } from "../schemas/product.schema.js"
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../schemas/product.schema.js"
 import { productQuerySchema } from "../schemas/product.query.schema.js"
-import { updateProductSchema } from "../schemas/product.schema.js"
 
 const router = Router()
 

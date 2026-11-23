@@ -17,12 +17,14 @@ export const ContactForm = () => {
 
   if (exito) {
     return (
-      <div className={s.alertaExito} role="status">
-        <p className={s.tituloExito}>Consulta enviada</p>
-        <p className={s.textoExito}>
-          Recibimos tu mensaje. Te vamos a responder con calma y con datos
-          concretos, a la brevedad.
-        </p>
+      <div className={s.alertaExito}>
+        <output className={s.mensajeExito}>
+          <span className={s.tituloExito}>Consulta enviada</span>
+          <span className={s.textoExito}>
+            Recibimos tu mensaje. Te vamos a responder con calma y con datos
+            concretos, a la brevedad.
+          </span>
+        </output>
         <button className={s.botonSecundario} type="button" onClick={reiniciar}>
           Enviar otra consulta
         </button>
