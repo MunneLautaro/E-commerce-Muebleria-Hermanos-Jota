@@ -98,13 +98,7 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body
     const user = await User.findOne({ email }).select("+password")
 
-    // Una cuenta creada con Google no tiene contraseña: bcrypt.compare lanzaría
-    // una excepción, así que se responde el mismo 401 que con una clave errónea.
-    if (
-      !user ||
-      !user.password ||
-      !(await bcrypt.compare(password, user.password))
-    ) {
+    if (!user?.password || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: "Email o contraseña incorrectos" })
     }
 
@@ -117,6 +111,40 @@ export const login = async (req, res, next) => {
   } catch (error) {
     next(handleDatabaseError(error))
   }
+}
+
+const linkGoogleAccount = async (user, { googleId, name, picture }) => {
+  user.googleId = googleId
+  if (!user.name && name) user.name = name
+  if (!user.picture && picture) user.picture = picture
+  await user.save()
+  return user
+}
+
+const findOrCreateGoogleUser = async ({
+  sub: googleId,
+  email,
+  name,
+  picture,
+}) => {
+  const userByGoogleId = await User.findOne({ googleId })
+  if (userByGoogleId) return userByGoogleId
+
+  const normalizedEmail = email.toLowerCase().trim()
+  const userByEmail = await User.findOne({ email: normalizedEmail })
+  if (userByEmail) {
+    return linkGoogleAccount(userByEmail, { googleId, name, picture })
+  }
+
+  return User.create({
+    email: normalizedEmail,
+    googleId,
+    name: name || "",
+    picture: picture || "",
+    authProvider: "google",
+    isActive: true,
+    orders: [],
+  })
 }
 
 export const googleLogin = async (req, res, next) => {
@@ -144,31 +172,7 @@ export const googleLogin = async (req, res, next) => {
         .json({ error: "No se pudo obtener la información de Google" })
     }
 
-    const { sub: googleId, email, name, picture } = payload
-    const normalizedEmail = email.toLowerCase().trim()
-
-    let user = await User.findOne({ googleId })
-
-    if (!user) {
-      user = await User.findOne({ email: normalizedEmail })
-
-      if (user) {
-        user.googleId = googleId
-        if (!user.name && name) user.name = name
-        if (!user.picture && picture) user.picture = picture
-        await user.save()
-      } else {
-        user = await User.create({
-          email: normalizedEmail,
-          googleId,
-          name: name || "",
-          picture: picture || "",
-          authProvider: "google",
-          isActive: true,
-          orders: [],
-        })
-      }
-    }
+    const user = await findOrCreateGoogleUser(payload)
 
     if (!user.isActive) {
       return res.status(403).json({ error: "El usuario está inactivo" })
@@ -185,7 +189,7 @@ export const getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.sub)
 
-    if (!user || !user.isActive) {
+    if (!user?.isActive) {
       return res.status(401).json({ error: "Usuario no disponible" })
     }
 
@@ -195,9 +199,6 @@ export const getCurrentUser = async (req, res, next) => {
   }
 }
 
-// La sesión vive en el token que guarda el cliente (localStorage), por lo que
-// el logout es stateless: el cliente descarta el token y este endpoint solo
-// confirma la operación.
 export const logout = (req, res) => {
   return res.json({ message: "Sesión cerrada correctamente" })
 }
