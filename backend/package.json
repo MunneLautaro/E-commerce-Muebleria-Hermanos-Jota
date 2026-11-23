@@ -18,7 +18,8 @@
     "dev": "node --watch src/server.js",
     "seed:products": "node src/seeders/products.seeder.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -32,6 +33,7 @@
     "yup": "^1.7.1"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "^5.1.0",
     "mongodb-memory-server": "^11.3.0",
     "supertest": "^7.3.2",
     "vitest": "^5.1.0"

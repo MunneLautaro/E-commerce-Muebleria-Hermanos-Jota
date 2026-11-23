@@ -1,0 +1,58 @@
+name: SonarCloud
+
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+
+concurrency:
+  group: sonar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  sonar:
+    name: Análisis y coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            client/package-lock.json
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Instalar dependencias del backend
+        working-directory: backend
+        run: npm ci --ignore-scripts
+
+      - name: Instalar dependencias del cliente
+        working-directory: client
+        run: npm ci --ignore-scripts
+
+      - name: Coverage del backend
+        working-directory: backend
+        run: npm run test:coverage
+
+      - name: Coverage del cliente
+        working-directory: client
+        run: npm run test:coverage
+
+      - uses: SonarSource/sonarqube-scan-action@70bad232163b09d998ea0707ee80c0ec80798c16
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

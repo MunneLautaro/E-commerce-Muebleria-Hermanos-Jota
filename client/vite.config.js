@@ -18,5 +18,12 @@ export default defineConfig({
       VITE_API_URL: "http://localhost:3000/api",
       VITE_GOOGLE_CLIENT_ID: "test-google-client-id",
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", ["lcov", { projectRoot: ".." }]],
+      reportsDirectory: "./coverage",
+      include: ["src/**/*.{js,jsx}"],
+      exclude: ["src/**/*.test.{js,jsx}", "src/test/**"],
+    },
   },
 })
