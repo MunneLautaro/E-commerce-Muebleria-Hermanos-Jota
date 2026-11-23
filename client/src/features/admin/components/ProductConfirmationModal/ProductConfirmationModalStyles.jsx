@@ -1,7 +1,4 @@
 export const productConfirmationModalStyles = {
-  overlay:
-    "fixed inset-0 z-50 flex items-center justify-center bg-ink/50 p-4",
-  dialog: "w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl",
   heading: "flex items-start justify-between gap-4",
   eyebrow:
     "text-xs font-semibold uppercase tracking-[0.18em] text-salvia",
