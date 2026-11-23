@@ -62,7 +62,8 @@ const createWithUniqueSku = async (productData, attemptsLeft) => {
 export const createProductService = (productData) =>
   createWithUniqueSku(productData, SKU_GENERATION_ATTEMPTS)
 
-const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+const escapeRegex = (value) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
 
 const SORT_OPTIONS = {
   name_asc: { nombre: 1, _id: 1 },
