@@ -61,6 +61,10 @@ export const createProductService = async (productData) => {
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 
+const SORT_OPTIONS = {
+  name_asc: { nombre: 1, _id: 1 },
+}
+
 const getProducts = async ({
   page = 1,
   limit = 12,
@@ -81,7 +85,7 @@ const getProducts = async ({
     if (maxPrice !== undefined) filter.precio.$lte = maxPrice
   }
 
-  const sort = order === "name_asc" ? { nombre: 1, _id: 1 } : { nombre: 1, _id: 1 }
+  const sort = SORT_OPTIONS[order] ?? SORT_OPTIONS.name_asc
   const skip = (page - 1) * limit
   const [items, total] = await Promise.all([
     Product.find(filter).sort(sort).skip(skip).limit(limit).lean(),

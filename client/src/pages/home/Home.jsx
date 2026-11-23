@@ -30,7 +30,7 @@ export default function HomePage() {
       }
     }
 
-    fetchFeaturedProducts()
+    void fetchFeaturedProducts()
   }, [])
 
   if (loading) {

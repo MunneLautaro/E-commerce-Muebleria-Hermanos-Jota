@@ -10,14 +10,15 @@ concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  pull-requests: read
+permissions: {}
 
 jobs:
   changes:
     name: Detectar cambios
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       client: ${{ steps.filter.outputs.client }}
@@ -25,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad
         id: filter
         with:
           filters: |
@@ -41,6 +42,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: backend
@@ -59,7 +62,7 @@ jobs:
           path: ~/.cache/mongodb-binaries
           key: mongodb-binaries-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       - run: npm test
 
@@ -68,6 +71,8 @@ jobs:
     needs: changes
     if: needs.changes.outputs.client == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: client
@@ -81,6 +86,6 @@ jobs:
           cache: npm
           cache-dependency-path: client/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       - run: npm test
