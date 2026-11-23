@@ -19,7 +19,7 @@ export const RegisterForm = () => {
       setCargandoGoogle(true)
       await loginWithGoogle(credentialResponse.credential)
       toast.success("¡Cuenta lista! Bienvenido/a a Hermanos Jota.")
-      navigate("/")
+      void navigate("/")
     } catch (error) {
       toast.error(error.message || "Error al registrarse con Google")
     } finally {
