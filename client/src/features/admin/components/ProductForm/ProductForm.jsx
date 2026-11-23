@@ -46,6 +46,7 @@ export function ProductForm({
   }, [initialValues, reset])
 
   const imageError = imageErrorUrl !== "" && imageErrorUrl === imageUrl
+  const submitLabel = isEditing ? "Guardar cambios" : "Guardar producto"
 
   const handleValidSubmit = (values) => {
     onSubmit({
@@ -287,11 +288,7 @@ export function ProductForm({
           disabled={isSubmitting}
           className={styles.submitButton}
         >
-          {isSubmitting
-            ? "Guardando..."
-            : isEditing
-              ? "Guardar cambios"
-              : "Guardar producto"}
+          {isSubmitting ? "Guardando..." : submitLabel}
         </button>
       </div>
     </form>

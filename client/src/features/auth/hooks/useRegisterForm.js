@@ -38,7 +38,7 @@ export const useRegisterForm = () => {
       })
 
       toast.success("¡Cuenta creada! Ingresá con tu email y contraseña.")
-      navigate("/login", { replace: true, state: { email } })
+      void navigate("/login", { replace: true, state: { email } })
     } catch (error) {
       const mensaje = error.message || "Error al crear la cuenta."
       setError("root", { type: "server", message: mensaje })
