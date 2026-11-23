@@ -180,9 +180,9 @@ export function ProductForm({
           )}
 
           {imageUrl && imageError && (
-            <p className={styles.imageError} role="status">
+            <output className={styles.imageError}>
               No se pudo cargar la vista previa de esta URL.
-            </p>
+            </output>
           )}
 
           <label className={styles.activeToggle}>
