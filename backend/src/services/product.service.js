@@ -44,20 +44,23 @@ const mapProductCreationError = (error) => {
   return error
 }
 
-export const createProductService = async (productData) => {
-  for (let attempt = 0; attempt < SKU_GENERATION_ATTEMPTS; attempt += 1) {
-    try {
-      return await Product.create({
-        ...productData,
-        sku: generateSku(),
-      })
-    } catch (error) {
-      if (error?.code !== 11000 || attempt === SKU_GENERATION_ATTEMPTS - 1) {
-        throw mapProductCreationError(error)
-      }
+const createWithUniqueSku = async (productData, attemptsLeft) => {
+  try {
+    return await Product.create({
+      ...productData,
+      sku: generateSku(),
+    })
+  } catch (error) {
+    if (error?.code !== 11000 || attemptsLeft <= 1) {
+      throw mapProductCreationError(error)
     }
+
+    return createWithUniqueSku(productData, attemptsLeft - 1)
   }
 }
+
+export const createProductService = (productData) =>
+  createWithUniqueSku(productData, SKU_GENERATION_ATTEMPTS)
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 
