@@ -88,6 +88,42 @@ export default function AdminProductsPage() {
   if (!user) return <Navigate to="/login" replace />
   if (user.role !== "admin") return <Navigate to="/" replace />
 
+  const renderCatalog = () => {
+    if (isLoading) {
+      return <p className={styles.feedback}>Cargando productos...</p>
+    }
+
+    if (error) {
+      return (
+        <div className={styles.errorFeedback}>
+          <p className={styles.errorText}>{error}</p>
+          <button
+            type="button"
+            onClick={loadProducts}
+            className={styles.retryButton}
+          >
+            Intentar nuevamente
+          </button>
+        </div>
+      )
+    }
+
+    if (products.length === 0) {
+      return (
+        <div className={styles.feedback}>
+          <p>Todavía no hay productos activos.</p>
+          <Link to="/admin/crear-producto" className={styles.emptyButton}>
+            Crear el primero
+          </Link>
+        </div>
+      )
+    }
+
+    return (
+      <AdminProductTable products={products} onDelete={setProductToDelete} />
+    )
+  }
+
   return (
     <main className={styles.container}>
       <AdminPageHeader />
@@ -112,32 +148,7 @@ export default function AdminProductsPage() {
           </button>
         </div>
 
-        {isLoading ? (
-          <p className={styles.feedback}>Cargando productos...</p>
-        ) : error ? (
-          <div className={styles.errorFeedback}>
-            <p className={styles.errorText}>{error}</p>
-            <button
-              type="button"
-              onClick={loadProducts}
-              className={styles.retryButton}
-            >
-              Intentar nuevamente
-            </button>
-          </div>
-        ) : products.length === 0 ? (
-          <div className={styles.feedback}>
-            <p>Todavía no hay productos activos.</p>
-            <Link to="/admin/crear-producto" className={styles.emptyButton}>
-              Crear el primero
-            </Link>
-          </div>
-        ) : (
-          <AdminProductTable
-            products={products}
-            onDelete={setProductToDelete}
-          />
-        )}
+        {renderCatalog()}
 
         {!isLoading && !error && (
           <AdminPagination
