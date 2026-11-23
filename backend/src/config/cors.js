@@ -1,11 +1,13 @@
-const whitelist = (process.env.CORS_WHITELIST || "http://localhost:5173,http://localhost:5174")
-  .split(",")
-  .map((origin) => origin.trim())
-  .filter(Boolean)
+const whitelist = new Set(
+  (process.env.CORS_WHITELIST || "http://localhost:5173,http://localhost:5174")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
+)
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || whitelist.includes(origin)) {
+    if (!origin || whitelist.has(origin)) {
       return callback(null, true)
     }
 
