@@ -9,6 +9,20 @@ import { homeStyles } from "./HomeStyles"
 const homeDescription =
   "Muebles de diseño hechos en Buenos Aires desde 1998. Materiales nobles, producción local y atención personalizada para living, comedor y espacios de trabajo."
 
+const FeaturedProducts = ({ loading, error, products }) => {
+  if (loading) {
+    return (
+      <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
+    )
+  }
+
+  if (error) {
+    return <p className={homeStyles.errorText}>{error}</p>
+  }
+
+  return <ProductList products={products} compact />
+}
+
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -36,24 +50,6 @@ export default function HomePage() {
 
     void fetchFeaturedProducts()
   }, [])
-
-  if (loading) {
-    return (
-      <div className={homeStyles.loadingContainer}>
-        <PageMeta description={homeDescription} />
-        <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={homeStyles.errorContainer}>
-        <PageMeta description={homeDescription} />
-        <p className={homeStyles.errorText}>{error}</p>
-      </div>
-    )
-  }
 
   return (
     <div className={homeStyles.container}>
@@ -127,7 +123,11 @@ export default function HomePage() {
           <Link to="/productos" className={homeStyles.viewAllLink}>Explorar colección →</Link>
         </div>
 
-        <ProductList products={featuredProducts} compact />
+        <FeaturedProducts
+          loading={loading}
+          error={error}
+          products={featuredProducts}
+        />
       </section>
 
       <section className={homeStyles.contactCta}>
