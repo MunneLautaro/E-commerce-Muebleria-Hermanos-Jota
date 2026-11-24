@@ -1,14 +1,16 @@
+import { lazy } from "react"
 import { Routes, Route } from "react-router-dom"
 import { Layout } from "../components/Layout/Layout"
 import HomePage from "../pages/home/Home"
-import ProductsPage from "../pages/products/Products"
-import ProductDetail from "../pages/productDetail/ProductDetail"
-import ContactPage from "../pages/contact/ContactPage"
-import LoginPage from "../pages/login/LoginPage"
-import RegisterPage from "../pages/register/RegisterPage"
-import AdminProductsPage from "../pages/admin/AdminProductsPage"
-import CreateProductPage from "../pages/admin/CreateProductPage"
-import NotFoundPage from "../pages/notFound/NotFoundPage"
+
+const ProductsPage = lazy(() => import("../pages/products/Products"))
+const ProductDetail = lazy(() => import("../pages/productDetail/ProductDetail"))
+const ContactPage = lazy(() => import("../pages/contact/ContactPage"))
+const LoginPage = lazy(() => import("../pages/login/LoginPage"))
+const RegisterPage = lazy(() => import("../pages/register/RegisterPage"))
+const AdminProductsPage = lazy(() => import("../pages/admin/AdminProductsPage"))
+const CreateProductPage = lazy(() => import("../pages/admin/CreateProductPage"))
+const NotFoundPage = lazy(() => import("../pages/notFound/NotFoundPage"))
 
 export const AppRouter = () => {
   return (
