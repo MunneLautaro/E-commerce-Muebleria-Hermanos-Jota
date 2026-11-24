@@ -8,7 +8,7 @@ export const productDetailStyles = {
   imageWrapper: "overflow-hidden rounded-lg bg-[#F5E6D3]",
   image: "h-full min-h-[400px] w-full object-cover",
   contentWrapper: "flex flex-col justify-center",
-  title: "font-serif text-4xl font-bold text-[#A0522D]",
+  title: "font-display text-4xl font-bold text-[#A0522D]",
   description: "mt-6 text-base leading-7 text-gray-700",
   measuresWrapper: "mt-6 border-t border-[#A0522D]/20 pt-5",
   measuresText: "text-base text-gray-700",

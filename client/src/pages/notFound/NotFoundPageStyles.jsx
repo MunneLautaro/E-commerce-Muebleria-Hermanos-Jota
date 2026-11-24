@@ -4,7 +4,7 @@ export const notFoundStyles = {
   code: "font-display text-7xl font-bold text-siena md:text-9xl",
   eyebrow:
     "mt-4 text-xs font-medium uppercase tracking-[0.2em] text-salvia md:text-sm",
-  title: "mt-3 font-serif text-3xl font-bold text-ink md:text-4xl",
+  title: "mt-3 font-display text-3xl font-bold text-ink md:text-4xl",
   description: "mt-5 max-w-md text-base leading-8 text-ink-soft",
   actions: "mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row",
   primaryButton:
