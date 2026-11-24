@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { LoginForm, useAuth } from "../../features/auth"
+import { GoogleAuthProvider, LoginForm, useAuth } from "../../features/auth"
 import { loginPageStyles as s } from "./LoginPageStyles"
 
 export default function LoginPage() {
@@ -33,7 +33,9 @@ export default function LoginPage() {
               Ingresá tu correo y tu contraseña habitual.
             </p>
           </div>
-          <LoginForm />
+          <GoogleAuthProvider>
+            <LoginForm />
+          </GoogleAuthProvider>
         </div>
 
         <aside className={s.aside}>
