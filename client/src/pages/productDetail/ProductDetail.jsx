@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { useCart } from "../../features/cart"
 import {
   productOptionalFields,
@@ -17,6 +18,19 @@ const formatPrice = new Intl.NumberFormat("es-AR", {
   currency: "ARS",
   maximumFractionDigits: 0,
 })
+
+const MAX_DESCRIPTION_LENGTH = 155
+
+const buildProductDescription = ({ nombre, descripcion }) => {
+  const text = descripcion?.trim().replaceAll(/\s+/g, " ")
+
+  if (!text) {
+    return `Conocé ${nombre} en Mueblería Hermanos Jota, muebles de diseño hechos en Buenos Aires.`
+  }
+  if (text.length <= MAX_DESCRIPTION_LENGTH) return text
+
+  return `${text.slice(0, MAX_DESCRIPTION_LENGTH - 1).trimEnd()}…`
+}
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -109,6 +123,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <section className={productDetailStyles.loadingSection}>
+        <PageMeta title="Cargando producto" />
         <p className={productDetailStyles.loadingText}>
           Cargando producto...
         </p>
@@ -128,6 +143,7 @@ export default function ProductDetail() {
   if (error) {
     return (
       <section className={productDetailStyles.errorSection}>
+        <PageMeta title="No se pudo cargar el producto" noIndex />
         <p className={productDetailStyles.errorText}>{error}</p>
       </section>
     )
@@ -139,6 +155,11 @@ export default function ProductDetail() {
 
   return (
     <section className={productDetailStyles.container}>
+      <PageMeta
+        title={product.nombre}
+        description={buildProductDescription(product)}
+        canonicalPath={`/productos/${id}`}
+      />
       <div className={productDetailStyles.grid}>
         <div className={productDetailStyles.imageWrapper}>
           <img
