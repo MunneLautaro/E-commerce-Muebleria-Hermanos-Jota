@@ -8,8 +8,8 @@ export const productCardStyles = {
   content: (compact) => (compact ? "px-3 pb-3 pt-2" : "p-5"),
   title: (compact) =>
     compact
-      ? "font-serif text-lg font-bold text-siena sm:text-xl"
-      : "font-serif text-2xl font-bold text-siena",
+      ? "font-display text-lg font-bold text-siena sm:text-xl"
+      : "font-display text-2xl font-bold text-siena",
   price: "mt-2 text-lg font-semibold text-ink",
   description: "mt-3 text-sm leading-6 text-ink-soft",
   measures: "mt-4 text-sm text-ink-soft",
