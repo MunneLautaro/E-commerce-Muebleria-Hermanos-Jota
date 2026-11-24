@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { RegisterForm, useAuth } from "../../features/auth"
 import { registerPageStyles as s } from "./RegisterPageStyles"
 
@@ -11,6 +12,7 @@ export default function RegisterPage() {
 
   return (
     <div className={s.container}>
+      <PageMeta title="Creá tu cuenta" noIndex />
       <header className={s.header}>
         <p className={s.eyebrow}>Crear nueva cuenta</p>
         <h1 className={s.title}>Registrate en Hermanos Jota</h1>

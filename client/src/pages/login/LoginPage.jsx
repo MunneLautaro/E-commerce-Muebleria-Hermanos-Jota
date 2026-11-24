@@ -1,4 +1,5 @@
 import { Navigate } from "react-router-dom"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { LoginForm, useAuth } from "../../features/auth"
 import { loginPageStyles as s } from "./LoginPageStyles"
 
@@ -11,6 +12,7 @@ export default function LoginPage() {
 
   return (
     <div className={s.container}>
+      <PageMeta title="Ingresá a tu cuenta" noIndex />
       <header className={s.header}>
         <p className={s.eyebrow}>Acceso a clientes</p>
         <h1 className={s.title}>Ingresá a tu cuenta</h1>
