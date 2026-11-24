@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import { Layout } from "../components/Layout/Layout"
 import HomePage from "../pages/home/Home"
 import ProductsPage from "../pages/products/Products"
@@ -8,6 +8,7 @@ import LoginPage from "../pages/login/LoginPage"
 import RegisterPage from "../pages/register/RegisterPage"
 import AdminProductsPage from "../pages/admin/AdminProductsPage"
 import CreateProductPage from "../pages/admin/CreateProductPage"
+import NotFoundPage from "../pages/notFound/NotFoundPage"
 
 export const AppRouter = () => {
   return (
@@ -27,7 +28,7 @@ export const AppRouter = () => {
           path="/admin/editar-producto/:id"
           element={<CreateProductPage />}
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
   )
