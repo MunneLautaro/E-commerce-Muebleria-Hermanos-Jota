@@ -1,6 +1,4 @@
 export const productsStyles = {
-  loadingSection: "mx-auto max-w-[1280px] px-4 py-12 md:px-6 md:py-16",
-  loadingText: "text-ink-soft",
   errorSection: "mx-auto max-w-[1280px] px-4 py-12 md:px-6 md:py-16",
   errorText: "text-error",
   container: "mx-auto max-w-[1280px] px-4 py-8 md:px-6 md:py-14",
