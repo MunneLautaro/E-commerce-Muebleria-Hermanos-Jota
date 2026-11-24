@@ -127,7 +127,7 @@ export default function AdminProductsPage() {
   }
 
   return (
-    <main className={styles.container}>
+    <div className={styles.container}>
       <PageMeta title="Panel de productos" noIndex />
       <AdminPageHeader />
 
@@ -169,6 +169,6 @@ export default function AdminProductsPage() {
         onClose={() => setProductToDelete(null)}
         onConfirm={handleDelete}
       />
-    </main>
+    </div>
   )
 }

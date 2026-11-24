@@ -8,7 +8,11 @@ import {
 } from "lucide-react"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { ProductList, productService } from "../../features/products"
+import {
+  ProductList,
+  ProductListSkeleton,
+  productService,
+} from "../../features/products"
 import { productsStyles } from "./ProductsStyles"
 
 const productsMeta = {
@@ -91,15 +95,6 @@ export default function ProductsPage() {
     setCurrentPage(1)
   }
 
-  if (loading) {
-    return (
-      <section className={productsStyles.loadingSection}>
-        <PageMeta {...productsMeta} />
-        <p className={productsStyles.loadingText}>Cargando productos...</p>
-      </section>
-    )
-  }
-
   if (error) {
     return (
       <section className={productsStyles.errorSection}>
@@ -110,7 +105,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <main className={productsStyles.container}>
+    <div className={productsStyles.container}>
       <PageMeta {...productsMeta} />
       <header className={productsStyles.header}>
         <p className={productsStyles.eyebrow}>
@@ -134,10 +129,12 @@ export default function ProductsPage() {
               Encontrá tu próximo mueble
             </h2>
           </div>
-          <p className={productsStyles.resultCount} aria-live="polite">
-            {pagination.total}{" "}
-            {pagination.total === 1 ? "producto" : "productos"}
-          </p>
+          {!loading && (
+            <p className={productsStyles.resultCount} aria-live="polite">
+              {pagination.total}{" "}
+              {pagination.total === 1 ? "producto" : "productos"}
+            </p>
+          )}
         </div>
 
         <div className={productsStyles.filterControls}>
@@ -234,9 +231,14 @@ export default function ProductsPage() {
         className={productsStyles.listWrapper}
         aria-label="Lista de productos"
       >
-        {products.length > 0 ? (
-          <ProductList products={products} />
-        ) : (
+        {loading && (
+          <ProductListSkeleton
+            count={productsPerPage}
+            label="Cargando productos..."
+          />
+        )}
+        {!loading && products.length > 0 && <ProductList products={products} />}
+        {!loading && products.length === 0 && (
           <div className={productsStyles.emptyState}>
             <h2 className={productsStyles.emptyStateTitle}>
               {pagination.total === 0
@@ -261,36 +263,38 @@ export default function ProductsPage() {
         )}
       </section>
 
-      <nav
-        className={productsStyles.pagination}
-        aria-label="Paginación de productos"
-      >
-        <button
-          type="button"
-          onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          disabled={currentPage === 1}
-          className={productsStyles.pageButton}
-          aria-label="Página anterior"
+      {!loading && (
+        <nav
+          className={productsStyles.pagination}
+          aria-label="Paginación de productos"
         >
-          <ChevronLeft size={18} aria-hidden="true" />
-          Anterior
-        </button>
-        <span className={productsStyles.pageStatus} aria-live="polite">
-          Página {currentPage} de {pageCount}
-        </span>
-        <button
-          type="button"
-          onClick={() =>
-            setCurrentPage((page) => Math.min(pageCount, page + 1))
-          }
-          disabled={currentPage >= pageCount}
-          className={productsStyles.pageButton}
-          aria-label="Página siguiente"
-        >
-          Siguiente
-          <ChevronRight size={18} aria-hidden="true" />
-        </button>
-      </nav>
-    </main>
+          <button
+            type="button"
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            disabled={currentPage === 1}
+            className={productsStyles.pageButton}
+            aria-label="Página anterior"
+          >
+            <ChevronLeft size={18} aria-hidden="true" />
+            Anterior
+          </button>
+          <span className={productsStyles.pageStatus} aria-live="polite">
+            Página {currentPage} de {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() =>
+              setCurrentPage((page) => Math.min(pageCount, page + 1))
+            }
+            disabled={currentPage >= pageCount}
+            className={productsStyles.pageButton}
+            aria-label="Página siguiente"
+          >
+            Siguiente
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
+        </nav>
+      )}
+    </div>
   )
 }
