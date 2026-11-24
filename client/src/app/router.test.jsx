@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import { useLocation } from "react-router-dom"
 import { CartProvider } from "../features/cart"
 import { renderWithProviders } from "../test/renderWithProviders"
@@ -19,25 +19,35 @@ const renderRoute = (route) =>
   )
 
 describe("AppRouter", () => {
-  test("muestra la página 404 en una ruta inexistente", () => {
+  test("muestra la página 404 en una ruta inexistente", async () => {
     renderRoute("/una-ruta-que-no-existe")
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Página no encontrada" }),
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "Página no encontrada",
+      }),
     ).toBeInTheDocument()
   })
 
-  test("marca /contact como URL canónica de las dos rutas de contacto", () => {
+  test("marca /contact como URL canónica de las dos rutas de contacto", async () => {
     renderRoute("/contacto")
 
-    expect(document.title).toBe("Contacto | Mueblería Hermanos Jota")
+    await waitFor(() =>
+      expect(document.title).toBe("Contacto | Mueblería Hermanos Jota"),
+    )
     expect(
       document.head.querySelector('link[rel="canonical"]'),
     ).toHaveAttribute("href", `${globalThis.location.origin}/contact`)
   })
 
-  test("no redirige al inicio ante una ruta inexistente", () => {
+  test("no redirige al inicio ante una ruta inexistente", async () => {
     renderRoute("/admin/algo/raro")
+
+    await screen.findByRole("heading", {
+      level: 1,
+      name: "Página no encontrada",
+    })
 
     expect(screen.getByTestId("pathname")).toHaveTextContent(
       "/admin/algo/raro",
