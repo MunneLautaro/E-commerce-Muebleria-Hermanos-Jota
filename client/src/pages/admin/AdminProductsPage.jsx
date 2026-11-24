@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Link, Navigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { useAuth } from "../../features/auth"
 import { productService } from "../../features/products"
 import {
@@ -80,6 +81,7 @@ export default function AdminProductsPage() {
   if (loading) {
     return (
       <section className={styles.loadingSection} aria-busy="true">
+        <PageMeta title="Panel de productos" noIndex />
         <p className={styles.loadingText}>Verificando permisos...</p>
       </section>
     )
@@ -126,6 +128,7 @@ export default function AdminProductsPage() {
 
   return (
     <main className={styles.container}>
+      <PageMeta title="Panel de productos" noIndex />
       <AdminPageHeader />
 
       <section className={styles.catalog}>

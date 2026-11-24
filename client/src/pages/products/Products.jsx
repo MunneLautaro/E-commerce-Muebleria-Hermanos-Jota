@@ -7,8 +7,15 @@ import {
   X,
 } from "lucide-react"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { ProductList, productService } from "../../features/products"
 import { productsStyles } from "./ProductsStyles"
+
+const productsMeta = {
+  title: "Catálogo de muebles",
+  description:
+    "Explorá el catálogo de Mueblería Hermanos Jota: sofás, mesas, sillas y muebles de diseño hechos en Buenos Aires. Buscá por nombre y filtrá por precio.",
+}
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([])
@@ -87,6 +94,7 @@ export default function ProductsPage() {
   if (loading) {
     return (
       <section className={productsStyles.loadingSection}>
+        <PageMeta {...productsMeta} />
         <p className={productsStyles.loadingText}>Cargando productos...</p>
       </section>
     )
@@ -95,6 +103,7 @@ export default function ProductsPage() {
   if (error) {
     return (
       <section className={productsStyles.errorSection}>
+        <PageMeta {...productsMeta} />
         <p className={productsStyles.errorText}>{error}</p>
       </section>
     )
@@ -102,6 +111,7 @@ export default function ProductsPage() {
 
   return (
     <main className={productsStyles.container}>
+      <PageMeta {...productsMeta} />
       <header className={productsStyles.header}>
         <p className={productsStyles.eyebrow}>
           Hermanos Jota · Diseño para durar

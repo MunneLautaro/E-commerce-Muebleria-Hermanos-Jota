@@ -2,6 +2,9 @@ import { screen } from "@testing-library/react"
 import { renderWithProviders } from "../../test/renderWithProviders"
 import NotFoundPage from "./NotFoundPage"
 
+const getMeta = (name) =>
+  document.head.querySelector(`meta[name="${name}"]`)
+
 describe("NotFoundPage", () => {
   test("muestra el título y la descripción por defecto", () => {
     renderWithProviders(<NotFoundPage />)
@@ -23,6 +26,15 @@ describe("NotFoundPage", () => {
       screen.getByRole("heading", { level: 1, name: "Producto no encontrado" }),
     ).toBeInTheDocument()
     expect(screen.getByText("No está.")).toBeInTheDocument()
+  })
+
+  test("pide no indexar la página y usa el título en la pestaña", () => {
+    renderWithProviders(<NotFoundPage title="Producto no encontrado" />)
+
+    expect(document.title).toBe(
+      "Producto no encontrado | Mueblería Hermanos Jota",
+    )
+    expect(getMeta("robots")).toHaveAttribute("content", "noindex, nofollow")
   })
 
   test("ofrece volver al inicio y ver la colección", () => {

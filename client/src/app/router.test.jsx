@@ -27,6 +27,15 @@ describe("AppRouter", () => {
     ).toBeInTheDocument()
   })
 
+  test("marca /contact como URL canónica de las dos rutas de contacto", () => {
+    renderRoute("/contacto")
+
+    expect(document.title).toBe("Contacto | Mueblería Hermanos Jota")
+    expect(
+      document.head.querySelector('link[rel="canonical"]'),
+    ).toHaveAttribute("href", `${globalThis.location.origin}/contact`)
+  })
+
   test("no redirige al inicio ante una ruta inexistente", () => {
     renderRoute("/admin/algo/raro")
 
