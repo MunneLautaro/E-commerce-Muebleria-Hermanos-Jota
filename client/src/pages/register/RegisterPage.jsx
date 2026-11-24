@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { RegisterForm, useAuth } from "../../features/auth"
+import { GoogleAuthProvider, RegisterForm, useAuth } from "../../features/auth"
 import { registerPageStyles as s } from "./RegisterPageStyles"
 
 export default function RegisterPage() {
@@ -34,7 +34,9 @@ export default function RegisterPage() {
               Todos los campos son necesarios para poder gestionar tus pedidos.
             </p>
           </div>
-          <RegisterForm />
+          <GoogleAuthProvider>
+            <RegisterForm />
+          </GoogleAuthProvider>
         </div>
 
         <aside className={s.aside}>
