@@ -2,18 +2,35 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { useCart } from "../../features/cart"
 import {
   productOptionalFields,
   productService,
 } from "../../features/products"
+import NotFoundPage from "../notFound/NotFoundPage"
 import { productDetailStyles } from "./ProductDetailStyles"
+
+const NOT_FOUND_STATUSES = new Set([400, 404])
 
 const formatPrice = new Intl.NumberFormat("es-AR", {
   style: "currency",
   currency: "ARS",
   maximumFractionDigits: 0,
 })
+
+const MAX_DESCRIPTION_LENGTH = 155
+
+const buildProductDescription = ({ nombre, descripcion }) => {
+  const text = descripcion?.trim().replaceAll(/\s+/g, " ")
+
+  if (!text) {
+    return `Conocé ${nombre} en Mueblería Hermanos Jota, muebles de diseño hechos en Buenos Aires.`
+  }
+  if (text.length <= MAX_DESCRIPTION_LENGTH) return text
+
+  return `${text.slice(0, MAX_DESCRIPTION_LENGTH - 1).trimEnd()}…`
+}
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -22,6 +39,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [notFound, setNotFound] = useState(false)
   const [quantity, setQuantity] = useState(1)
 
   useEffect(() => {
@@ -31,6 +49,7 @@ export default function ProductDetail() {
       setLoading(true)
       setProduct(null)
       setError("")
+      setNotFound(false)
       setQuantity(1)
 
       try {
@@ -39,14 +58,18 @@ export default function ProductDetail() {
         if (!isActive) return
 
         if (!data) {
-          throw new Error("El producto no existe")
+          setNotFound(true)
+          return
         }
 
         setProduct(data)
       } catch (error) {
-        console.error(error)
+        if (!isActive) return
 
-        if (isActive) {
+        if (NOT_FOUND_STATUSES.has(error.status)) {
+          setNotFound(true)
+        } else {
+          console.error(error)
           setProduct(null)
           setError("No se pudo cargar el producto.")
           toast.error("No se pudo cargar el producto.")
@@ -100,6 +123,7 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <section className={productDetailStyles.loadingSection}>
+        <PageMeta title="Cargando producto" />
         <p className={productDetailStyles.loadingText}>
           Cargando producto...
         </p>
@@ -107,9 +131,19 @@ export default function ProductDetail() {
     )
   }
 
+  if (notFound) {
+    return (
+      <NotFoundPage
+        title="Producto no encontrado"
+        description="El producto que buscás no existe o ya no está disponible. Podés seguir explorando el resto de nuestra colección."
+      />
+    )
+  }
+
   if (error) {
     return (
       <section className={productDetailStyles.errorSection}>
+        <PageMeta title="No se pudo cargar el producto" noIndex />
         <p className={productDetailStyles.errorText}>{error}</p>
       </section>
     )
@@ -121,6 +155,11 @@ export default function ProductDetail() {
 
   return (
     <section className={productDetailStyles.container}>
+      <PageMeta
+        title={product.nombre}
+        description={buildProductDescription(product)}
+        canonicalPath={`/productos/${id}`}
+      />
       <div className={productDetailStyles.grid}>
         <div className={productDetailStyles.imageWrapper}>
           <img

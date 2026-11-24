@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { useAuth } from "../../features/auth"
 import {
   ProductConfirmationModal,
@@ -24,6 +25,7 @@ const initialProduct = {
 export default function CreateProductPage() {
   const { user, loading } = useAuth()
   const { id } = useParams()
+  const navigate = useNavigate()
   const isEditing = Boolean(id)
   const [initialValues, setInitialValues] = useState(initialProduct)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,6 +64,8 @@ export default function CreateProductPage() {
     }
   }, [id])
 
+  const pageTitle = isEditing ? "Editar producto" : "Crear producto"
+
   const handleSubmit = (payload) => {
     if (isSubmitting) return
 
@@ -79,9 +83,9 @@ export default function CreateProductPage() {
       } else {
         await productService.createProduct(pendingPayload)
         toast.success("Producto creado correctamente.")
-        setInitialValues(initialProduct)
       }
       setPendingPayload(null)
+      navigate("/admin")
     } catch (error) {
       toast.error(
         error.message ||
@@ -95,6 +99,7 @@ export default function CreateProductPage() {
   if (loading || isLoadingProduct) {
     return (
       <section className={styles.loadingSection} aria-busy="true">
+        <PageMeta title={pageTitle} noIndex />
         <p className={styles.loadingText}>
           {loading ? "Verificando permisos..." : "Cargando producto..."}
         </p>
@@ -107,6 +112,7 @@ export default function CreateProductPage() {
 
   return (
     <section className={styles.container}>
+      <PageMeta title={pageTitle} noIndex />
       <Link to="/admin" className={styles.backLink}>
         <ArrowLeft size={17} aria-hidden="true" />
         Volver al panel
@@ -114,9 +120,7 @@ export default function CreateProductPage() {
 
       <header className={styles.header}>
         <p className={styles.eyebrow}>Panel de administración</p>
-        <h1 className={styles.title}>
-          {isEditing ? "Editar producto" : "Crear producto"}
-        </h1>
+        <h1 className={styles.title}>{pageTitle}</h1>
         <p className={styles.description}>
           {isEditing
             ? "Actualizá la información y confirmá los cambios antes de guardarlos."

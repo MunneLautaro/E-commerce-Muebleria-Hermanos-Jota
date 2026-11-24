@@ -61,7 +61,6 @@ const productSchema = new mongoose.Schema(
     imagenUrl: {
       type: String,
       required: true,
-      default: "",
       trim: true,
       maxlength: 2048,
       validate: {
