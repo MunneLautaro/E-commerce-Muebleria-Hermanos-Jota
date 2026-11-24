@@ -69,7 +69,7 @@ Toda página lleva `PageMeta` de `client/src/components/PageMeta/PageMeta.jsx` c
 <PageMeta title="Nosotros" description="Conocé la historia del taller..." />
 ```
 
-Las páginas públicas llevan `title` y `description` propios. Las privadas, las de admin y las de error llevan `noIndex`. Las reglas completas (largo de títulos y descripciones, URL canónica, qué no poner en `index.html` y cómo testearlo) están en el skill `seo-pagina`: seguilo para este paso.
+Las páginas públicas llevan `title` y `description` propios. Las privadas, las de admin y las de error llevan `noIndex`. Las reglas completas (largo de títulos y descripciones, URL canónica, robots.txt, qué no poner en `index.html` y cómo testearlo) están en el skill `seo-pagina`: seguilo para este paso.
 
 ## 3. Si la página consume la API
 

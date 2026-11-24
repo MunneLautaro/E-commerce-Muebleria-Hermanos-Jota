@@ -60,7 +60,9 @@ No instales `react-helmet` ni `react-helmet-async`. El primero está abandonado 
 
 `noIndex` va en: login, registro, todo `/admin`, la 404, los estados de error y cualquier página que dependa de la sesión del usuario (carrito, mis pedidos, perfil).
 
-Si en algún momento se agrega un `robots.txt`, no bloquees en él páginas que tienen `noIndex`. Si el bot no puede rastrearlas, tampoco lee el `noindex`.
+Además, `/admin` está bloqueado en `client/public/robots.txt`. Vite lo copia a la raíz del build, y Vercel lo sirve antes de aplicar el rewrite a `index.html` de `client/vercel.json`. Si agregás otra sección privada con prefijo propio, que no aporta nada a los buscadores, sumá su `Disallow`.
+
+No bloquees en `robots.txt` las páginas que solo necesitan `noIndex` (login, registro, 404). Si el bot no puede rastrearlas, tampoco lee el `noindex`, y la URL puede seguir apareciendo en los resultados si otro sitio la enlaza.
 
 ### URL canónica
 
