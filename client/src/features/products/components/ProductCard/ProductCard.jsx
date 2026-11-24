@@ -21,6 +21,10 @@ export const ProductCard = ({ product, compact = false }) => {
         <img
           src={product.imagenUrl}
           alt={product.nombre}
+          width={800}
+          height={800}
+          loading="lazy"
+          decoding="async"
           className={productCardStyles.image(compact)}
         />
 
