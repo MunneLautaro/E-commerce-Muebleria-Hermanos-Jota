@@ -39,24 +39,24 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <main className={homeStyles.loadingContainer}>
+      <div className={homeStyles.loadingContainer}>
         <PageMeta description={homeDescription} />
         <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
-      </main>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <main className={homeStyles.errorContainer}>
+      <div className={homeStyles.errorContainer}>
         <PageMeta description={homeDescription} />
         <p className={homeStyles.errorText}>{error}</p>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className={homeStyles.container}>
+    <div className={homeStyles.container}>
       <PageMeta description={homeDescription} />
       <section className={homeStyles.heroSection}>
         <div className={homeStyles.heroContent}>
@@ -134,6 +134,6 @@ export default function HomePage() {
         <div><p className={homeStyles.eyebrow}>¿Tenés un proyecto en mente?</p><h2 className={homeStyles.ctaTitle}>Hagámoslo realidad.</h2></div>
         <Link to="/contact" className={homeStyles.ctaButton}>Contactanos</Link>
       </section>
-    </main>
+    </div>
   )
 }

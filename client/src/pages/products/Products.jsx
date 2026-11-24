@@ -110,7 +110,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <main className={productsStyles.container}>
+    <div className={productsStyles.container}>
       <PageMeta {...productsMeta} />
       <header className={productsStyles.header}>
         <p className={productsStyles.eyebrow}>
@@ -291,6 +291,6 @@ export default function ProductsPage() {
           <ChevronRight size={18} aria-hidden="true" />
         </button>
       </nav>
-    </main>
+    </div>
   )
 }
