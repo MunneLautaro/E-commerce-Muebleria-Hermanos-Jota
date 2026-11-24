@@ -3,11 +3,30 @@ import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { ProductList } from "../../features/products/components/ProductList/ProductList"
+import { ProductListSkeleton } from "../../features/products/components/ProductListSkeleton/ProductListSkeleton"
 import { fetchApi } from "../../services/api"
 import { homeStyles } from "./HomeStyles"
 
 const homeDescription =
   "Muebles de diseño hechos en Buenos Aires desde 1998. Materiales nobles, producción local y atención personalizada para living, comedor y espacios de trabajo."
+
+const FeaturedProducts = ({ loading, error, products }) => {
+  if (loading) {
+    return (
+      <ProductListSkeleton
+        count={4}
+        compact
+        label="Cargando productos destacados..."
+      />
+    )
+  }
+
+  if (error) {
+    return <p className={homeStyles.errorText}>{error}</p>
+  }
+
+  return <ProductList products={products} compact />
+}
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -37,26 +56,8 @@ export default function HomePage() {
     void fetchFeaturedProducts()
   }, [])
 
-  if (loading) {
-    return (
-      <main className={homeStyles.loadingContainer}>
-        <PageMeta description={homeDescription} />
-        <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
-      </main>
-    )
-  }
-
-  if (error) {
-    return (
-      <main className={homeStyles.errorContainer}>
-        <PageMeta description={homeDescription} />
-        <p className={homeStyles.errorText}>{error}</p>
-      </main>
-    )
-  }
-
   return (
-    <main className={homeStyles.container}>
+    <div className={homeStyles.container}>
       <PageMeta description={homeDescription} />
       <section className={homeStyles.heroSection}>
         <div className={homeStyles.heroContent}>
@@ -127,13 +128,17 @@ export default function HomePage() {
           <Link to="/productos" className={homeStyles.viewAllLink}>Explorar colección →</Link>
         </div>
 
-        <ProductList products={featuredProducts} compact />
+        <FeaturedProducts
+          loading={loading}
+          error={error}
+          products={featuredProducts}
+        />
       </section>
 
       <section className={homeStyles.contactCta}>
         <div><p className={homeStyles.eyebrow}>¿Tenés un proyecto en mente?</p><h2 className={homeStyles.ctaTitle}>Hagámoslo realidad.</h2></div>
         <Link to="/contact" className={homeStyles.ctaButton}>Contactanos</Link>
       </section>
-    </main>
+    </div>
   )
 }

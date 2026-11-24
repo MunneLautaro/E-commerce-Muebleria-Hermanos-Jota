@@ -37,6 +37,16 @@ describe("ProductCard", () => {
       )
     })
 
+    test("carga la imagen en diferido y con dimensiones fijas", () => {
+      renderCard()
+
+      const image = screen.getByRole("img", { name: "Mesa Roble" })
+      expect(image).toHaveAttribute("loading", "lazy")
+      expect(image).toHaveAttribute("decoding", "async")
+      expect(image).toHaveAttribute("width", "800")
+      expect(image).toHaveAttribute("height", "800")
+    })
+
     test("muestra la descripción", () => {
       renderCard()
 
