@@ -7,7 +7,10 @@ import {
   productOptionalFields,
   productService,
 } from "../../features/products"
+import NotFoundPage from "../notFound/NotFoundPage"
 import { productDetailStyles } from "./ProductDetailStyles"
+
+const NOT_FOUND_STATUSES = new Set([400, 404])
 
 const formatPrice = new Intl.NumberFormat("es-AR", {
   style: "currency",
@@ -22,6 +25,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [notFound, setNotFound] = useState(false)
   const [quantity, setQuantity] = useState(1)
 
   useEffect(() => {
@@ -31,6 +35,7 @@ export default function ProductDetail() {
       setLoading(true)
       setProduct(null)
       setError("")
+      setNotFound(false)
       setQuantity(1)
 
       try {
@@ -39,14 +44,18 @@ export default function ProductDetail() {
         if (!isActive) return
 
         if (!data) {
-          throw new Error("El producto no existe")
+          setNotFound(true)
+          return
         }
 
         setProduct(data)
       } catch (error) {
-        console.error(error)
+        if (!isActive) return
 
-        if (isActive) {
+        if (NOT_FOUND_STATUSES.has(error.status)) {
+          setNotFound(true)
+        } else {
+          console.error(error)
           setProduct(null)
           setError("No se pudo cargar el producto.")
           toast.error("No se pudo cargar el producto.")
@@ -104,6 +113,15 @@ export default function ProductDetail() {
           Cargando producto...
         </p>
       </section>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <NotFoundPage
+        title="Producto no encontrado"
+        description="El producto que buscás no existe o ya no está disponible. Podés seguir explorando el resto de nuestra colección."
+      />
     )
   }
 
