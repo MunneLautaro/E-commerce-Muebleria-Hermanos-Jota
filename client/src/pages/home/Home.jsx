@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { ProductList } from "../../features/products/components/ProductList/ProductList"
 import { fetchApi } from "../../services/api"
 import { homeStyles } from "./HomeStyles"
+
+const homeDescription =
+  "Muebles de diseño hechos en Buenos Aires desde 1998. Materiales nobles, producción local y atención personalizada para living, comedor y espacios de trabajo."
 
 export default function HomePage() {
   const [featuredProducts, setFeaturedProducts] = useState([])
@@ -36,6 +40,7 @@ export default function HomePage() {
   if (loading) {
     return (
       <main className={homeStyles.loadingContainer}>
+        <PageMeta description={homeDescription} />
         <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
       </main>
     )
@@ -44,6 +49,7 @@ export default function HomePage() {
   if (error) {
     return (
       <main className={homeStyles.errorContainer}>
+        <PageMeta description={homeDescription} />
         <p className={homeStyles.errorText}>{error}</p>
       </main>
     )
@@ -51,6 +57,7 @@ export default function HomePage() {
 
   return (
     <main className={homeStyles.container}>
+      <PageMeta description={homeDescription} />
       <section className={homeStyles.heroSection}>
         <div className={homeStyles.heroContent}>
           <div className={homeStyles.heroCopy}>

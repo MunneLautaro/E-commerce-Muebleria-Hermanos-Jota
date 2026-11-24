@@ -48,6 +48,15 @@ const confirmSave = async (user, submitLabel) => {
 }
 
 describe("CreateProductPage", () => {
+  test("usa el título de creación y pide no indexar la página", () => {
+    renderEditor("/admin/crear-producto")
+
+    expect(document.title).toBe("Crear producto | Mueblería Hermanos Jota")
+    expect(
+      document.head.querySelector('meta[name="robots"]'),
+    ).toHaveAttribute("content", "noindex, nofollow")
+  })
+
   test("al crear un producto redirige al panel", async () => {
     let createdBody
     server.use(

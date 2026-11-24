@@ -1,3 +1,4 @@
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { ContactForm } from "../../features/contacto/components/Form/ContactForm"
 import { datosContacto } from "../../datos/contacto"
 
@@ -17,6 +18,11 @@ const contactLinks = [
 export default function ContactPage() {
   return (
     <div className="space-y-16 py-4 md:space-y-20 md:py-8">
+      <PageMeta
+        title="Contacto"
+        description="Contanos qué mueble estás imaginando. Escribinos por email o WhatsApp, o visitá nuestra Casa Taller en Av. San Juan 2847, CABA."
+        canonicalPath="/contact"
+      />
       <header className="grid gap-8 md:grid-cols-[1fr_auto] md:items-end">
         <div className="max-w-2xl space-y-5">
           <p className="font-medium text-sm uppercase tracking-cta text-salvia">

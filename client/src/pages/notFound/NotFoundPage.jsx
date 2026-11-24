@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { notFoundStyles as s } from "./NotFoundPageStyles"
 
 export default function NotFoundPage({
@@ -7,6 +8,7 @@ export default function NotFoundPage({
 }) {
   return (
     <section className={s.section} aria-labelledby="not-found-title">
+      <PageMeta title={title} description={description} noIndex />
       <p className={s.code} aria-hidden="true">
         404
       </p>

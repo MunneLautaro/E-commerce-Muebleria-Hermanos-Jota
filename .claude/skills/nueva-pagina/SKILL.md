@@ -1,6 +1,6 @@
 ---
 name: nueva-pagina
-description: Crea una página nueva en el cliente React de Mueblería Hermanos Jota siguiendo las convenciones del proyecto (carpeta en pages/, archivo de estilos Tailwind con los tokens de marca, ruta en router.jsx, servicio en features/ si consume la API, guard de admin si corresponde y tests con Vitest + Testing Library + MSW). Usalo siempre que el usuario pida agregar una página, pantalla, vista, sección navegable o ruta nueva en el frontend/client, por ejemplo "hacé una página de nosotros", "agregá la vista de mis pedidos", "necesito una pantalla de admin para usuarios" o "sumá /favoritos", aunque no diga la palabra "página".
+description: Crea una página nueva en el cliente React de Mueblería Hermanos Jota siguiendo las convenciones del proyecto (carpeta en pages/, archivo de estilos Tailwind con los tokens de marca, ruta en router.jsx, metadatos de SEO con PageMeta, servicio en features/ si consume la API, guard de admin si corresponde y tests con Vitest + Testing Library + MSW). Usalo siempre que el usuario pida agregar una página, pantalla, vista, sección navegable o ruta nueva en el frontend/client, por ejemplo "hacé una página de nosotros", "agregá la vista de mis pedidos", "necesito una pantalla de admin para usuarios" o "sumá /favoritos", aunque no diga la palabra "página".
 ---
 
 # Nueva página del cliente
@@ -60,6 +60,16 @@ Botones habituales:
 - Secundario: `inline-flex items-center justify-center rounded-marca border border-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro`
 
 El diseño es mobile first: la base es para mobile y se amplía con `sm:`/`md:`/`lg:`.
+
+### Metadatos (SEO)
+
+Toda página lleva `PageMeta` de `client/src/components/PageMeta/PageMeta.jsx` como primer hijo del elemento raíz, en **cada** `return` que renderiza algo (carga, error y éxito):
+
+```jsx
+<PageMeta title="Nosotros" description="Conocé la historia del taller..." />
+```
+
+Las páginas públicas llevan `title` y `description` propios. Las privadas, las de admin y las de error llevan `noIndex`. Las reglas completas (largo de títulos y descripciones, URL canónica, robots.txt, qué no poner en `index.html` y cómo testearlo) están en el skill `seo-pagina`: seguilo para este paso.
 
 ## 3. Si la página consume la API
 
@@ -129,6 +139,7 @@ Casos mínimos:
 - Servicio: pide el path y los parámetros correctos y propaga el `status` del error. Copiá el helper `captureRequest` de `client/src/features/products/services/productService.test.js`.
 - Formulario: después de guardar con éxito redirige, y si falla se queda. Para comprobar la redirección, registrá la ruta destino en el test con un elemento simple (`<Route path="/admin" element={<h1>Panel</h1>} />`) y esperá ese heading. Referencia: `client/src/pages/admin/CreateProductPage.test.jsx`.
 - Ruta: si agregaste lógica especial de routing, un test en `client/src/app/router.test.jsx`.
+- Metadatos: `document.title` y, según corresponda, la `description` o el `noindex`, como indica el skill `seo-pagina`.
 
 Buscá elementos por rol y nombre accesible (`getByRole("heading", { level: 1, name: ... })`), como en el resto de los tests del repo.
 
