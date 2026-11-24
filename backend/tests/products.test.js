@@ -576,3 +576,18 @@ describe("permisos de administrador en productos", () => {
     expect(stored.isActive).toBe(true)
   })
 })
+
+describe("modelo Product", () => {
+  it.each([
+    ["sin imagen", undefined],
+    ["con la imagen vacía", ""],
+  ])("rechaza un producto %s", async (_caso, imagenUrl) => {
+    const data = { ...validProductBody(), sku: "HJ-000001", imagenUrl }
+
+    await expect(Product.create(data)).rejects.toMatchObject({
+      name: "ValidationError",
+      errors: { imagenUrl: { kind: "required" } },
+    })
+    expect(await Product.countDocuments()).toBe(0)
+  })
+})

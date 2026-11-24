@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
-import { Link, Navigate, useParams } from "react-router-dom"
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "../../features/auth"
 import {
@@ -24,6 +24,7 @@ const initialProduct = {
 export default function CreateProductPage() {
   const { user, loading } = useAuth()
   const { id } = useParams()
+  const navigate = useNavigate()
   const isEditing = Boolean(id)
   const [initialValues, setInitialValues] = useState(initialProduct)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -79,9 +80,9 @@ export default function CreateProductPage() {
       } else {
         await productService.createProduct(pendingPayload)
         toast.success("Producto creado correctamente.")
-        setInitialValues(initialProduct)
       }
       setPendingPayload(null)
+      navigate("/admin")
     } catch (error) {
       toast.error(
         error.message ||
