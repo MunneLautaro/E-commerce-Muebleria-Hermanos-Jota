@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
 import { ProductList } from "../../features/products/components/ProductList/ProductList"
+import { ProductListSkeleton } from "../../features/products/components/ProductListSkeleton/ProductListSkeleton"
 import { fetchApi } from "../../services/api"
 import { homeStyles } from "./HomeStyles"
 
@@ -12,7 +13,11 @@ const homeDescription =
 const FeaturedProducts = ({ loading, error, products }) => {
   if (loading) {
     return (
-      <p className={homeStyles.loadingText}>Cargando productos destacados...</p>
+      <ProductListSkeleton
+        count={4}
+        compact
+        label="Cargando productos destacados..."
+      />
     )
   }
 
