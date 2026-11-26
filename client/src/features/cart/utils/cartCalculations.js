@@ -13,7 +13,10 @@ const isCouponEligible = (coupon, subtotal) =>
   !coupon.minimumSubtotal || subtotal > coupon.minimumSubtotal
 
 export const validateCartCoupon = (code, subtotal) => {
-  const normalizedCode = code.trim().toUpperCase()
+  const normalizedCode = String(code ?? "").trim().toUpperCase()
+  const normalizedSubtotal = Number.isFinite(Number(subtotal))
+    ? Math.max(0, Math.round(Number(subtotal)))
+    : 0
 
   if (!normalizedCode) {
     return { coupon: null, error: "Ingresá un código promocional." }
@@ -25,7 +28,7 @@ export const validateCartCoupon = (code, subtotal) => {
     return { coupon: null, error: "El código ingresado no es válido." }
   }
 
-  if (!isCouponEligible(coupon, subtotal)) {
+  if (!isCouponEligible(coupon, normalizedSubtotal)) {
     return {
       coupon: null,
       error: `${coupon.code} requiere una compra superior a ${formatCartCurrency.format(
@@ -38,19 +41,29 @@ export const validateCartCoupon = (code, subtotal) => {
 }
 
 export const calculateCartSummary = (products, couponCode = "") => {
-  const subtotal = products.reduce((sum, product) => {
+  const subtotal = Array.isArray(products)
+    ? products.reduce((sum, product) => {
     const price = Number(product.precio)
     const quantity = Number(product.quantity)
 
-    if (!Number.isFinite(price) || !Number.isFinite(quantity)) return sum
-    return sum + price * quantity
+    if (
+      !Number.isFinite(price) ||
+      price < 0 ||
+      !Number.isInteger(quantity) ||
+      quantity < 1
+    ) {
+      return sum
+    }
+    return sum + Math.round(price) * quantity
   }, 0)
+    : 0
 
   const coupon = CART_COUPONS[couponCode]
   const discount =
     coupon && isCouponEligible(coupon, subtotal)
       ? Math.round(subtotal * coupon.discountRate)
       : 0
+  const normalizedDiscount = Math.min(discount, subtotal)
   const shipping =
     subtotal > 0 && subtotal < CART_BUSINESS_RULES.freeShippingThreshold
       ? CART_BUSINESS_RULES.standardShippingCost
@@ -62,9 +75,9 @@ export const calculateCartSummary = (products, couponCode = "") => {
 
   return {
     subtotal,
-    discount,
+    discount: normalizedDiscount,
     shipping,
-    total: subtotal - discount + shipping,
+    total: Math.max(0, subtotal - normalizedDiscount + shipping),
     freeShippingRemaining,
     freeShippingProgress: Math.min(
       100,
