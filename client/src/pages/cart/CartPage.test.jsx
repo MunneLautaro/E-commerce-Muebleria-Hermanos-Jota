@@ -20,6 +20,17 @@ const product = {
   materiales: "Roble macizo",
 }
 
+const recommendationProduct = {
+  _id: "silla-1",
+  nombre: "Sillas Córdoba",
+  descripcion: "Sillas de madera maciza.",
+  precio: 85000,
+  stock: 4,
+  imagenUrl: "/sillas-cordoba.jpg",
+}
+
+const catalogProducts = [product, recommendationProduct]
+
 const CartSeed = () => {
   const { addItem } = useCart()
   const seeded = useRef(false)
@@ -33,13 +44,29 @@ const CartSeed = () => {
   return null
 }
 
-const respondWithProduct = (status = 200) =>
+const respondWithProducts = (status = 200) =>
   server.use(
-    http.get(apiUrl("/products/:id"), () =>
-      HttpResponse.json(
-        status === 200 ? product : { error: "Error interno" },
-        { status },
-      ),
+    http.get(apiUrl("/products"), () =>
+      HttpResponse.json({
+        items: [recommendationProduct],
+        pagination: { page: 1, totalPages: 1 },
+      }),
+    ),
+    http.get(apiUrl("/products/:id"), ({ params }) => {
+      if (status !== 200) {
+        return HttpResponse.json({ error: "Error interno" }, { status })
+      }
+
+      const foundProduct = catalogProducts.find(
+        ({ _id }) => _id === params.id,
+      )
+      return foundProduct
+        ? HttpResponse.json(foundProduct)
+        : HttpResponse.json(
+            { error: "Producto no encontrado" },
+            { status: 404 },
+          )
+    },
     ),
   )
 
@@ -65,12 +92,12 @@ describe("CartPage", () => {
   })
 
   test("muestra el resumen y abre el detalle del producto en un modal", async () => {
-    respondWithProduct()
+    respondWithProducts()
 
     const { user } = renderCart()
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Mi carrito" }),
+      await screen.findByRole("button", { name: "Ver detalle de Mesa Roble" }),
     ).toBeInTheDocument()
     expect(screen.getByText("Subtotal: $ 300.000")).toBeInTheDocument()
     expect(document.title).toBe("Mi carrito | Mueblería Hermanos Jota")
@@ -87,7 +114,7 @@ describe("CartPage", () => {
   })
 
   test("aumenta, disminuye y elimina productos con avisos en castellano", async () => {
-    respondWithProduct()
+    respondWithProducts()
     const successToast = vi.spyOn(toast, "success")
     const infoToast = vi.spyOn(toast, "info")
     const { user } = renderCart()
@@ -96,13 +123,17 @@ describe("CartPage", () => {
     await user.click(screen.getByRole("button", { name: "Aumentar cantidad de Mesa Roble" }))
     expect(successToast).toHaveBeenCalledWith("Se agregó 1 Mesa Roble al carrito")
     await waitFor(() =>
-      expect(screen.getByLabelText("Cantidad")).toHaveTextContent("3"),
+      expect(
+        screen.getByLabelText("Cantidad de Mesa Roble"),
+      ).toHaveTextContent("3"),
     )
 
     await user.click(screen.getByRole("button", { name: "Disminuir cantidad de Mesa Roble" }))
     expect(infoToast).toHaveBeenCalledWith("Se eliminó 1 Mesa Roble del carrito")
     await waitFor(() =>
-      expect(screen.getByLabelText("Cantidad")).toHaveTextContent("2"),
+      expect(
+        screen.getByLabelText("Cantidad de Mesa Roble"),
+      ).toHaveTextContent("2"),
     )
 
     await user.click(screen.getByRole("button", { name: "Eliminar Mesa Roble del carrito" }))
@@ -112,7 +143,7 @@ describe("CartPage", () => {
   })
 
   test("muestra un error de carga y mantiene los metadatos privados", async () => {
-    respondWithProduct(500)
+    respondWithProducts(500)
 
     renderCart()
 
@@ -124,6 +155,8 @@ describe("CartPage", () => {
   })
 
   test("invita a explorar productos cuando el carrito está vacío", async () => {
+    respondWithProducts()
+
     renderWithProviders(
       <CartProvider>
         <CartPage />
@@ -138,5 +171,67 @@ describe("CartPage", () => {
       "href",
       "/productos",
     )
+  })
+
+  test("aplica un cupón sin distinguir mayúsculas y recalcula el total", async () => {
+    respondWithProducts()
+    const successToast = vi.spyOn(toast, "success")
+    const { user } = renderCart()
+
+    await screen.findByRole("heading", { name: "Resumen de compra" })
+    await user.type(screen.getByLabelText("Código promocional"), "jOtA10")
+    await user.click(screen.getByRole("button", { name: "Aplicar" }))
+
+    expect(
+      await screen.findByText(/Cupón demostrativo JOTA10 aplicado localmente/),
+    ).toHaveTextContent(
+      "Cupón demostrativo JOTA10 aplicado localmente.",
+    )
+    expect(screen.getByLabelText("Descuento")).toHaveTextContent("30.000")
+    expect(screen.getByLabelText("Total final")).toHaveTextContent("270.000")
+    expect(successToast).toHaveBeenCalledWith(
+      expect.stringContaining("Cupón demostrativo JOTA10"),
+    )
+
+    await user.click(screen.getByRole("button", { name: "Quitar cupón JOTA10" }))
+    expect(screen.getByLabelText("Descuento")).toHaveTextContent("0")
+    expect(screen.getByLabelText("Total final")).toHaveTextContent("300.000")
+  })
+
+  test("rechaza JOTA15 si el subtotal no supera el mínimo", async () => {
+    respondWithProducts()
+    const errorToast = vi.spyOn(toast, "error")
+    const { user } = renderCart()
+
+    await screen.findByRole("heading", { name: "Resumen de compra" })
+    await user.type(screen.getByLabelText("Código promocional"), "jota15")
+    await user.click(screen.getByRole("button", { name: "Aplicar" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /JOTA15 requiere una compra superior/,
+    )
+    expect(screen.getByLabelText("Descuento")).toHaveTextContent("0")
+    expect(errorToast).toHaveBeenCalled()
+  })
+
+  test("agrega al carrito una recomendación real devuelta por el catálogo", async () => {
+    respondWithProducts()
+    const successToast = vi.spyOn(toast, "success")
+    const { user } = renderCart()
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "Agregar Sillas Córdoba al carrito",
+      }),
+    )
+
+    expect(successToast).toHaveBeenCalledWith(
+      "Se agregó 1 Sillas Córdoba al carrito",
+    )
+    expect(
+      await screen.findByRole("button", {
+        name: "Aumentar cantidad de Sillas Córdoba",
+      }),
+    ).toBeInTheDocument()
   })
 })
