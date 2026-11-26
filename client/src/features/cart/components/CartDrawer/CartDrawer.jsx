@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react"
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react"
+import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useCart } from "../../hooks/useCart"
 import { fetchApi } from "../../../../services/api"
@@ -14,7 +15,21 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
   const handleRemoveItem = (product) => {
     removeItem(product._id)
-    toast.info(`${product.nombre} eliminado del carrito`)
+    toast.info(`Se eliminó ${product.nombre} del carrito`)
+  }
+
+  const handleDecrease = (product) => {
+    updateQuantity(product._id, -1, product.stock)
+    if (product.quantity <= 1) {
+      toast.info(`Se eliminó ${product.nombre} del carrito`)
+      return
+    }
+    toast.info(`Se eliminó 1 ${product.nombre} del carrito`)
+  }
+
+  const handleIncrease = (product) => {
+    updateQuantity(product._id, 1, product.stock)
+    toast.success(`Se agregó 1 ${product.nombre} al carrito`)
   }
 
   useEffect(() => {
@@ -113,9 +128,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
               <div className={cartDrawerStyles.quantityControls}>
                 <button
                   type="button"
-                  onClick={() =>
-                    updateQuantity(product._id, -1, product.stock)
-                  }
+                  onClick={() => handleDecrease(product)}
                   className={cartDrawerStyles.quantityButton}
                   aria-label={`Quitar una unidad de ${product.nombre}`}
                 >
@@ -129,9 +142,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
                 <button
                   type="button"
                   disabled={product.quantity >= product.stock}
-                  onClick={() =>
-                    updateQuantity(product._id, 1, product.stock)
-                  }
+                  onClick={() => handleIncrease(product)}
                   className={`${cartDrawerStyles.quantityButton} disabled:cursor-not-allowed disabled:opacity-40`}
                   aria-label={`Agregar una unidad de ${product.nombre}`}
                 >
@@ -195,6 +206,15 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
         <div className={cartDrawerStyles.content}>
           {renderContent()}
+        </div>
+        <div className={cartDrawerStyles.footer}>
+          <Link
+            to="/carrito"
+            className={cartDrawerStyles.viewCartButton}
+            onClick={onClose}
+          >
+            Ver carrito
+          </Link>
         </div>
       </aside>
     </>

@@ -16,6 +16,9 @@ export const cartDrawerStyles = {
   closeButton:
     "inline-flex h-9 w-9 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro",
   content: "flex-1 overflow-y-auto px-5 py-5",
+  footer: "border-t border-linea px-5 py-4",
+  viewCartButton:
+    "inline-flex w-full items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
   loadingText: "text-sm text-ink-soft",
   errorText: "text-sm text-error",
   emptyContainer:
