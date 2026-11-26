@@ -19,6 +19,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
   }
 
   const handleDecrease = (product) => {
+    if (!Number.isInteger(product.quantity) || product.quantity < 1) return
     updateQuantity(product._id, -1, product.stock)
     if (product.quantity <= 1) {
       toast.info(`Se eliminó ${product.nombre} del carrito`)
@@ -28,6 +29,11 @@ export const CartDrawer = ({ isOpen, onClose }) => {
   }
 
   const handleIncrease = (product) => {
+    const stock = Number(product.stock)
+    if (!Number.isFinite(stock) || product.quantity >= stock) {
+      toast.error(`No hay más unidades disponibles de ${product.nombre}.`)
+      return
+    }
     updateQuantity(product._id, 1, product.stock)
     toast.success(`Se agregó 1 ${product.nombre} al carrito`)
   }

@@ -4,6 +4,14 @@ export const cartPageStyles = {
   title: "mt-2 font-display text-3xl text-siena md:text-4xl",
   intro: "mt-3 max-w-2xl text-sm leading-7 text-ink-soft",
   layout: "mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]",
+  mobileSummary:
+    "mb-4 flex items-center justify-between gap-4 rounded-marca border border-linea bg-crema px-4 py-3 shadow-tarjeta lg:hidden",
+  mobileSummaryLabel: "text-xs text-ink-soft",
+  mobileSummaryValue: "text-lg font-medium text-siena",
+  trustSection:
+    "mt-5 border-t border-linea pt-4 text-xs leading-5 text-ink-soft",
+  trustLink:
+    "font-medium text-siena underline decoration-siena/30 underline-offset-4 hover:text-ink",
   itemList: "space-y-4",
   itemCard: (isRemoving, hasFeedback) =>
     `grid gap-4 rounded-marca border border-linea bg-white p-4 shadow-tarjeta transition-all duration-200 sm:grid-cols-[8rem_minmax(0,1fr)_auto] sm:items-center ${

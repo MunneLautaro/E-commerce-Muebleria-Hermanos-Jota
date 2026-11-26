@@ -72,4 +72,19 @@ describe("cartCalculations", () => {
       error: "El código ingresado no es válido.",
     })
   })
+
+  test("ignora cantidades inválidas y limita el descuento al subtotal", () => {
+    const summary = calculateCartSummary([
+      { precio: 100000, quantity: 0 },
+      { precio: -100, quantity: 2 },
+      { precio: 50000, quantity: 1.5 },
+    ], "JOTA10")
+
+    expect(summary).toMatchObject({
+      subtotal: 0,
+      discount: 0,
+      shipping: 0,
+      total: 0,
+    })
+  })
 })

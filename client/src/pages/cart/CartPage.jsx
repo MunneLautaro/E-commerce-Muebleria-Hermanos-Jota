@@ -21,12 +21,19 @@ import {
   validateCartCoupon,
 } from "../../features/cart"
 import { productOptionalFields, productService } from "../../features/products"
+import { datosContacto } from "../../datos/contacto"
 import { cartPageStyles as s } from "./CartPageStyles"
 
 const cartPageMeta = { title: "Mi carrito", noIndex: true }
 
 export default function CartPage() {
-  const { cart, addItem, updateQuantity, removeItem } = useCart()
+  const {
+    cart,
+    addItem,
+    updateQuantity,
+    setItemQuantity,
+    removeItem,
+  } = useCart()
   const [products, setProducts] = useState([])
   const [cartProductsLoaded, setCartProductsLoaded] = useState(false)
   const [error, setError] = useState("")
@@ -64,15 +71,31 @@ export default function CartPage() {
       setError("")
 
       try {
-        const cartProducts = await Promise.all(
+        const cartProducts = (await Promise.all(
           cart.map(async ({ id, quantity }) => {
             const product = await productService.getProductById(id)
             if (!product) {
               throw new Error(`No se encontró el producto ${id} del carrito.`)
             }
-            return { ...product, quantity }
+            const stock = Number(product.stock)
+            const safeQuantity = Number.isInteger(quantity) ? quantity : 0
+
+            if (
+              !Number.isFinite(stock) ||
+              stock <= 0 ||
+              safeQuantity <= 0
+            ) {
+              setItemQuantity(id, 0, stock)
+              return null
+            }
+
+            const clampedQuantity = Math.min(safeQuantity, stock)
+            if (clampedQuantity !== quantity) {
+              setItemQuantity(id, clampedQuantity, stock)
+            }
+            return { ...product, quantity: clampedQuantity }
           }),
-        )
+        )).filter(Boolean)
 
         if (isActive) {
           setProducts(cartProducts)
@@ -98,7 +121,7 @@ export default function CartPage() {
     return () => {
       isActive = false
     }
-  }, [cart])
+  }, [cart, setItemQuantity])
 
   useEffect(() => {
     let isActive = true
@@ -346,7 +369,21 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className={s.layout}>
+        <>
+          <div className={s.mobileSummary} aria-label="Resumen compacto del carrito">
+            <div>
+              <p className={s.mobileSummaryLabel}>Total final</p>
+              <p className={s.mobileSummaryValue}>
+                {formatCartCurrency.format(summary.total)}
+              </p>
+            </div>
+            <p className={s.mobileSummaryLabel}>
+              {summary.qualifiesForFreeShipping
+                ? "Envío gratis"
+                : `${formatCartCurrency.format(summary.freeShippingRemaining)} para envío gratis`}
+            </p>
+          </div>
+          <div className={s.layout}>
           <ul className={s.itemList} aria-label="Productos en tu carrito">
             {products.map((product) => {
               const isRemoving = removingProductId === product._id
@@ -581,8 +618,21 @@ export default function CartPage() {
             <Link to="/productos" className={s.continueLink}>
               Seguir comprando
             </Link>
+            <div className={s.trustSection}>
+              <p>Consultas y atención: {datosContacto.horario}</p>
+              <p>
+                <a className={s.trustLink} href={`tel:${datosContacto.telefono}`}>
+                  {datosContacto.telefono}
+                </a>
+                {" · "}
+                <a className={s.trustLink} href={`mailto:${datosContacto.email}`}>
+                  {datosContacto.email}
+                </a>
+              </p>
+            </div>
           </aside>
-        </div>
+          </div>
+        </>
       )}
 
       <section

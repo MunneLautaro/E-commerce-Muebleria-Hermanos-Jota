@@ -84,6 +84,7 @@ const getMeta = (name) =>
 
 describe("CartPage", () => {
   beforeEach(() => {
+    window.localStorage.clear()
     vi.spyOn(console, "error").mockImplementation(() => {})
   })
 
