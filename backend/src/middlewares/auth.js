@@ -1,3 +1,4 @@
+
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose"
 import User from "../models/user.model.js"
@@ -19,7 +20,9 @@ export const requireAuth = (req, res, next) => {
     : null
 
   if (!token) {
-    return res.status(401).json({ error: "Token de autenticación requerido" })
+    return res.status(401).json({
+      error: "Token de autenticación requerido",
+    })
   }
 
   try {
@@ -30,7 +33,9 @@ export const requireAuth = (req, res, next) => {
       error.name === "TokenExpiredError" ||
       error.name === "JsonWebTokenError"
     ) {
-      return res.status(401).json({ error: "Token inválido o expirado" })
+      return res.status(401).json({
+        error: "Token inválido o expirado",
+      })
     }
 
     next(error)
@@ -40,18 +45,21 @@ export const requireAuth = (req, res, next) => {
 export const requireAdmin = async (req, res, next) => {
   try {
     const userId = req.user?.sub
+
     const user = mongoose.isValidObjectId(userId)
       ? await User.findById(userId).select("role isActive").lean()
       : null
 
     if (!user?.isActive) {
-      return res.status(401).json({ error: "Usuario no disponible" })
+      return res.status(401).json({
+        error: "Usuario no disponible",
+      })
     }
 
     if (user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ error: "Se requieren permisos de administrador" })
+      return res.status(403).json({
+        error: "Se requieren permisos de administrador",
+      })
     }
 
     next()
