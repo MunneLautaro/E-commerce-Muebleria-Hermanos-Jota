@@ -36,8 +36,10 @@ export const cartDrawerStyles = {
   itemName: "truncate font-medium text-ink",
   quantityControls: "mt-2 flex items-center gap-2",
   quantityButton:
-    "inline-flex h-8 w-8 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro",
+    "inline-flex h-8 w-8 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro disabled:cursor-not-allowed disabled:opacity-40",
+  quantityIcon: "h-4 w-4",
   quantityText: "min-w-9 text-center text-sm font-medium text-ink-soft",
+  stockText: "mt-1 text-xs text-ink-soft",
   removeButton:
     "inline-flex h-10 w-10 items-center justify-center rounded-full border border-linea text-error transition-colors hover:bg-error-bg",
 }
