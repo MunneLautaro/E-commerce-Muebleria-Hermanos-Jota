@@ -1,40 +1,42 @@
-
-import express from "express"
+import { Router } from "express"
 import {
   createPurchaseOrder,
   getAllPurchaseOrders,
   getPurchaseOrdersByBuyer,
 } from "../controllers/purchaseOrder.controller.js"
-
 import {
+  requireActiveUser,
+  requireAdmin,
+  requireAuth,
+  requireOwnerOrAdmin,
+} from "../middlewares/auth.js"
+import { purchaseOrderWriteRateLimit } from "../middlewares/rateLimit.js"
+import { validate, validateQuery } from "../middlewares/validate.js"
+import { createPurchaseOrderSchema } from "../schemas/purchaseOrder.schema.js"
+import { purchaseOrderQuerySchema } from "../schemas/purchaseOrder.query.schema.js"
+
+const router = Router()
+
+router.post(
+  "/",
+  requireAuth,
+  requireActiveUser,
+  purchaseOrderWriteRateLimit,
+  validate(createPurchaseOrderSchema),
+  createPurchaseOrder,
+)
+router.get(
+  "/",
   requireAuth,
   requireAdmin,
-} from "../middlewares/auth.js"
-
-const router = express.Router()
-
-// Crear una orden de compra: requiere autenticación
-router.post("/", requireAuth, createPurchaseOrder)
-
-// Obtener todas las órdenes: solamente administradores
-router.get("/", requireAuth, requireAdmin, getAllPurchaseOrders)
-
-// Ver las órdenes propias o las de otro usuario si es administrador
-const authorizeBuyerOrAdmin = (req, res, next) => {
-  const authenticatedUserId = req.user.sub
-  const requestedBuyerId = req.params.buyerId
-
-  if (authenticatedUserId === requestedBuyerId) {
-    return next()
-  }
-
-  return requireAdmin(req, res, next)
-}
-
+  validateQuery(purchaseOrderQuerySchema),
+  getAllPurchaseOrders,
+)
 router.get(
-  "/user/:buyerId",
+  "/usuario/:compradorId",
   requireAuth,
-  authorizeBuyerOrAdmin,
+  requireOwnerOrAdmin("compradorId"),
+  validateQuery(purchaseOrderQuerySchema),
   getPurchaseOrdersByBuyer,
 )
 
