@@ -1,4 +1,3 @@
-
 import express from "express"
 import mongoose from "mongoose"
 import { logger } from "./middlewares/logger.js"
@@ -28,9 +27,7 @@ app.get("/ready", async (req, res) => {
   } catch (error) {
     console.error("Error conectando a MongoDB:", error.message)
   }
-
   const ready = mongoose.connection.readyState === 1
-
   return res.status(ready ? 200 : 503).json({
     status: ready ? "ready" : "not_ready",
     database: ready ? "connected" : "disconnected",
@@ -43,16 +40,12 @@ app.use(cors(corsOptions))
 
 app.use("/api", async (req, res, next) => {
   if (req.method === "OPTIONS") return next()
-
   try {
     await connectDB()
     next()
   } catch (error) {
     console.error("Error conectando a MongoDB:", error.message)
-
-    res.status(503).json({
-      error: "Base de datos no disponible",
-    })
+    res.status(503).json({ error: "Base de datos no disponible" })
   }
 })
 
@@ -61,12 +54,10 @@ app.use("/api/productos", productRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/contacto", contactRoutes)
-app.use("/api/purchase-orders", purchaseOrderRoutes)
+app.use("/api/ordenes", purchaseOrderRoutes)
 
 app.use((req, res) => {
-  res.status(404).json({
-    error: "Ruta no encontrada",
-  })
+  res.status(404).json({ error: "Ruta no encontrada" })
 })
 
 app.use(errorHandler)
