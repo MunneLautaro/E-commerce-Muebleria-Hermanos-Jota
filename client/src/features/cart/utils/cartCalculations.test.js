@@ -47,7 +47,7 @@ describe("cartCalculations", () => {
 
   test("rechaza JOTA15 en el límite exacto y lo acepta por encima del mínimo", () => {
     expect(validateCartCoupon("JOTA15", 300000).error).toMatch(
-      /superior a \$ 300\.000/,
+      /superior a \$\s300\.000/,
     )
     expect(validateCartCoupon("jota15", 300001)).toMatchObject({
       coupon: { code: "JOTA15", discountRate: 0.15 },
