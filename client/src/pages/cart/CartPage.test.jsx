@@ -363,7 +363,7 @@ describe("CartPage", () => {
     expect(screen.getByText("Paso 3 de 3")).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Pago" })).toBeInTheDocument()
     expect(screen.getByText("Mesa Roble")).toBeInTheDocument()
-    expect(screen.getByText("$ 300.000")).toBeInTheDocument()
+    expect(screen.getAllByText("$ 300.000").length).toBeGreaterThanOrEqual(2)
     expect(JSON.parse(window.localStorage.getItem("hj-checkout-address"))).toEqual({
       nombreCompleto: "Ana Pérez",
       telefono: "11 5555-1234",
