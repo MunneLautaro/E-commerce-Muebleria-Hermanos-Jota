@@ -1,61 +1,61 @@
-
 import mongoose from "mongoose"
+
+export const PURCHASE_ORDER_STATES = ["pendiente", "aceptada", "rechazada"]
+
+const orderItemSchema = new mongoose.Schema(
+  {
+    producto: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+    cantidad: {
+      type: Number,
+      required: true,
+      min: 1,
+      validate: {
+        validator: Number.isInteger,
+        message: "La cantidad debe ser un número entero",
+      },
+    },
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+  },
+  { _id: false },
+)
 
 const purchaseOrderSchema = new mongoose.Schema(
   {
-    products: {
-      type: [
-        {
-          productId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-            required: true,
-          },
-          quantity: {
-            type: Number,
-            required: true,
-            min: 1,
-            validate: {
-              validator: Number.isInteger,
-              message: "La cantidad debe ser un número entero",
-            },
-          },
-          totalPrice: {
-            type: Number,
-            required: true,
-            min: 0,
-          },
-        },
-      ],
-      required: true,
+    productos: {
+      type: [orderItemSchema],
       validate: {
-        validator: (products) => products.length > 0,
+        validator: (productos) => productos.length > 0,
         message: "La compra debe contener al menos un producto",
       },
     },
-
     total: {
       type: Number,
       required: true,
       min: 0,
     },
-
-    buyer: {
+    comprador: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
-
-    status: {
+    estado: {
       type: String,
-      enum: ["Accepted", "Rejected", "Pending"],
-      required: true,
-      default: "Pending",
+      enum: PURCHASE_ORDER_STATES,
+      default: "aceptada",
     },
   },
   {
     timestamps: true,
-    collection: "purchaseOrders",
+    collection: "ordenes",
   },
 )
 
