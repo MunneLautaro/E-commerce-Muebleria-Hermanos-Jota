@@ -1,7 +1,7 @@
 import {
   CART_BUSINESS_RULES,
   CART_COUPONS,
-} from "../config/cartBusinessRules"
+} from "../constants/cartBusinessRules"
 
 export const formatCartCurrency = new Intl.NumberFormat("es-AR", {
   style: "currency",
