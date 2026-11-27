@@ -130,6 +130,26 @@ export const CartProvider = ({ children }) => {
     })
   }, [])
 
+  const limitToStock = useCallback((productId, stock) => {
+    const availableStock = Number(stock)
+
+    if (typeof productId !== "string" || Number.isNaN(availableStock)) {
+      return
+    }
+
+    setCart((currentCart) =>
+      currentCart.flatMap((item) => {
+        if (item.id !== productId || item.quantity <= availableStock) {
+          return [item]
+        }
+
+        return availableStock >= 1
+          ? [{ ...item, quantity: Math.floor(availableStock) }]
+          : []
+      }),
+    )
+  }, [])
+
   const removeItem = useCallback((productId) => {
     setCart((currentCart) =>
       currentCart.filter((item) => item.id !== productId),
@@ -144,6 +164,7 @@ export const CartProvider = ({ children }) => {
       addItem,
       updateQuantity,
       setItemQuantity,
+      limitToStock,
       removeItem,
       clearCart,
       itemCount: cart.length,
@@ -154,6 +175,7 @@ export const CartProvider = ({ children }) => {
       addItem,
       updateQuantity,
       setItemQuantity,
+      limitToStock,
       removeItem,
       clearCart,
     ],
