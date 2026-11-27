@@ -271,6 +271,9 @@ La API utiliza el prefijo `/api`.
 | `POST`   | `/api/chat`          | Envía un mensaje al workflow de n8n y devuelve la respuesta del asistente.                                                                                                                                       |
 | `GET`    | `/api/auth/me`       | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`.                                                                                                                                       |
 | `POST`   | `/api/auth/logout`   | Confirma el cierre de sesión. La sesión es stateless: el cliente elimina el token de `localStorage`.                                                                                                             |
+| `POST`   | `/api/ordenes`       | Crea una orden de compra con `{ productos: [{ producto, cantidad }] }`. Toma los precios de la base, calcula subtotales y total y descuenta el stock en una transacción: si un producto no está disponible o no tiene stock, no se descuenta nada. Requiere un usuario autenticado y activo. |
+| `GET`    | `/api/ordenes`       | Lista todas las órdenes, de la más nueva a la más vieja, con comprador y productos populados. Acepta `page` y `limit` (12, 15 o 20). Solo admin.                                                                  |
+| `GET`    | `/api/ordenes/usuario/:compradorId` | Lista las órdenes de un usuario con la misma paginación. Cada usuario ve solo las suyas; un admin puede ver las de cualquiera.                                                                           |
 
 Para habilitar el panel de carga, registrá primero el usuario y asignale el rol `admin` directamente en MongoDB:
 
@@ -335,7 +338,7 @@ El backend sigue una separación por responsabilidades:
   registro de peticiones y manejo de errores.
 - **Config** contiene la configuración de CORS.
 
-MongoDB Atlas almacena usuarios, productos y consultas de contacto. El chatbot
+MongoDB Atlas almacena usuarios, productos, órdenes de compra y consultas de contacto. El chatbot
 se integra mediante n8n; la persistencia de sus mensajes la realiza el
 workflow en MongoDB Atlas.
 
