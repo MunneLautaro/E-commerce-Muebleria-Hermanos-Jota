@@ -1,90 +1,73 @@
-
 import mongoose from "mongoose"
 import PurchaseOrder from "../models/purchaseOrder.model.js"
 import Product from "../models/product.model.js"
 
-const ITEMS_PER_PAGE = 12
+const badRequest = (message) => {
+  const error = new Error(message)
+  error.status = 400
+  error.expose = true
+  return error
+}
 
-export const createPurchaseOrderService = async (buyerId, products) => {
-  if (!mongoose.isValidObjectId(buyerId)) {
-    const error = new Error("El usuario no es válido")
-    error.status = 400
-    throw error
+const unavailableProductError = async (productId, session) => {
+  const product = await Product.findById(productId)
+    .select("nombre stock isActive")
+    .session(session)
+    .lean()
+
+  if (!product?.isActive) {
+    return badRequest("Uno de los productos ya no está disponible")
   }
 
-  if (!Array.isArray(products) || products.length === 0) {
-    const error = new Error("La compra debe contener al menos un producto")
-    error.status = 400
-    throw error
+  const remaining =
+    product.stock === 1 ? "Queda 1 unidad" : `Quedan ${product.stock} unidades`
+
+  return badRequest(`No hay stock suficiente de "${product.nombre}". ${remaining}`)
+}
+
+const reserveProduct = async ({ producto, cantidad }, session) => {
+  const product = await Product.findOneAndUpdate(
+    {
+      _id: producto,
+      isActive: true,
+      stock: { $gte: cantidad },
+    },
+    { $inc: { stock: -cantidad } },
+    { returnDocument: "after", session },
+  ).lean()
+
+  if (!product) {
+    throw await unavailableProductError(producto, session)
   }
 
+  return {
+    producto: product._id,
+    cantidad,
+    subtotal: product.precio * cantidad,
+  }
+}
+
+export const createPurchaseOrderService = async (compradorId, productos) => {
   const session = await mongoose.startSession()
 
   try {
     let purchaseOrder
 
     await session.withTransaction(async () => {
-      const orderProducts = []
-      let total = 0
+      const items = []
 
-      for (const item of products) {
-        if (
-          !mongoose.isValidObjectId(item.productId) ||
-          !Number.isInteger(item.quantity) ||
-          item.quantity < 1
-        ) {
-          const error = new Error("Los datos de un producto no son válidos")
-          error.status = 400
-          throw error
-        }
-
-        const product = await Product.findOneAndUpdate(
-          {
-            _id: item.productId,
-            isActive: true,
-            stock: { $gte: item.quantity },
-          },
-          {
-            $inc: { stock: -item.quantity },
-          },
-          {
-            new: true,
-            session,
-          },
-        )
-
-        if (!product) {
-          const error = new Error(
-            `El producto ${item.productId} no existe, no está disponible o no tiene stock suficiente`,
-          )
-          error.status = 400
-          throw error
-        }
-
-        const totalPrice = product.precio * item.quantity
-
-        orderProducts.push({
-          productId: product._id,
-          quantity: item.quantity,
-          totalPrice,
-        })
-
-        total += totalPrice
+      for (const item of productos) {
+        items.push(await reserveProduct(item, session))
       }
 
-      const orders = await PurchaseOrder.create(
-        [
-          {
-            products: orderProducts,
-            total,
-            buyer: buyerId,
-            status: "Accepted",
-          },
-        ],
+      const total = items.reduce((sum, item) => sum + item.subtotal, 0)
+
+      const [created] = await PurchaseOrder.create(
+        [{ productos: items, total, comprador: compradorId }],
         { session },
       )
 
-      purchaseOrder = orders[0]
+      purchaseOrder = created.toObject()
     })
 
     return purchaseOrder
@@ -93,65 +76,38 @@ export const createPurchaseOrderService = async (buyerId, products) => {
   }
 }
 
-export const getAllPurchaseOrdersService = async (page = 1) => {
-  const currentPage = Math.max(1, Number(page) || 1)
-  const skip = (currentPage - 1) * ITEMS_PER_PAGE
+const getPurchaseOrders = async (filter, { page = 1, limit = 12 } = {}) => {
+  const skip = (page - 1) * limit
 
-  const [orders, total] = await Promise.all([
-    PurchaseOrder.find()
-      .populate("buyer", "name email")
-      .populate("products.productId", "nombre precio imagenUrl")
-      .sort({ createdAt: -1 })
+  const [items, total] = await Promise.all([
+    PurchaseOrder.find(filter)
+      .populate("comprador", "name email")
+      .populate("productos.producto", "nombre precio imagenUrl")
+      .sort({ createdAt: -1, _id: -1 })
       .skip(skip)
-      .limit(ITEMS_PER_PAGE)
+      .limit(limit)
       .lean(),
-
-    PurchaseOrder.countDocuments(),
+    PurchaseOrder.countDocuments(filter),
   ])
 
   return {
-    orders,
+    items,
     pagination: {
+      page,
+      limit,
       total,
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-      totalPages: Math.ceil(total / ITEMS_PER_PAGE),
+      totalPages: Math.ceil(total / limit),
     },
   }
 }
 
-export const getPurchaseOrdersByBuyerService = async (
-  buyerId,
-  page = 1,
-) => {
-  if (!mongoose.isValidObjectId(buyerId)) {
-    const error = new Error("El usuario no es válido")
-    error.status = 400
-    throw error
+export const getAllPurchaseOrdersService = (params) =>
+  getPurchaseOrders({}, params)
+
+export const getPurchaseOrdersByBuyerService = (compradorId, params) => {
+  if (!mongoose.isValidObjectId(compradorId)) {
+    throw badRequest("El ID del comprador no es válido")
   }
 
-  const currentPage = Math.max(1, Number(page) || 1)
-  const skip = (currentPage - 1) * ITEMS_PER_PAGE
-
-  const [orders, total] = await Promise.all([
-    PurchaseOrder.find({ buyer: buyerId })
-      .populate("buyer", "name email")
-      .populate("products.productId", "nombre precio imagenUrl")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(ITEMS_PER_PAGE)
-      .lean(),
-
-    PurchaseOrder.countDocuments({ buyer: buyerId }),
-  ])
-
-  return {
-    orders,
-    pagination: {
-      total,
-      page: currentPage,
-      limit: ITEMS_PER_PAGE,
-      totalPages: Math.ceil(total / ITEMS_PER_PAGE),
-    },
-  }
+  return getPurchaseOrders({ comprador: compradorId }, params)
 }
