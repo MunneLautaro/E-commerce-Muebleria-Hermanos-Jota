@@ -1,5 +1,20 @@
 export { CartContext } from "./context/CartContext"
-export { CartProvider } from "./context/CartProvider"
+export {
+  CART_STORAGE_KEY,
+  CartProvider,
+} from "./context/CartProvider"
 export { useCart } from "./hooks/useCart"
+export { useCartProducts } from "./hooks/useCartProducts"
+export { hasStockFor, useCartItemActions } from "./hooks/useCartItemActions"
 export { CartDrawer } from "./components/CartDrawer/CartDrawer"
 export { cartDrawerStyles } from "./components/CartDrawer/CartDrawerStyles"
+export { CartItem } from "./components/CartItem/CartItem"
+export { CartSummary } from "./components/CartSummary/CartSummary"
+export { CartRecommendations } from "./components/CartRecommendations/CartRecommendations"
+export { CartProductModal } from "./components/CartProductModal/CartProductModal"
+export { CART_BUSINESS_RULES, CART_COUPONS } from "./constants/cartBusinessRules"
+export {
+  calculateCartSummary,
+  formatCartCurrency,
+  validateCartCoupon,
+} from "./utils/cartCalculations"

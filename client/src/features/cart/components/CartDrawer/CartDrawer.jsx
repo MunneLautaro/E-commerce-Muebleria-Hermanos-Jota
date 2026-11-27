@@ -1,69 +1,12 @@
-
-import { useEffect, useState } from "react"
 import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react"
-import { toast } from "react-toastify"
-import { useCart } from "../../hooks/useCart"
-import { fetchApi } from "../../../../services/api"
+import { Link } from "react-router-dom"
+import { hasStockFor, useCartItemActions } from "../../hooks/useCartItemActions"
+import { useCartProducts } from "../../hooks/useCartProducts"
 import { cartDrawerStyles } from "./CartDrawerStyles"
 
 export const CartDrawer = ({ isOpen, onClose }) => {
-  const { cart, removeItem, updateQuantity } = useCart()
-  const [cartItems, setCartItems] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
-
-  const handleRemoveItem = (product) => {
-    removeItem(product._id)
-    toast.info(`${product.nombre} eliminado del carrito`)
-  }
-
-  useEffect(() => {
-    let isMounted = true
-
-    const loadProducts = async () => {
-      if (!cart.length) {
-        if (isMounted) {
-          setCartItems([])
-          setLoading(false)
-        }
-        return
-      }
-
-      setLoading(true)
-      setError("")
-
-      try {
-        const products = await Promise.all(
-          cart.map(async ({ id, quantity }) => {
-            const product = await fetchApi(`/productos/${id}`)
-            return { ...product, quantity }
-          }),
-        )
-
-        if (isMounted) {
-          setCartItems(products)
-        }
-      } catch (loadError) {
-        console.error(loadError)
-
-        if (isMounted) {
-          setError("No pudimos cargar tus productos del carrito.")
-          toast.error("No pudimos cargar tus productos del carrito.")
-          setCartItems([])
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    void loadProducts()
-
-    return () => {
-      isMounted = false
-    }
-  }, [cart])
+  const { products, loading, error } = useCartProducts({ enabled: isOpen })
+  const { increase, decrease, remove } = useCartItemActions()
 
   const renderContent = () => {
     if (loading) {
@@ -72,11 +15,15 @@ export const CartDrawer = ({ isOpen, onClose }) => {
       )
     }
 
-    if (error) {
-      return <p className={cartDrawerStyles.errorText}>{error}</p>
+    if (error && products.length === 0) {
+      return (
+        <p className={cartDrawerStyles.errorText}>
+          No pudimos cargar tus productos del carrito.
+        </p>
+      )
     }
 
-    if (cartItems.length === 0) {
+    if (products.length === 0) {
       return (
         <div className={cartDrawerStyles.emptyContainer}>
           <div className={cartDrawerStyles.emptyIconWrapper}>
@@ -97,7 +44,7 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
     return (
       <ul className={cartDrawerStyles.itemList}>
-        {cartItems.map((product) => (
+        {products.map((product) => (
           <li key={product._id} className={cartDrawerStyles.itemCard}>
             <img
               src={product.imagenUrl}
@@ -113,13 +60,11 @@ export const CartDrawer = ({ isOpen, onClose }) => {
               <div className={cartDrawerStyles.quantityControls}>
                 <button
                   type="button"
-                  onClick={() =>
-                    updateQuantity(product._id, -1, product.stock)
-                  }
+                  onClick={() => decrease(product)}
                   className={cartDrawerStyles.quantityButton}
                   aria-label={`Quitar una unidad de ${product.nombre}`}
                 >
-                  <Minus className="h-4 w-4" aria-hidden="true" />
+                  <Minus className={cartDrawerStyles.quantityIcon} aria-hidden="true" />
                 </button>
 
                 <span className={cartDrawerStyles.quantityText}>
@@ -128,25 +73,23 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
                 <button
                   type="button"
-                  disabled={product.quantity >= product.stock}
-                  onClick={() =>
-                    updateQuantity(product._id, 1, product.stock)
-                  }
-                  className={`${cartDrawerStyles.quantityButton} disabled:cursor-not-allowed disabled:opacity-40`}
+                  disabled={!hasStockFor(product, product.quantity + 1)}
+                  onClick={() => increase(product)}
+                  className={cartDrawerStyles.quantityButton}
                   aria-label={`Agregar una unidad de ${product.nombre}`}
                 >
-                  <Plus className="h-4 w-4" aria-hidden="true" />
+                  <Plus className={cartDrawerStyles.quantityIcon} aria-hidden="true" />
                 </button>
               </div>
 
-              <p className="mt-1 text-xs text-gray-500">
+              <p className={cartDrawerStyles.stockText}>
                 Stock disponible: {product.stock}
               </p>
             </div>
 
             <button
               type="button"
-              onClick={() => handleRemoveItem(product)}
+              onClick={() => remove(product)}
               className={cartDrawerStyles.removeButton}
               aria-label={`Eliminar ${product.nombre} del carrito`}
             >
@@ -195,6 +138,15 @@ export const CartDrawer = ({ isOpen, onClose }) => {
 
         <div className={cartDrawerStyles.content}>
           {renderContent()}
+        </div>
+        <div className={cartDrawerStyles.footer}>
+          <Link
+            to="/carrito"
+            className={cartDrawerStyles.viewCartButton}
+            onClick={onClose}
+          >
+            Ver carrito
+          </Link>
         </div>
       </aside>
     </>

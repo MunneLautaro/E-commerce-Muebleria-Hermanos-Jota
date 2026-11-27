@@ -8,6 +8,7 @@ const ProductDetail = lazy(() => import("../pages/productDetail/ProductDetail"))
 const ContactPage = lazy(() => import("../pages/contact/ContactPage"))
 const LoginPage = lazy(() => import("../pages/login/LoginPage"))
 const RegisterPage = lazy(() => import("../pages/register/RegisterPage"))
+const CartPage = lazy(() => import("../pages/cart/CartPage"))
 const AdminProductsPage = lazy(() => import("../pages/admin/AdminProductsPage"))
 const CreateProductPage = lazy(() => import("../pages/admin/CreateProductPage"))
 const NotFoundPage = lazy(() => import("../pages/notFound/NotFoundPage"))
@@ -24,6 +25,7 @@ export const AppRouter = () => {
         <Route path="/contacto" element={<ContactPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/carrito" element={<CartPage />} />
         <Route path="/admin" element={<AdminProductsPage />} />
         <Route path="/admin/crear-producto" element={<CreateProductPage />} />
         <Route

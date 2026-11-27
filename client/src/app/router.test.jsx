@@ -1,7 +1,10 @@
 import { screen, waitFor } from "@testing-library/react"
+import { http, HttpResponse } from "msw"
 import { useLocation } from "react-router-dom"
 import { CartProvider } from "../features/cart"
+import { apiUrl } from "../test/msw/handlers"
 import { renderWithProviders } from "../test/renderWithProviders"
+import { server } from "../test/msw/server"
 import { AppRouter } from "./router"
 
 const LocationProbe = () => {
@@ -39,6 +42,24 @@ describe("AppRouter", () => {
     expect(
       document.head.querySelector('link[rel="canonical"]'),
     ).toHaveAttribute("href", `${globalThis.location.origin}/contact`)
+  })
+
+  test("muestra el carrito en /carrito y lo marca como privado para buscadores", async () => {
+    server.use(
+      http.get(apiUrl("/products"), () =>
+        HttpResponse.json({ items: [], pagination: { page: 1, totalPages: 0 } }),
+      ),
+    )
+
+    renderRoute("/carrito")
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Mi carrito" }),
+    ).toBeInTheDocument()
+    expect(document.title).toBe("Mi carrito | Mueblería Hermanos Jota")
+    expect(
+      document.head.querySelector('meta[name="robots"]'),
+    ).toHaveAttribute("content", "noindex, nofollow")
   })
 
   test("no redirige al inicio ante una ruta inexistente", async () => {
