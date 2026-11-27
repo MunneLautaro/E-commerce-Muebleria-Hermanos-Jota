@@ -1,4 +1,3 @@
-
 import {
   createPurchaseOrderService,
   getAllPurchaseOrdersService,
@@ -7,47 +6,34 @@ import {
 
 export const createPurchaseOrder = async (req, res, next) => {
   try {
-    const buyerId = req.user.sub
-    const { products } = req.body
-
     const purchaseOrder = await createPurchaseOrderService(
-      buyerId,
-      products,
+      req.user.sub,
+      req.body.productos,
     )
 
-    return res.status(201).json({
-      message: "Orden de compra creada correctamente",
-      purchaseOrder,
-    })
+    return res.status(201).json(purchaseOrder)
   } catch (error) {
-    next(error)
+    return next(error)
   }
 }
 
 export const getAllPurchaseOrders = async (req, res, next) => {
   try {
-    const page = req.query.page || 1
-
-    const result = await getAllPurchaseOrdersService(page)
-
-    return res.status(200).json(result)
+    const purchaseOrders = await getAllPurchaseOrdersService(req.validatedQuery)
+    return res.json(purchaseOrders)
   } catch (error) {
-    next(error)
+    return next(error)
   }
 }
 
 export const getPurchaseOrdersByBuyer = async (req, res, next) => {
   try {
-    const buyerId = req.params.buyerId
-    const page = req.query.page || 1
-
-    const result = await getPurchaseOrdersByBuyerService(
-      buyerId,
-      page,
+    const purchaseOrders = await getPurchaseOrdersByBuyerService(
+      req.params.compradorId,
+      req.validatedQuery,
     )
-
-    return res.status(200).json(result)
+    return res.json(purchaseOrders)
   } catch (error) {
-    next(error)
+    return next(error)
   }
 }
