@@ -1,7 +1,9 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 import User from "../src/models/user.model.js"
 import Product from "../src/models/product.model.js"
+import PurchaseOrder from "../src/models/purchaseOrder.model.js"
 
 export const DEFAULT_PASSWORD = "password123"
 
@@ -50,3 +52,17 @@ export const createProduct = (overrides = {}) => {
     ...overrides,
   })
 }
+
+export const createPurchaseOrder = (comprador, overrides = {}) =>
+  PurchaseOrder.create({
+    productos: [
+      {
+        producto: new mongoose.Types.ObjectId(),
+        cantidad: 1,
+        subtotal: 1000,
+      },
+    ],
+    total: 1000,
+    comprador: comprador._id,
+    ...overrides,
+  })

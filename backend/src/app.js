@@ -8,6 +8,7 @@ import productRoutes from "./routes/product.router.js"
 import authRoutes from "./routes/auth.routes.js"
 import chatRoutes from "./routes/chat.routes.js"
 import contactRoutes from "./routes/contact.routes.js"
+import purchaseOrderRoutes from "./routes/purchaseOrder.routes.js"
 import { connectDB } from "./db.js"
 
 const app = express()
@@ -53,6 +54,7 @@ app.use("/api/productos", productRoutes)
 app.use("/api/auth", authRoutes)
 app.use("/api/chat", chatRoutes)
 app.use("/api/contacto", contactRoutes)
+app.use("/api/ordenes", purchaseOrderRoutes)
 
 app.use((req, res) => {
   res.status(404).json({ error: "Ruta no encontrada" })

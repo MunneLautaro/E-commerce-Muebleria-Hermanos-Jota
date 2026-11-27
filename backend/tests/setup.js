@@ -9,14 +9,16 @@ vi.mock("../src/middlewares/rateLimit.js", () => {
     chatRateLimit: passThrough,
     contactRateLimit: passThrough,
     productWriteRateLimit: passThrough,
+    purchaseOrderWriteRateLimit: passThrough,
   }
 })
 
 vi.spyOn(console, "log").mockImplementation(() => {})
 
 beforeAll(async () => {
-  const baseUri = inject("mongoUri").replace(/\/$/, "")
-  process.env.MONGODB_URI = `${baseUri}/hj-test-${process.env.VITEST_POOL_ID ?? "1"}`
+  const uri = new URL(inject("mongoUri"))
+  uri.pathname = `/hj-test-${process.env.VITEST_POOL_ID ?? "1"}`
+  process.env.MONGODB_URI = uri.toString()
 
   await connectDB()
 })

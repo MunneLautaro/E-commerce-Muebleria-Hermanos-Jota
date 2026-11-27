@@ -37,15 +37,57 @@ export const requireAuth = (req, res, next) => {
   }
 }
 
-export const requireAdmin = async (req, res, next) => {
+const findAuthenticatedUser = (req) => {
+  const userId = req.user?.sub
+
+  return mongoose.isValidObjectId(userId)
+    ? User.findById(userId).select("role isActive").lean()
+    : null
+}
+
+const unavailableUser = (res) =>
+  res.status(401).json({ error: "Usuario no disponible" })
+
+export const requireActiveUser = async (req, res, next) => {
   try {
-    const userId = req.user?.sub
-    const user = mongoose.isValidObjectId(userId)
-      ? await User.findById(userId).select("role isActive").lean()
-      : null
+    const user = await findAuthenticatedUser(req)
 
     if (!user?.isActive) {
-      return res.status(401).json({ error: "Usuario no disponible" })
+      return unavailableUser(res)
+    }
+
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const requireOwnerOrAdmin = (param) => async (req, res, next) => {
+  try {
+    const user = await findAuthenticatedUser(req)
+
+    if (!user?.isActive) {
+      return unavailableUser(res)
+    }
+
+    if (req.params[param] !== req.user.sub && user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ error: "No tenés permiso para ver los datos de otro usuario" })
+    }
+
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
+export const requireAdmin = async (req, res, next) => {
+  try {
+    const user = await findAuthenticatedUser(req)
+
+    if (!user?.isActive) {
+      return unavailableUser(res)
     }
 
     if (user.role !== "admin") {
