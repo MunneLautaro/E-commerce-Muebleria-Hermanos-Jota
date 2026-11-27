@@ -18,6 +18,7 @@ describe("rate limit", () => {
     ["chatRateLimit", 20],
     ["contactRateLimit", 5],
     ["productWriteRateLimit", 30],
+    ["purchaseOrderWriteRateLimit", 20],
   ])("%s permite %d pedidos y después responde 429", async (name, limit) => {
     const agent = request(appWith(limiters[name]))
 
