@@ -1,8 +1,7 @@
-import { useEffect, useRef } from "react"
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { toast } from "react-toastify"
-import { CartProvider, useCart } from "../../features/cart"
+import { CART_STORAGE_KEY, CartProvider } from "../../features/cart"
 import { apiUrl } from "../../test/msw/handlers"
 import { server } from "../../test/msw/server"
 import { renderWithProviders } from "../../test/renderWithProviders"
@@ -29,58 +28,59 @@ const recommendationProduct = {
   imagenUrl: "/sillas-cordoba.jpg",
 }
 
-const catalogProducts = [product, recommendationProduct]
+const storeCart = (items) =>
+  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items))
 
-const CartSeed = () => {
-  const { addItem } = useCart()
-  const seeded = useRef(false)
+const storedCart = () =>
+  JSON.parse(window.localStorage.getItem(CART_STORAGE_KEY))
 
-  useEffect(() => {
-    if (seeded.current) return
-    seeded.current = true
-    addItem(product, 2)
-  }, [addItem])
+const respondWithProducts = ({
+  catalog = [product, recommendationProduct],
+  detailStatus = 200,
+  catalogStatus = 200,
+} = {}) => {
+  const detailRequests = []
 
-  return null
-}
-
-const respondWithProducts = (status = 200) =>
   server.use(
     http.get(apiUrl("/products"), () =>
-      HttpResponse.json({
-        items: [recommendationProduct],
-        pagination: { page: 1, totalPages: 1 },
-      }),
+      catalogStatus === 200
+        ? HttpResponse.json({
+            items: [recommendationProduct],
+            pagination: { page: 1, totalPages: 1 },
+          })
+        : HttpResponse.json({ error: "Error interno" }, { status: catalogStatus }),
     ),
     http.get(apiUrl("/products/:id"), ({ params }) => {
-      if (status !== 200) {
-        return HttpResponse.json({ error: "Error interno" }, { status })
+      detailRequests.push(params.id)
+
+      if (detailStatus !== 200) {
+        return HttpResponse.json({ error: "Error interno" }, { status: detailStatus })
       }
 
-      const foundProduct = catalogProducts.find(
-        ({ _id }) => _id === params.id,
-      )
-      return foundProduct
-        ? HttpResponse.json(foundProduct)
-        : HttpResponse.json(
-            { error: "Producto no encontrado" },
-            { status: 404 },
-          )
-    },
-    ),
+      const found = catalog.find(({ _id }) => _id === params.id)
+      return found
+        ? HttpResponse.json(found)
+        : HttpResponse.json({ error: "Producto no encontrado" }, { status: 404 })
+    }),
   )
+
+  return detailRequests
+}
 
 const renderCart = () =>
   renderWithProviders(
     <CartProvider>
-      <CartSeed />
       <CartPage />
     </CartProvider>,
     { route: "/carrito" },
   )
 
-const getMeta = (name) =>
-  document.head.querySelector(`meta[name="${name}"]`)
+const summaryValue = (label) =>
+  within(screen.getByRole("complementary", { name: "Resumen de compra" }))
+    .getByText(label)
+    .closest("div")
+
+const getMeta = (name) => document.head.querySelector(`meta[name="${name}"]`)
 
 describe("CartPage", () => {
   beforeEach(() => {
@@ -93,6 +93,7 @@ describe("CartPage", () => {
   })
 
   test("muestra el resumen y abre el detalle del producto en un modal", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
     respondWithProducts()
 
     const { user } = renderCart()
@@ -100,70 +101,129 @@ describe("CartPage", () => {
     expect(
       await screen.findByRole("button", { name: "Ver detalle de Mesa Roble" }),
     ).toBeInTheDocument()
-    expect(screen.getByText("Subtotal: $ 300.000")).toBeInTheDocument()
+    expect(screen.getByText("Subtotal: $ 300.000")).toBeInTheDocument()
     expect(document.title).toBe("Mi carrito | Mueblería Hermanos Jota")
     expect(getMeta("robots")).toHaveAttribute("content", "noindex, nofollow")
 
     await user.click(screen.getByRole("button", { name: "Ver detalle de Mesa Roble" }))
 
-    expect(
-      screen.getByRole("heading", { level: 2, name: "Mesa Roble" }),
-    ).toBeInTheDocument()
-    expect(screen.getByText("Mesa de roble macizo para el comedor.")).toBeInTheDocument()
-    expect(screen.getByText("MR-01")).toBeInTheDocument()
-    expect(screen.getByText("Roble macizo")).toBeInTheDocument()
+    const modal = within(screen.getByRole("dialog", { name: "Mesa Roble" }))
+    expect(modal.getByText("Mesa de roble macizo para el comedor.")).toBeInTheDocument()
+    expect(modal.getByText("MR-01")).toBeInTheDocument()
+    expect(modal.getByText("Roble macizo")).toBeInTheDocument()
+    expect(modal.getByText("Cantidad en el carrito:").parentElement).toHaveTextContent("2")
   })
 
   test("aumenta, disminuye y elimina productos con avisos en castellano", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
     respondWithProducts()
     const successToast = vi.spyOn(toast, "success")
     const infoToast = vi.spyOn(toast, "info")
     const { user } = renderCart()
+    const quantity = () =>
+      screen.getByRole("status", { name: "Cantidad de Mesa Roble" })
 
-    await screen.findByRole("button", { name: "Aumentar cantidad de Mesa Roble" })
-    await user.click(screen.getByRole("button", { name: "Aumentar cantidad de Mesa Roble" }))
-    expect(successToast).toHaveBeenCalledWith("Se agregó 1 Mesa Roble al carrito")
-    await waitFor(() =>
-      expect(
-        screen.getByLabelText("Cantidad de Mesa Roble"),
-      ).toHaveTextContent("3"),
+    await user.click(
+      await screen.findByRole("button", { name: "Aumentar cantidad de Mesa Roble" }),
     )
+    expect(successToast).toHaveBeenCalledWith("Se agregó 1 Mesa Roble al carrito")
+    expect(quantity()).toHaveTextContent("3")
 
     await user.click(screen.getByRole("button", { name: "Disminuir cantidad de Mesa Roble" }))
     expect(infoToast).toHaveBeenCalledWith("Se eliminó 1 Mesa Roble del carrito")
-    await waitFor(() =>
-      expect(
-        screen.getByLabelText("Cantidad de Mesa Roble"),
-      ).toHaveTextContent("2"),
-    )
+    expect(quantity()).toHaveTextContent("2")
 
     await user.click(screen.getByRole("button", { name: "Eliminar Mesa Roble del carrito" }))
+    expect(
+      await screen.findByRole("heading", { name: "Tu carrito está vacío" }),
+    ).toBeInTheDocument()
     expect(infoToast).toHaveBeenCalledWith("Se eliminó Mesa Roble del carrito")
-    expect(await screen.findByRole("heading", { name: "Tu carrito está vacío" }))
-      .toBeInTheDocument()
+    expect(storedCart()).toEqual([])
   })
 
-  test("muestra un error de carga y mantiene los metadatos privados", async () => {
-    respondWithProducts(500)
+  test("no vuelve a pedir los productos al cambiar las cantidades", async () => {
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    const detailRequests = respondWithProducts()
+    const { user } = renderCart()
+
+    const increase = await screen.findByRole("button", {
+      name: "Aumentar cantidad de Mesa Roble",
+    })
+    await user.click(increase)
+    await user.click(increase)
+
+    expect(
+      screen.getByRole("status", { name: "Cantidad de Mesa Roble" }),
+    ).toHaveTextContent("3")
+    expect(detailRequests).toEqual(["mesa-1"])
+  })
+
+  test("quita del carrito los productos que ya no están disponibles", async () => {
+    storeCart([
+      { id: "mesa-1", quantity: 1 },
+      { id: "producto-desactivado", quantity: 2 },
+    ])
+    respondWithProducts()
+    const infoToast = vi.spyOn(toast, "info")
 
     renderCart()
 
     expect(
-      await screen.findByRole("alert"),
-    ).toHaveTextContent("No se pudieron cargar los productos de tu carrito.")
+      await screen.findByRole("button", { name: "Ver detalle de Mesa Roble" }),
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
+    expect(infoToast).toHaveBeenCalledWith(
+      "Quitamos del carrito un producto que ya no está disponible.",
+      expect.anything(),
+    )
+    await waitFor(() =>
+      expect(storedCart()).toEqual([{ id: "mesa-1", quantity: 1 }]),
+    )
+  })
+
+  test("muestra el carrito vacío si el único producto dejó de estar disponible", async () => {
+    storeCart([{ id: "producto-desactivado", quantity: 1 }])
+    respondWithProducts()
+
+    renderCart()
+
+    expect(
+      await screen.findByRole("heading", { name: "Tu carrito está vacío" }),
+    ).toBeInTheDocument()
+  })
+
+  test("ajusta la cantidad guardada al stock disponible", async () => {
+    storeCart([{ id: "mesa-1", quantity: 9 }])
+    respondWithProducts()
+
+    renderCart()
+
+    expect(
+      await screen.findByRole("status", { name: "Cantidad de Mesa Roble" }),
+    ).toHaveTextContent("5")
+    await waitFor(() =>
+      expect(storedCart()).toEqual([{ id: "mesa-1", quantity: 5 }]),
+    )
+  })
+
+  test("muestra un error de carga y mantiene los metadatos privados", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
+    respondWithProducts({ detailStatus: 500 })
+
+    renderCart()
+
+    expect(
+      await screen.findByText("No se pudieron cargar los productos de tu carrito."),
+    ).toHaveAttribute("role", "alert")
     expect(document.title).toBe("Mi carrito | Mueblería Hermanos Jota")
     expect(getMeta("robots")).toHaveAttribute("content", "noindex, nofollow")
+    expect(storedCart()).toEqual([{ id: "mesa-1", quantity: 2 }])
   })
 
   test("invita a explorar productos cuando el carrito está vacío", async () => {
     respondWithProducts()
 
-    renderWithProviders(
-      <CartProvider>
-        <CartPage />
-      </CartProvider>,
-      { route: "/carrito" },
-    )
+    renderCart()
 
     expect(
       await screen.findByRole("heading", { name: "Tu carrito está vacío" }),
@@ -175,6 +235,7 @@ describe("CartPage", () => {
   })
 
   test("aplica un cupón sin distinguir mayúsculas y recalcula el total", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
     respondWithProducts()
     const successToast = vi.spyOn(toast, "success")
     const { user } = renderCart()
@@ -185,21 +246,64 @@ describe("CartPage", () => {
 
     expect(
       await screen.findByText(/Cupón demostrativo JOTA10 aplicado localmente/),
-    ).toHaveTextContent(
-      "Cupón demostrativo JOTA10 aplicado localmente.",
-    )
-    expect(screen.getByLabelText("Descuento")).toHaveTextContent("30.000")
-    expect(screen.getByLabelText("Total final")).toHaveTextContent("270.000")
+    ).toBeInTheDocument()
+    expect(summaryValue("Descuentos")).toHaveTextContent("30.000")
+    expect(summaryValue("Total final")).toHaveTextContent("270.000")
     expect(successToast).toHaveBeenCalledWith(
       expect.stringContaining("Cupón demostrativo JOTA10"),
     )
 
     await user.click(screen.getByRole("button", { name: "Quitar cupón JOTA10" }))
-    expect(screen.getByLabelText("Descuento")).toHaveTextContent("0")
-    expect(screen.getByLabelText("Total final")).toHaveTextContent("300.000")
+    expect(summaryValue("Descuentos")).toHaveTextContent("$ 0")
+    expect(summaryValue("Total final")).toHaveTextContent("300.000")
+  })
+
+  test("deja de aplicar el cupón si el subtotal baja del mínimo y lo vuelve a aplicar al subir", async () => {
+    storeCart([{ id: "mesa-1", quantity: 3 }])
+    respondWithProducts()
+    const { user } = renderCart()
+
+    await screen.findByRole("heading", { name: "Resumen de compra" })
+    await user.type(screen.getByLabelText("Código promocional"), "JOTA15")
+    await user.click(screen.getByRole("button", { name: "Aplicar" }))
+    expect(summaryValue("Descuentos")).toHaveTextContent("67.500")
+
+    await user.click(screen.getByRole("button", { name: "Disminuir cantidad de Mesa Roble" }))
+    expect(
+      screen.getByText(/El cupón JOTA15 no se aplica: JOTA15 requiere una compra superior/),
+    ).toBeInTheDocument()
+    expect(summaryValue("Descuentos")).toHaveTextContent("$ 0")
+
+    await user.click(screen.getByRole("button", { name: "Aumentar cantidad de Mesa Roble" }))
+    expect(summaryValue("Descuentos")).toHaveTextContent("67.500")
+  })
+
+  test("pide un código si se envía el cupón vacío o inexistente", async () => {
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    respondWithProducts()
+    const { user } = renderCart()
+
+    await screen.findByRole("heading", { name: "Resumen de compra" })
+    await user.click(screen.getByRole("button", { name: "Aplicar" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ingresá un código promocional.",
+    )
+    expect(screen.getByLabelText("Código promocional")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    )
+
+    await user.type(screen.getByLabelText("Código promocional"), "NOEXISTE")
+    await user.click(screen.getByRole("button", { name: "Aplicar" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "El código ingresado no es válido.",
+    )
   })
 
   test("rechaza JOTA15 si el subtotal no supera el mínimo", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
     respondWithProducts()
     const errorToast = vi.spyOn(toast, "error")
     const { user } = renderCart()
@@ -211,28 +315,38 @@ describe("CartPage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       /JOTA15 requiere una compra superior/,
     )
-    expect(screen.getByLabelText("Descuento")).toHaveTextContent("0")
+    expect(summaryValue("Descuentos")).toHaveTextContent("$ 0")
     expect(errorToast).toHaveBeenCalled()
   })
 
   test("agrega al carrito una recomendación real devuelta por el catálogo", async () => {
-    respondWithProducts()
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    const detailRequests = respondWithProducts()
     const successToast = vi.spyOn(toast, "success")
     const { user } = renderCart()
 
     await user.click(
-      await screen.findByRole("button", {
-        name: "Agregar Sillas Córdoba al carrito",
-      }),
+      await screen.findByRole("button", { name: "Agregar Sillas Córdoba al carrito" }),
     )
 
-    expect(successToast).toHaveBeenCalledWith(
-      "Se agregó 1 Sillas Córdoba al carrito",
-    )
+    expect(successToast).toHaveBeenCalledWith("Se agregó 1 Sillas Córdoba al carrito")
     expect(
-      await screen.findByRole("button", {
-        name: "Aumentar cantidad de Sillas Córdoba",
-      }),
+      await screen.findByRole("button", { name: "Aumentar cantidad de Sillas Córdoba" }),
+    ).toBeInTheDocument()
+    expect(detailRequests).toEqual(["mesa-1"])
+  })
+
+  test("avisa si no se pudieron cargar las recomendaciones", async () => {
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    respondWithProducts({ catalogStatus: 500 })
+
+    renderCart()
+
+    expect(
+      await screen.findByText("No se pudieron cargar las recomendaciones."),
+    ).toHaveAttribute("role", "alert")
+    expect(
+      screen.getByRole("button", { name: "Ver detalle de Mesa Roble" }),
     ).toBeInTheDocument()
   })
 })
