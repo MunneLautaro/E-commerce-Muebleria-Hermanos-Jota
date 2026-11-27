@@ -336,17 +336,121 @@ describe("CartPage", () => {
     expect(detailRequests).toEqual(["mesa-1"])
   })
 
-  test("avisa si no se pudieron cargar las recomendaciones", async () => {
-    storeCart([{ id: "mesa-1", quantity: 1 }])
-    respondWithProducts({ catalogStatus: 500 })
+  test("avanza por el carrito y la ubicación hasta la información de pago", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
+    respondWithProducts()
+    const { user } = renderCart()
 
-    renderCart()
+    expect(await screen.findByText("Paso 1 de 3")).toBeInTheDocument()
 
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    expect(screen.getByText("Paso 2 de 3")).toBeInTheDocument()
     expect(
-      await screen.findByText("No se pudieron cargar las recomendaciones."),
-    ).toHaveAttribute("role", "alert")
-    expect(
-      screen.getByRole("button", { name: "Ver detalle de Mesa Roble" }),
+      screen.getByRole("heading", { name: "Datos de entrega" }),
     ).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText("Nombre completo"), "Ana Pérez")
+    await user.type(screen.getByLabelText("Teléfono"), "11 5555-1234")
+    await user.type(screen.getByLabelText("Dirección"), "Av. Corrientes")
+    await user.type(screen.getByLabelText("Altura"), "1234")
+    await user.type(screen.getByLabelText("Ciudad"), "Buenos Aires")
+    await user.type(screen.getByLabelText("Código postal"), "1043")
+
+    await user.click(screen.getByRole("checkbox", { name: "Guardar para futuras compras" }))
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    expect(screen.getByText("Paso 3 de 3")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Pago" })).toBeInTheDocument()
+    expect(screen.getByText("Mesa Roble")).toBeInTheDocument()
+    expect(screen.getByText("$ 300.000")).toBeInTheDocument()
+    expect(JSON.parse(window.localStorage.getItem("hj-checkout-address"))).toEqual({
+      nombreCompleto: "Ana Pérez",
+      telefono: "11 5555-1234",
+      direccion: "Av. Corrientes",
+      altura: "1234",
+      ciudad: "Buenos Aires",
+      codigoPostal: "1043",
+    })
+  })
+
+  test("carga los datos guardados y permite dejarlos de guardar", async () => {
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    window.localStorage.setItem(
+      "hj-checkout-address",
+      JSON.stringify({
+        nombreCompleto: "Ana Pérez",
+        telefono: "11 5555-1234",
+        direccion: "Av. Corrientes",
+        altura: "1234",
+        ciudad: "Buenos Aires",
+        codigoPostal: "1043",
+      }),
+    )
+    respondWithProducts()
+    const { user } = renderCart()
+
+    await screen.findByRole("button", { name: "Siguiente" })
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    expect(screen.getByLabelText("Nombre completo")).toHaveValue("Ana Pérez")
+    expect(screen.getByLabelText("Teléfono")).toHaveValue("11 5555-1234")
+    expect(screen.getByRole("checkbox", { name: "Guardar para futuras compras" })).toBeChecked()
+
+    await user.clear(screen.getByLabelText("Nombre completo"))
+    await user.type(screen.getByLabelText("Nombre completo"), "Ana Modificada")
+    await user.click(screen.getByRole("checkbox", { name: "Guardar para futuras compras" }))
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    expect(window.localStorage.getItem("hj-checkout-address")).toBeNull()
+  })
+
+  test("valida la ubicación antes de avanzar al pago", async () => {
+    storeCart([{ id: "mesa-1", quantity: 1 }])
+    respondWithProducts()
+    const { user } = renderCart()
+
+    await screen.findByRole("button", { name: "Siguiente" })
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    expect(screen.getByText("Ingresá tu nombre completo.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresá tu teléfono de contacto.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresá tu dirección de entrega.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresá el número de la dirección.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresá tu ciudad.")).toBeInTheDocument()
+    expect(screen.getByText("Ingresá tu código postal.")).toBeInTheDocument()
+    expect(screen.getByText("Paso 2 de 3")).toBeInTheDocument()
+  })
+
+  test("confirma el pago desde un modal y vacía por completo el carrito", async () => {
+    storeCart([{ id: "mesa-1", quantity: 2 }])
+    respondWithProducts()
+    const { user } = renderCart()
+
+    await screen.findByRole("button", { name: "Siguiente" })
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    await user.type(screen.getByLabelText("Nombre completo"), "Ana Pérez")
+    await user.type(screen.getByLabelText("Teléfono"), "11 5555-1234")
+    await user.type(screen.getByLabelText("Dirección"), "Av. Corrientes")
+    await user.type(screen.getByLabelText("Altura"), "1234")
+    await user.type(screen.getByLabelText("Ciudad"), "Buenos Aires")
+    await user.type(screen.getByLabelText("Código postal"), "1043")
+    await user.click(screen.getByRole("button", { name: "Siguiente" }))
+
+    await user.click(screen.getByRole("button", { name: "Comprar" }))
+
+    const modal = within(screen.getByRole("dialog", { name: "Confirmar compra" }))
+    expect(modal.getByRole("button", { name: "Rechazar" })).toBeInTheDocument()
+    expect(modal.getByRole("button", { name: "Confirmar" })).toBeInTheDocument()
+
+    await user.click(modal.getByRole("button", { name: "Rechazar" }))
+    expect(screen.queryByRole("dialog", { name: "Confirmar compra" })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Comprar" }))
+    await user.click(within(screen.getByRole("dialog", { name: "Confirmar compra" })).getByRole("button", { name: "Confirmar" }))
+
+    await waitFor(() => expect(storedCart()).toEqual([]))
   })
 })

@@ -74,4 +74,19 @@ describe("AppRouter", () => {
       "/admin/algo/raro",
     )
   })
+
+  test("muestra la confirmación de compra y permite volver al inicio", async () => {
+    renderRoute("/compra-confirmada")
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: "¡Gracias por tu compra!",
+      }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Tu pago fue confirmado/)).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Volver al inicio" }),
+    ).toHaveAttribute("href", "/")
+  })
 })
