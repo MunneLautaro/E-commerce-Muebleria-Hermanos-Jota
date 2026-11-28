@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import { formatPrice } from "../../../../utils/formatPrice"
 import { adminProductTableStyles as styles } from "./AdminProductTableStyles"
 
-export function AdminProductTable({ products, onDelete }) {
+export function AdminProductTable({ products, onDelete, editState }) {
   return (
     <div className={styles.wrapper}>
       <table className={styles.table}>
@@ -52,6 +52,7 @@ export function AdminProductTable({ products, onDelete }) {
               <td className={styles.actionCell}>
                 <Link
                   to={`/admin/editar-producto/${product._id}`}
+                  state={editState}
                   className={styles.editButton}
                 >
                   <Pencil size={15} aria-hidden="true" />

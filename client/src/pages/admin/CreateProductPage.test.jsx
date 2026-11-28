@@ -1,6 +1,6 @@
 import { screen } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
 import { apiUrl } from "../../test/msw/handlers"
 import { server } from "../../test/msw/server"
 import { renderWithProviders } from "../../test/renderWithProviders"
@@ -20,17 +20,27 @@ const storedProduct = {
   atributos: [],
 }
 
-const renderEditor = (route) =>
+const ListProbe = () => {
+  const location = useLocation()
+  return (
+    <>
+      <h1>Panel de productos</h1>
+      <p data-testid="list-search">{location.search}</p>
+    </>
+  )
+}
+
+const renderEditor = (route, routeState) =>
   renderWithProviders(
     <Routes>
-      <Route path="/admin/productos" element={<h1>Panel de productos</h1>} />
+      <Route path="/admin/productos" element={<ListProbe />} />
       <Route path="/admin/crear-producto" element={<CreateProductPage />} />
       <Route
         path="/admin/editar-producto/:id"
         element={<CreateProductPage />}
       />
     </Routes>,
-    { route, auth: { user: admin, isAuthenticated: true } },
+    { route, routeState, auth: { user: admin, isAuthenticated: true } },
   )
 
 const fillNewProduct = async (user) => {
@@ -102,6 +112,43 @@ describe("CreateProductPage", () => {
       await screen.findByRole("heading", { name: "Panel de productos" }),
     ).toBeInTheDocument()
     expect(updatedPath).toBe("/api/products/abc123")
+  })
+
+  test("al editar vuelve a la lista con los filtros y la página de origen", async () => {
+    server.use(
+      http.get(apiUrl("/products/admin/:id"), () =>
+        HttpResponse.json(storedProduct),
+      ),
+      http.put(apiUrl("/products/:id"), async ({ request }) =>
+        HttpResponse.json({ ...storedProduct, ...(await request.json()) }),
+      ),
+    )
+    const from = "/admin/productos?estado=inactivos&page=2"
+    const { user } = renderEditor("/admin/editar-producto/abc123", { from })
+
+    expect(
+      await screen.findByRole("link", { name: "Volver al panel" }),
+    ).toHaveAttribute("href", from)
+    expect(screen.getByRole("link", { name: "Cancelar" })).toHaveAttribute("href", from)
+
+    await confirmSave(user, "Guardar cambios")
+
+    expect(await screen.findByTestId("list-search")).toHaveTextContent(
+      "?estado=inactivos&page=2",
+    )
+  })
+
+  test("ignora un origen que no es la lista de productos", async () => {
+    server.use(
+      http.get(apiUrl("/products/admin/:id"), () =>
+        HttpResponse.json(storedProduct),
+      ),
+    )
+    renderEditor("/admin/editar-producto/abc123", { from: "/admin/ordenes" })
+
+    expect(
+      await screen.findByRole("link", { name: "Volver al panel" }),
+    ).toHaveAttribute("href", "/admin/productos")
   })
 
   test("si el guardado falla se queda en el formulario", async () => {
