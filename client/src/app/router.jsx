@@ -10,6 +10,7 @@ const LoginPage = lazy(() => import("../pages/login/LoginPage"))
 const RegisterPage = lazy(() => import("../pages/register/RegisterPage"))
 const CartPage = lazy(() => import("../pages/cart/CartPage"))
 const AdminProductsPage = lazy(() => import("../pages/admin/AdminProductsPage"))
+const AdminOrdersPage = lazy(() => import("../pages/admin/AdminOrdersPage"))
 const CreateProductPage = lazy(() => import("../pages/admin/CreateProductPage"))
 const NotFoundPage = lazy(() => import("../pages/notFound/NotFoundPage"))
 const PurchaseConfirmationPage = lazy(() => import("../pages/purchaseConfirmation/PurchaseConfirmationPage"))
@@ -33,6 +34,7 @@ export const AppRouter = () => {
           element={<Navigate to="/admin/productos" replace />}
         />
         <Route path="/admin/productos" element={<AdminProductsPage />} />
+        <Route path="/admin/ordenes" element={<AdminOrdersPage />} />
         <Route path="/admin/crear-producto" element={<CreateProductPage />} />
         <Route
           path="/admin/editar-producto/:id"

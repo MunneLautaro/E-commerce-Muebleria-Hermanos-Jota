@@ -18,10 +18,16 @@ export const renderWithProviders = (
   { route = "/", routeState, auth: authOverrides = {} } = {},
 ) => {
   const auth = { ...defaultAuth(), ...authOverrides }
+  const [pathname, search = ""] = route.split("?")
+  const initialEntry = {
+    pathname,
+    search: search ? `?${search}` : "",
+    state: routeState,
+  }
 
   const result = render(
     <AuthContext.Provider value={auth}>
-      <MemoryRouter initialEntries={[{ pathname: route, state: routeState }]}>
+      <MemoryRouter initialEntries={[initialEntry]}>
         {ui}
       </MemoryRouter>
     </AuthContext.Provider>,
