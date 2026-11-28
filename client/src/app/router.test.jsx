@@ -90,6 +90,18 @@ describe("AppRouter", () => {
     expect(
       screen.getByRole("link", { name: "Volver al inicio" }),
     ).toHaveAttribute("href", "/")
+    expect(
+      screen.getByRole("link", { name: "Ver mis órdenes" }),
+    ).toHaveAttribute("href", "/mis-ordenes")
+  })
+
+  test("manda al login a quien entra a /mis-ordenes sin sesión", async () => {
+    renderRoute("/mis-ordenes")
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Ingresá a tu cuenta" }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/login")
   })
 
   test("redirige al carrito si se entra a la confirmación sin una compra", async () => {

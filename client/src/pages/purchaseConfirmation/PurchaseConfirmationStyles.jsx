@@ -8,6 +8,9 @@ export const purchaseConfirmationStyles = {
   description: "mt-5 max-w-lg text-sm leading-7 text-ink-soft sm:text-base",
   orderNumber: "mt-4 text-xs uppercase tracking-caption text-ink-soft",
   orderId: "font-medium normal-case tracking-normal text-ink",
+  actions: "mt-8 flex flex-col gap-3 sm:flex-row",
   primaryButton:
-    "mt-8 inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
+    "inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
+  secondaryButton:
+    "inline-flex items-center justify-center rounded-marca border border-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro",
 }

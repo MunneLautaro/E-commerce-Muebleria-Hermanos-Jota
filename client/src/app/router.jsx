@@ -13,6 +13,7 @@ const AdminProductsPage = lazy(() => import("../pages/admin/AdminProductsPage"))
 const CreateProductPage = lazy(() => import("../pages/admin/CreateProductPage"))
 const NotFoundPage = lazy(() => import("../pages/notFound/NotFoundPage"))
 const PurchaseConfirmationPage = lazy(() => import("../pages/purchaseConfirmation/PurchaseConfirmationPage"))
+const MyOrdersPage = lazy(() => import("../pages/myOrders/MyOrdersPage"))
 
 export const AppRouter = () => {
   return (
@@ -34,6 +35,7 @@ export const AppRouter = () => {
           element={<CreateProductPage />}
         />
         <Route path="/compra-confirmada" element={<PurchaseConfirmationPage />} />
+        <Route path="/mis-ordenes" element={<MyOrdersPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
