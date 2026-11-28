@@ -14,5 +14,5 @@ export const cartRecommendationsStyles = {
   addButton:
     "mt-4 inline-flex w-full items-center justify-center gap-2 rounded-marca border border-siena px-3 py-2 text-xs font-medium uppercase tracking-cta text-siena transition-all hover:bg-alabastro active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40",
   addIcon: "h-4 w-4",
-  notice: "rounded-marca border border-linea bg-crema p-4 text-sm text-ink-soft",
+  notice: "block rounded-marca border border-linea bg-crema p-4 text-sm text-ink-soft",
 }

@@ -20,7 +20,9 @@ export const useCartProducts = ({ enabled = true } = {}) => {
   const [productsById, setProductsById] = useState({})
   const [failedKey, setFailedKey] = useState(null)
   const knownIdsRef = useRef(new Set())
-  const idsKey = [...new Set(cart.map(({ id }) => id))].sort().join("|")
+  const idsKey = [...new Set(cart.map(({ id }) => id))]
+    .sort((a, b) => a.localeCompare(b))
+    .join("|")
 
   useEffect(() => {
     if (!enabled || !idsKey) return undefined
@@ -74,7 +76,7 @@ export const useCartProducts = ({ enabled = true } = {}) => {
       })
 
       if (unavailableIds.length > 0) {
-        unavailableIds.forEach(removeItem)
+        unavailableIds.forEach((id) => removeItem(id))
         toast.info(unavailableMessage(unavailableIds.length), {
           toastId: "cart-unavailable-products",
         })

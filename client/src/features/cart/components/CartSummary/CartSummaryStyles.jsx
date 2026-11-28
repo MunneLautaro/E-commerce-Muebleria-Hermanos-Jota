@@ -5,9 +5,8 @@ export const cartSummaryStyles = {
   shipping: "mt-5 rounded-marca border border-linea bg-white p-4",
   shippingMessage: "flex items-start gap-2 text-sm leading-6 text-ink-soft",
   shippingIcon: "mt-0.5 h-4 w-4 shrink-0 text-siena",
-  progressTrack: "mt-3 h-2 overflow-hidden rounded-full bg-alabastro",
-  progressFill:
-    "h-full rounded-full bg-salvia transition-[width] duration-500 ease-out",
+  progress:
+    "mt-3 block h-2 w-full appearance-none overflow-hidden rounded-full border-0 bg-alabastro [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-salvia [&::-webkit-progress-bar]:bg-alabastro [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-salvia [&::-webkit-progress-value]:transition-[width] [&::-webkit-progress-value]:duration-500 [&::-webkit-progress-value]:ease-out",
   rows: "mt-5 space-y-3",
   row: "flex justify-between gap-4 text-sm text-ink-soft",
   discount: "font-medium text-salvia",

@@ -18,7 +18,7 @@ const ProductCardSkeleton = ({ compact }) => (
 )
 
 export const ProductListSkeleton = ({ count, compact = false, label }) => (
-  <div role="status">
+  <output className="block">
     <span className="sr-only">{label}</span>
     <div className={productListContainer(compact)} aria-hidden="true">
       {Array.from({ length: count }, (_, index) => `skeleton-${index}`).map(
@@ -27,5 +27,5 @@ export const ProductListSkeleton = ({ count, compact = false, label }) => (
         ),
       )}
     </div>
-  </div>
+  </output>
 )
