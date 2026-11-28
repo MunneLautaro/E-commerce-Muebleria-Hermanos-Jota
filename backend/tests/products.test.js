@@ -224,6 +224,92 @@ describe("GET /api/products · más vendidos", () => {
   })
 })
 
+describe("GET /api/products/destacados", () => {
+  const sell = (comprador, items, estado = "aceptada") =>
+    createPurchaseOrder(comprador, {
+      estado,
+      productos: items.map(([producto, cantidad]) => ({
+        producto: producto._id,
+        cantidad,
+        subtotal: 1000 * cantidad,
+      })),
+    })
+
+  const names = (res) => res.body.items.map((product) => product.nombre)
+
+  it("devuelve los 4 más vendidos ordenados por unidades vendidas", async () => {
+    const [a, b, c, d, e] = await Promise.all(
+      ["A", "B", "C", "D", "E"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [
+      [a, 1],
+      [b, 5],
+      [c, 2],
+      [d, 4],
+      [e, 3],
+    ])
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(res.status).toBe(200)
+    expect(names(res)).toEqual(["B", "D", "E", "C"])
+    expect(res.body.items.map((product) => product.masVendido)).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ])
+  })
+
+  it("completa con otros productos por nombre si hay pocas ventas", async () => {
+    const [, , mesa] = await Promise.all(
+      ["Aparador", "Banco", "Mesa", "Sillón", "Biblioteca"].map((nombre) =>
+        createProduct({ nombre }),
+      ),
+    )
+    await sell(admin, [[mesa, 2]])
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(names(res)).toEqual(["Mesa", "Aparador", "Banco", "Biblioteca"])
+    expect(res.body.items[0].masVendido).toBe(true)
+    expect(res.body.items.slice(1).every((p) => !p.masVendido)).toBe(true)
+  })
+
+  it("devuelve los primeros por nombre si todavía no hay ventas", async () => {
+    await Promise.all(
+      ["Sillón", "Mesa", "Aparador"].map((nombre) => createProduct({ nombre })),
+    )
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(names(res)).toEqual(["Aparador", "Mesa", "Sillón"])
+  })
+
+  it("no incluye productos inactivos ni ventas no aceptadas", async () => {
+    const [activo, otro] = await Promise.all(
+      ["Activo", "Otro"].map((nombre) => createProduct({ nombre })),
+    )
+    const inactivo = await createProduct({ nombre: "Inactivo", isActive: false })
+    await sell(admin, [[inactivo, 20]])
+    await sell(admin, [[otro, 10]], "rechazada")
+    await sell(admin, [[activo, 1]])
+
+    const res = await request(app).get("/api/productos/destacados")
+
+    expect(res.status).toBe(200)
+    expect(names(res)).toEqual(["Activo", "Otro"])
+    expect(res.body.items[1].masVendido).toBe(false)
+  })
+
+  it("devuelve una lista vacía si no hay productos", async () => {
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ items: [] })
+  })
+})
+
 describe("GET /api/products/:id", () => {
   it("devuelve un producto activo", async () => {
     const product = await createProduct({ nombre: "Mesa Palermo" })

@@ -155,6 +155,39 @@ export const getProductsService = async (params) => {
   }
 }
 
+export const FEATURED_PRODUCTS_LIMIT = 4
+
+export const getFeaturedProductsService = async () => {
+  const rankedIds = await getBestSellerIds(FEATURED_PRODUCTS_LIMIT)
+  const missing = FEATURED_PRODUCTS_LIMIT - rankedIds.length
+  const [bestSellers, others] = await Promise.all([
+    Product.find({ _id: { $in: rankedIds }, isActive: true }).lean(),
+    missing > 0
+      ? Product.find({ _id: { $nin: rankedIds }, isActive: true })
+          .sort(SORT_OPTIONS.name_asc)
+          .limit(missing)
+          .lean()
+      : [],
+  ])
+  const byId = new Map(
+    bestSellers.map((product) => [product._id.toString(), product]),
+  )
+  const ranked = rankedIds
+    .map((id) => byId.get(id.toString()))
+    .filter(Boolean)
+    .map((product, index) => ({
+      ...product,
+      masVendido: index < BEST_SELLERS_LIMIT,
+    }))
+
+  return {
+    items: [
+      ...ranked,
+      ...others.map((product) => ({ ...product, masVendido: false })),
+    ].slice(0, FEATURED_PRODUCTS_LIMIT),
+  }
+}
+
 export const getAdminProductsService = ({ estado = "todos", ...params } = {}) =>
   getProducts(params, {
     baseFilter: ADMIN_STATUS_FILTERS[estado] ?? ADMIN_STATUS_FILTERS.todos,
