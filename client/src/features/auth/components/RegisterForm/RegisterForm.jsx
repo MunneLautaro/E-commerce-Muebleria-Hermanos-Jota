@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { Eye, EyeOff } from "lucide-react"
 import { GoogleLogin } from "@react-oauth/google"
 import { toast } from "react-toastify"
 import { useAuth } from "../../hooks/useAuth"
 import { useRegisterForm } from "../../hooks/useRegisterForm"
+import { getRedirectPath, getRedirectState } from "../../utils/redirect"
 import { registerFormStyles as s } from "./RegisterFormStyles"
 
 const describedBy = (error, errorId, fallbackId) =>
@@ -23,13 +24,14 @@ export const RegisterForm = () => {
   const { register, handleSubmit, errors, cargando } = useRegisterForm()
   const { loginWithGoogle } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setCargandoGoogle(true)
       await loginWithGoogle(credentialResponse.credential)
       toast.success("¡Cuenta lista! Bienvenido/a a Hermanos Jota.")
-      void navigate("/")
+      void navigate(getRedirectPath(location.state), { replace: true })
     } catch (error) {
       toast.error(error.message || "Error al registrarse con Google")
     } finally {
@@ -206,7 +208,11 @@ export const RegisterForm = () => {
 
         <p className={s.pie}>
           ¿Ya tenés una cuenta?
-          <Link to="/login" className={s.enlace}>
+          <Link
+            to="/login"
+            state={getRedirectState(location.state)}
+            className={s.enlace}
+          >
             Iniciá sesión aquí
           </Link>
         </p>

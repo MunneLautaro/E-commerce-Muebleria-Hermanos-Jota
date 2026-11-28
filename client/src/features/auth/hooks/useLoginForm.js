@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "./useAuth"
 import { loginSchema } from "../schemas/auth.schema"
+import { getRedirectPath } from "../utils/redirect"
 
 export const useLoginForm = () => {
   const { login } = useAuth()
@@ -33,7 +34,7 @@ export const useLoginForm = () => {
       })
 
       toast.success("¡Bienvenido/a de nuevo!")
-      void navigate("/")
+      void navigate(getRedirectPath(location.state), { replace: true })
     } catch (error) {
       const mensaje = error.message || "Error al iniciar sesión."
       setError("root", { type: "server", message: mensaje })
