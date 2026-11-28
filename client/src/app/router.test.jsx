@@ -12,13 +12,13 @@ const LocationProbe = () => {
   return <span data-testid="pathname">{pathname}</span>
 }
 
-const renderRoute = (route) =>
+const renderRoute = (route, routeState) =>
   renderWithProviders(
     <CartProvider>
       <AppRouter />
       <LocationProbe />
     </CartProvider>,
-    { route },
+    { route, routeState },
   )
 
 describe("AppRouter", () => {
@@ -76,7 +76,7 @@ describe("AppRouter", () => {
   })
 
   test("muestra la confirmación de compra y permite volver al inicio", async () => {
-    renderRoute("/compra-confirmada")
+    renderRoute("/compra-confirmada", { orderId: "orden-123" })
 
     expect(
       await screen.findByRole("heading", {
@@ -85,8 +85,28 @@ describe("AppRouter", () => {
       }),
     ).toBeInTheDocument()
     expect(screen.getByText(/Tu pago fue confirmado/)).toBeInTheDocument()
+    expect(screen.getByText("orden-123")).toBeInTheDocument()
+    expect(document.title).toBe("Compra confirmada | Mueblería Hermanos Jota")
     expect(
       screen.getByRole("link", { name: "Volver al inicio" }),
     ).toHaveAttribute("href", "/")
+  })
+
+  test("redirige al carrito si se entra a la confirmación sin una compra", async () => {
+    server.use(
+      http.get(apiUrl("/products"), () =>
+        HttpResponse.json({ items: [], pagination: { page: 1, totalPages: 0 } }),
+      ),
+    )
+
+    renderRoute("/compra-confirmada")
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Mi carrito" }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/carrito")
+    expect(
+      screen.queryByRole("heading", { name: "¡Gracias por tu compra!" }),
+    ).not.toBeInTheDocument()
   })
 })
