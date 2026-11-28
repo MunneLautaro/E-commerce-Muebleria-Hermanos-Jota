@@ -11,13 +11,15 @@ vi.mock("react-toastify", () => ({
 }))
 
 const products = [
-  { _id: "1", nombre: "Mesa Roble", vendidos: 3, imagenUrl: "/mesa.jpg" },
-  { _id: "2", nombre: "Silla Nórdica", vendidos: 10, imagenUrl: "/silla.jpg" },
+  { _id: "2", nombre: "Silla Nórdica", masVendido: true, imagenUrl: "/silla.jpg" },
+  { _id: "1", nombre: "Mesa Roble", masVendido: false, imagenUrl: "/mesa.jpg" },
 ]
 
 const respondWith = (body, status = 200) =>
   server.use(
-    http.get(apiUrl("/products"), () => HttpResponse.json(body, { status })),
+    http.get(apiUrl("/products/destacados"), () =>
+      HttpResponse.json(body, { status }),
+    ),
   )
 
 describe("HomePage", () => {
@@ -49,7 +51,7 @@ describe("HomePage", () => {
     ).not.toBeInTheDocument()
   })
 
-  test("ordena los destacados por cantidad de ventas", async () => {
+  test("respeta el orden de ventas que devuelve el backend", async () => {
     respondWith({ items: products })
 
     renderWithProviders(<HomePage />)

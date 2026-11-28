@@ -6,6 +6,10 @@ export const productService = {
     return fetchApi(withQuery("/products", params))
   },
 
+  async getFeaturedProducts() {
+    return fetchApi("/products/destacados")
+  },
+
   async getProductById(id) {
     return fetchApi(`/products/${id}`)
   },
