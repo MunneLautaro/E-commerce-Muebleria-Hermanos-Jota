@@ -1,8 +1,8 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
 import { useLocation } from "react-router-dom"
 import { CartProvider } from "../features/cart"
-import { apiUrl } from "../test/msw/handlers"
+import { adminProductsHandler, apiUrl } from "../test/msw/handlers"
 import { renderWithProviders } from "../test/renderWithProviders"
 import { server } from "../test/msw/server"
 import { AppRouter } from "./router"
@@ -12,13 +12,13 @@ const LocationProbe = () => {
   return <span data-testid="pathname">{pathname}</span>
 }
 
-const renderRoute = (route, routeState) =>
+const renderRoute = (route, routeState, auth) =>
   renderWithProviders(
     <CartProvider>
       <AppRouter />
       <LocationProbe />
     </CartProvider>,
-    { route, routeState },
+    { route, routeState, auth },
   )
 
 describe("AppRouter", () => {
@@ -90,6 +90,37 @@ describe("AppRouter", () => {
     expect(
       screen.getByRole("link", { name: "Volver al inicio" }),
     ).toHaveAttribute("href", "/")
+    expect(
+      screen.getByRole("link", { name: "Ver mis órdenes" }),
+    ).toHaveAttribute("href", "/mis-ordenes")
+  })
+
+  test("redirige /admin a la lista de productos del panel", async () => {
+    const { handler } = adminProductsHandler()
+    server.use(handler)
+
+    renderRoute("/admin", undefined, {
+      user: { id: "admin-1", email: "admin@example.com", role: "admin" },
+      isAuthenticated: true,
+    })
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Gestionar productos" }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/admin/productos")
+    const tabs = screen.getByRole("navigation", { name: "Secciones del panel" })
+    expect(
+      within(tabs).getByRole("link", { name: "Productos" }),
+    ).toHaveAttribute("aria-current", "page")
+  })
+
+  test("manda al login a quien entra a /mis-ordenes sin sesión", async () => {
+    renderRoute("/mis-ordenes")
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Ingresá a tu cuenta" }),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("pathname")).toHaveTextContent("/login")
   })
 
   test("redirige al carrito si se entra a la confirmación sin una compra", async () => {

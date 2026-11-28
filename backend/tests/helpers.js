@@ -63,6 +63,15 @@ export const validShippingBody = (overrides = {}) => ({
   ...overrides,
 })
 
+export const createPurchaseOrderAt = async (comprador, createdAt, overrides = {}) => {
+  const order = await createPurchaseOrder(comprador, overrides)
+  await PurchaseOrder.collection.updateOne(
+    { _id: order._id },
+    { $set: { createdAt: new Date(createdAt) } },
+  )
+  return order
+}
+
 export const createPurchaseOrder = (comprador, overrides = {}) =>
   PurchaseOrder.create({
     envio: validShippingBody(),

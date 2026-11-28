@@ -1,0 +1,26 @@
+export const orderDetailModalStyles = {
+  header: "flex items-start justify-between gap-4",
+  eyebrow: "text-xs font-semibold uppercase tracking-[0.18em] text-salvia",
+  title: "mt-1 break-all font-display text-xl text-siena",
+  meta: "mt-2 flex flex-wrap items-center gap-3 text-sm text-ink-soft",
+  close:
+    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro",
+  closeIcon: "h-5 w-5",
+  section: "mt-5 border-t border-linea pt-4",
+  sectionTitle: "text-xs font-semibold uppercase tracking-cta text-ink-soft",
+  items: "mt-3 space-y-3",
+  item: "flex gap-3",
+  image: "h-14 w-14 shrink-0 rounded-lg border border-linea bg-crema object-contain p-1",
+  imagePlaceholder:
+    "flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-linea bg-crema text-ink-soft",
+  itemBody: "min-w-0 flex-1",
+  itemName: "font-semibold text-ink",
+  itemUnavailable: "font-semibold text-ink-soft italic",
+  itemFacts: "mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5 text-xs text-ink-soft",
+  itemSubtotal: "font-semibold text-ink",
+  facts: "mt-3 grid gap-1 text-sm text-ink-soft",
+  factLabel: "font-semibold text-ink",
+  total: "mt-5 flex items-center justify-between border-t border-linea pt-4",
+  totalLabel: "text-sm font-semibold uppercase tracking-cta text-ink-soft",
+  totalValue: "font-display text-2xl text-siena",
+}

@@ -95,6 +95,9 @@ const purchaseOrderSchema = new mongoose.Schema(
   },
 )
 
+purchaseOrderSchema.index({ createdAt: -1, _id: -1 })
+purchaseOrderSchema.index({ estado: 1, createdAt: -1, _id: -1 })
+
 const PurchaseOrder =
   mongoose.models.PurchaseOrder ||
   mongoose.model("PurchaseOrder", purchaseOrderSchema)

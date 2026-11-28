@@ -1,6 +1,8 @@
 import mongoose from "mongoose"
 import PurchaseOrder from "../models/purchaseOrder.model.js"
 import Product from "../models/product.model.js"
+import User from "../models/user.model.js"
+import { escapeRegex } from "../utils/escapeRegex.js"
 
 const badRequest = (message) => {
   const error = new Error(message)
@@ -101,8 +103,48 @@ const getPurchaseOrders = async (filter, { page = 1, limit = 12 } = {}) => {
   }
 }
 
-export const getAllPurchaseOrdersService = (params) =>
-  getPurchaseOrders({}, params)
+const ARGENTINA_OFFSET = "-03:00"
+const OBJECT_ID_PATTERN = /^[a-f\d]{24}$/i
+const DAY_MS = 24 * 60 * 60 * 1000
+
+const startOfArgentinaDay = (date) =>
+  new Date(`${date}T00:00:00${ARGENTINA_OFFSET}`)
+
+const buildDateFilter = (desde, hasta) => {
+  const createdAt = {}
+  if (desde) createdAt.$gte = startOfArgentinaDay(desde)
+  if (hasta) createdAt.$lt = new Date(startOfArgentinaDay(hasta).getTime() + DAY_MS)
+  return createdAt
+}
+
+const buildSearchFilter = async (q) => {
+  if (OBJECT_ID_PATTERN.test(q)) {
+    return { _id: q }
+  }
+
+  const pattern = { $regex: escapeRegex(q), $options: "i" }
+  const buyers = await User.find({ $or: [{ name: pattern }, { email: pattern }] })
+    .select("_id")
+    .lean()
+
+  return { comprador: { $in: buyers.map(({ _id }) => _id) } }
+}
+
+const buildAdminFilter = async ({ estado, desde, hasta, q }) => {
+  const filter = {}
+
+  if (estado) filter.estado = estado
+  if (desde || hasta) filter.createdAt = buildDateFilter(desde, hasta)
+  if (q) Object.assign(filter, await buildSearchFilter(q))
+
+  return filter
+}
+
+export const getAllPurchaseOrdersService = async ({
+  page,
+  limit,
+  ...filters
+} = {}) => getPurchaseOrders(await buildAdminFilter(filters), { page, limit })
 
 export const getPurchaseOrdersByBuyerService = (compradorId, params) => {
   if (!mongoose.isValidObjectId(compradorId)) {

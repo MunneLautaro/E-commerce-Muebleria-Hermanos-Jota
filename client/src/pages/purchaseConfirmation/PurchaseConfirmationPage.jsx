@@ -29,9 +29,14 @@ export default function PurchaseConfirmationPage() {
       <p className={s.orderNumber}>
         Número de orden: <span className={s.orderId}>{orderId}</span>
       </p>
-      <Link to="/" className={s.primaryButton}>
-        Volver al inicio
-      </Link>
+      <div className={s.actions}>
+        <Link to="/mis-ordenes" className={s.secondaryButton}>
+          Ver mis órdenes
+        </Link>
+        <Link to="/" className={s.primaryButton}>
+          Volver al inicio
+        </Link>
+      </div>
     </section>
   )
 }

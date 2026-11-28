@@ -13,7 +13,10 @@ import {
 import { purchaseOrderWriteRateLimit } from "../middlewares/rateLimit.js"
 import { validate, validateQuery } from "../middlewares/validate.js"
 import { createPurchaseOrderSchema } from "../schemas/purchaseOrder.schema.js"
-import { purchaseOrderQuerySchema } from "../schemas/purchaseOrder.query.schema.js"
+import {
+  adminPurchaseOrderQuerySchema,
+  purchaseOrderQuerySchema,
+} from "../schemas/purchaseOrder.query.schema.js"
 
 const router = Router()
 
@@ -29,7 +32,7 @@ router.get(
   "/",
   requireAuth,
   requireAdmin,
-  validateQuery(purchaseOrderQuerySchema),
+  validateQuery(adminPurchaseOrderQuerySchema),
   getAllPurchaseOrders,
 )
 router.get(

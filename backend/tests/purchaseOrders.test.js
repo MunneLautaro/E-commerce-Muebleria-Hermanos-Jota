@@ -8,6 +8,7 @@ import { MAX_ORDER_ITEMS } from "../src/schemas/purchaseOrder.schema.js"
 import {
   createProduct,
   createPurchaseOrder,
+  createPurchaseOrderAt,
   createUser,
   signToken,
   tokenFor,
@@ -330,8 +331,209 @@ describe("GET /api/ordenes", () => {
   })
 })
 
+describe("GET /api/ordenes con filtros", () => {
+  const listOrders = (query) =>
+    asAdmin(request(app).get("/api/ordenes").query(query))
+
+  const totals = (res) => res.body.items.map((item) => item.total)
+
+  it("filtra por estado", async () => {
+    await createPurchaseOrder(cliente, { total: 1 })
+    await createPurchaseOrder(cliente, { total: 2, estado: "pendiente" })
+    await createPurchaseOrder(cliente, { total: 3, estado: "rechazada" })
+
+    const pendientes = await listOrders({ estado: "pendiente" })
+    const rechazadas = await listOrders({ estado: "rechazada" })
+    const aceptadas = await listOrders({ estado: "aceptada" })
+
+    expect(totals(pendientes)).toEqual([2])
+    expect(pendientes.body.pagination.total).toBe(1)
+    expect(totals(rechazadas)).toEqual([3])
+    expect(totals(aceptadas)).toEqual([1])
+  })
+
+  describe("por fecha en la hora de Argentina", () => {
+    beforeEach(async () => {
+      await createPurchaseOrderAt(cliente, "2026-03-10T02:59:59.999Z", { total: 1 })
+      await createPurchaseOrderAt(cliente, "2026-03-10T03:00:00.000Z", { total: 2 })
+      await createPurchaseOrderAt(cliente, "2026-03-11T02:59:59.999Z", { total: 3 })
+      await createPurchaseOrderAt(cliente, "2026-03-11T03:00:00.000Z", { total: 4 })
+    })
+
+    it("desde incluye las órdenes desde las 00:00 de ese día", async () => {
+      const res = await listOrders({ desde: "2026-03-10" })
+
+      expect(res.status).toBe(200)
+      expect(totals(res)).toEqual([4, 3, 2])
+    })
+
+    it("hasta incluye el día completo", async () => {
+      const res = await listOrders({ hasta: "2026-03-10" })
+
+      expect(res.status).toBe(200)
+      expect(totals(res)).toEqual([3, 2, 1])
+    })
+
+    it("con desde y hasta iguales devuelve solo ese día", async () => {
+      const res = await listOrders({ desde: "2026-03-10", hasta: "2026-03-10" })
+
+      expect(res.status).toBe(200)
+      expect(totals(res)).toEqual([3, 2])
+      expect(res.body.pagination.total).toBe(2)
+    })
+  })
+
+  describe("búsqueda", () => {
+    let lucia
+    let pedro
+
+    beforeEach(async () => {
+      lucia = await createUser({ email: "lucia@correo.com", name: "Lucia Fernan" })
+      pedro = await createUser({ email: "pedro.gomez@correo.com", name: "Pedro Gómez" })
+      await createPurchaseOrder(lucia, { total: 1 })
+      await createPurchaseOrder(pedro, { total: 2 })
+      await createPurchaseOrder(cliente, { total: 3 })
+    })
+
+    it("busca por el ID exacto de la orden", async () => {
+      const orden = await createPurchaseOrder(pedro, { total: 4 })
+
+      const res = await listOrders({ q: orden._id.toString().toUpperCase() })
+
+      expect(res.status).toBe(200)
+      expect(totals(res)).toEqual([4])
+    })
+
+    it("no devuelve nada si el ID no corresponde a ninguna orden", async () => {
+      const res = await listOrders({ q: missingId() })
+
+      expect(res.status).toBe(200)
+      expect(res.body.items).toEqual([])
+      expect(res.body.pagination.total).toBe(0)
+    })
+
+    it("busca por email del comprador sin distinguir mayúsculas", async () => {
+      const res = await listOrders({ q: "PEDRO.GOMEZ@" })
+
+      expect(totals(res)).toEqual([2])
+    })
+
+    it("busca por nombre del comprador", async () => {
+      const res = await listOrders({ q: "gómez" })
+
+      expect(totals(res)).toEqual([2])
+      expect(res.body.items[0].comprador).toMatchObject({
+        name: "Pedro Gómez",
+        email: "pedro.gomez@correo.com",
+      })
+    })
+
+    it("no interpreta un texto de 12 caracteres como ID", async () => {
+      const res = await listOrders({ q: "Lucia Fernan" })
+
+      expect(res.status).toBe(200)
+      expect(totals(res)).toEqual([1])
+    })
+
+    it("trata los caracteres especiales como texto literal", async () => {
+      const res = await listOrders({ q: "(.*" })
+
+      expect(res.status).toBe(200)
+      expect(res.body.items).toEqual([])
+    })
+
+    it("ignora los espacios alrededor del texto", async () => {
+      const res = await listOrders({ q: "  lucia@  " })
+
+      expect(totals(res)).toEqual([1])
+    })
+  })
+
+  it("combina estado, fechas y búsqueda", async () => {
+    const lucia = await createUser({ email: "lucia@correo.com", name: "Lucia" })
+    await createPurchaseOrderAt(lucia, "2026-03-10T15:00:00Z", { total: 1, estado: "pendiente" })
+    await createPurchaseOrderAt(lucia, "2026-03-10T16:00:00Z", { total: 2 })
+    await createPurchaseOrderAt(lucia, "2026-03-12T15:00:00Z", { total: 3, estado: "pendiente" })
+    await createPurchaseOrderAt(cliente, "2026-03-10T15:00:00Z", { total: 4, estado: "pendiente" })
+
+    const res = await listOrders({
+      estado: "pendiente",
+      desde: "2026-03-09",
+      hasta: "2026-03-11",
+      q: "lucia",
+    })
+
+    expect(res.status).toBe(200)
+    expect(totals(res)).toEqual([1])
+    expect(res.body.pagination).toEqual({ page: 1, limit: 12, total: 1, totalPages: 1 })
+  })
+
+  it("pagina los resultados filtrados", async () => {
+    for (let i = 1; i <= 14; i += 1) {
+      await createPurchaseOrder(cliente, {
+        total: i,
+        estado: i % 2 === 0 ? "pendiente" : "aceptada",
+      })
+    }
+
+    const res = await listOrders({ estado: "pendiente", limit: 15 })
+
+    expect(totals(res)).toEqual([14, 12, 10, 8, 6, 4, 2])
+    expect(res.body.pagination).toEqual({ page: 1, limit: 15, total: 7, totalPages: 1 })
+  })
+
+  it.each([
+    ["un estado inválido", { estado: "cancelada" }, "estado debe ser pendiente, aceptada, rechazada"],
+    ["una fecha con otro formato", { desde: "10/03/2026" }, "desde debe tener el formato AAAA-MM-DD"],
+    ["una fecha inexistente", { hasta: "2026-02-30" }, "hasta no es una fecha válida"],
+    ["desde posterior a hasta", { desde: "2026-03-11", hasta: "2026-03-10" }, "desde no puede ser posterior a hasta"],
+    ["una búsqueda demasiado larga", { q: "a".repeat(101) }, "q no puede superar 100 caracteres"],
+  ])("responde 400 con %s", async (_, query, message) => {
+    const res = await listOrders(query)
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: "Parámetros inválidos", details: [message] })
+  })
+
+  it("define índices para ordenar y filtrar por estado y fecha", () => {
+    const indexes = PurchaseOrder.schema.indexes().map(([fields]) => fields)
+
+    expect(indexes).toContainEqual({ createdAt: -1, _id: -1 })
+    expect(indexes).toContainEqual({ estado: 1, createdAt: -1, _id: -1 })
+  })
+})
+
 describe("GET /api/ordenes/usuario/:compradorId", () => {
   const ordersOf = (user) => request(app).get(`/api/ordenes/usuario/${user._id}`)
+
+  it("ordena de la orden más nueva a la más vieja", async () => {
+    await createPurchaseOrderAt(cliente, "2026-01-10T12:00:00Z", { total: 1 })
+    await createPurchaseOrderAt(cliente, "2026-03-10T12:00:00Z", { total: 3 })
+    await createPurchaseOrderAt(cliente, "2026-02-10T12:00:00Z", { total: 2 })
+
+    const res = await asCliente(ordersOf(cliente))
+
+    expect(res.body.items.map((item) => item.total)).toEqual([3, 2, 1])
+  })
+
+  it("ignora los filtros del admin", async () => {
+    const orden = await createPurchaseOrder(cliente, { total: 1 })
+    await createPurchaseOrder(cliente, { total: 2, estado: "pendiente" })
+    await createPurchaseOrder(cliente, { total: 3, estado: "rechazada" })
+
+    const res = await asCliente(
+      ordersOf(cliente).query({
+        estado: "pendiente",
+        desde: "2999-01-01",
+        hasta: "no-es-una-fecha",
+        q: orden._id.toString(),
+      }),
+    )
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((item) => item.total)).toEqual([3, 2, 1])
+    expect(res.body.pagination.total).toBe(3)
+  })
 
   it("devuelve solo las órdenes del usuario logueado", async () => {
     await createPurchaseOrder(cliente)
