@@ -6,6 +6,7 @@ import Product from "../src/models/product.model.js"
 import User from "../src/models/user.model.js"
 import {
   createProduct,
+  createPurchaseOrder,
   createUser,
   tokenFor,
   validProductBody,
@@ -146,6 +147,80 @@ describe("GET /api/products", () => {
     expect(res.status).toBe(400)
     expect(res.body.error).toBe("Parámetros inválidos")
     expect(res.body.details).toContain(mensaje)
+  })
+})
+
+describe("GET /api/products · más vendidos", () => {
+  const sell = (comprador, items, estado = "aceptada") =>
+    createPurchaseOrder(comprador, {
+      estado,
+      productos: items.map(([producto, cantidad]) => ({
+        producto: producto._id,
+        cantidad,
+        subtotal: 1000 * cantidad,
+      })),
+    })
+
+  const bestSellerNames = (res) =>
+    res.body.items
+      .filter((product) => product.masVendido)
+      .map((product) => product.nombre)
+
+  it("marca los 3 productos con más unidades vendidas", async () => {
+    const [a, b, c, d] = await Promise.all(
+      ["A", "B", "C", "D"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [
+      [a, 1],
+      [b, 5],
+    ])
+    await sell(admin, [
+      [c, 3],
+      [d, 2],
+      [a, 3],
+    ])
+
+    const res = await request(app).get("/api/products")
+
+    expect(res.status).toBe(200)
+    expect(bestSellerNames(res)).toEqual(["A", "B", "C"])
+    expect(res.body.items.find((p) => p.nombre === "D").masVendido).toBe(false)
+  })
+
+  it("no cuenta órdenes pendientes ni rechazadas", async () => {
+    const [a, b] = await Promise.all(
+      ["A", "B"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [[a, 1]])
+    await sell(admin, [[b, 10]], "pendiente")
+    await sell(admin, [[b, 10]], "rechazada")
+
+    const res = await request(app).get("/api/products")
+
+    expect(bestSellerNames(res)).toEqual(["A"])
+  })
+
+  it("ignora productos inactivos al armar el ranking", async () => {
+    const products = await Promise.all(
+      ["A", "B", "C", "D"].map((nombre) => createProduct({ nombre })),
+    )
+    const inactive = await createProduct({ nombre: "Z", isActive: false })
+    await sell(admin, [
+      [inactive, 50],
+      ...products.map((product, index) => [product, index + 1]),
+    ])
+
+    const res = await request(app).get("/api/products")
+
+    expect(bestSellerNames(res)).toEqual(["B", "C", "D"])
+  })
+
+  it("no marca nada si todavía no hay ventas", async () => {
+    await createProduct()
+
+    const res = await request(app).get("/api/products")
+
+    expect(res.body.items[0].masVendido).toBe(false)
   })
 })
 

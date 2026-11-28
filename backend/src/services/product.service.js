@@ -1,7 +1,10 @@
 import { randomInt } from "node:crypto"
 import mongoose from "mongoose"
 import Product from "../models/product.model.js"
+import PurchaseOrder from "../models/purchaseOrder.model.js"
 import { escapeRegex } from "../utils/escapeRegex.js"
+
+export const BEST_SELLERS_LIMIT = 3
 
 const SKU_GENERATION_ATTEMPTS = 5
 
@@ -108,7 +111,49 @@ const getProducts = async (
   }
 }
 
-export const getProductsService = (params) => getProducts(params)
+const getBestSellerIds = async (limit = BEST_SELLERS_LIMIT) => {
+  const rows = await PurchaseOrder.aggregate([
+    { $match: { estado: "aceptada" } },
+    { $unwind: "$productos" },
+    {
+      $group: {
+        _id: "$productos.producto",
+        vendidos: { $sum: "$productos.cantidad" },
+      },
+    },
+    {
+      $lookup: {
+        from: Product.collection.name,
+        localField: "_id",
+        foreignField: "_id",
+        pipeline: [{ $match: { isActive: true } }, { $project: { _id: 1 } }],
+        as: "producto",
+      },
+    },
+    { $match: { "producto.0": { $exists: true } } },
+    { $sort: { vendidos: -1, _id: 1 } },
+    { $limit: limit },
+    { $project: { _id: 1 } },
+  ])
+
+  return rows.map(({ _id }) => _id)
+}
+
+export const getProductsService = async (params) => {
+  const [result, bestSellers] = await Promise.all([
+    getProducts(params),
+    getBestSellerIds(),
+  ])
+  const bestSellerIds = new Set(bestSellers.map((id) => id.toString()))
+
+  return {
+    ...result,
+    items: result.items.map((product) => ({
+      ...product,
+      masVendido: bestSellerIds.has(product._id.toString()),
+    })),
+  }
+}
 
 export const getAdminProductsService = ({ estado = "todos", ...params } = {}) =>
   getProducts(params, {
