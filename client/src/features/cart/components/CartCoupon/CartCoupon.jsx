@@ -38,11 +38,11 @@ export const CartCoupon = ({ appliedCoupon, subtotal, onApply, onRemove }) => {
 
       {appliedCoupon ? (
         <div>
-          <p className={inactiveReason ? s.error : s.success} role="status">
+          <output className={inactiveReason ? s.error : s.success}>
             {inactiveReason
               ? `El cupón ${appliedCoupon} no se aplica: ${inactiveReason}`
               : message || `Cupón ${appliedCoupon} aplicado localmente.`}
-          </p>
+          </output>
           <button type="button" className={s.remove} onClick={removeCoupon}>
             <X className={s.removeIcon} aria-hidden="true" />
             Quitar cupón {appliedCoupon}
@@ -76,9 +76,7 @@ export const CartCoupon = ({ appliedCoupon, subtotal, onApply, onRemove }) => {
         </p>
       )}
       {message && !appliedCoupon && (
-        <p className={s.success} role="status">
-          {message}
-        </p>
+        <output className={s.success}>{message}</output>
       )}
 
       <ul className={s.codes} aria-label="Cupones demostrativos">

@@ -68,7 +68,7 @@ export const CartRecommendations = ({ onAdd }) => {
         })
 
         if (!Array.isArray(result?.items)) {
-          throw new Error("La respuesta del catálogo no contiene productos.")
+          throw new TypeError("La respuesta del catálogo no contiene productos.")
         }
 
         if (isActive) setCatalog(result.items)
@@ -98,9 +98,9 @@ export const CartRecommendations = ({ onAdd }) => {
   const renderContent = () => {
     if (loading) {
       return (
-        <p className={s.notice} role="status">
+        <output className={s.notice}>
           Buscando productos del catálogo...
-        </p>
+        </output>
       )
     }
 

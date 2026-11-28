@@ -58,8 +58,10 @@ export const createPurchaseOrderService = async (compradorId, productos, envio) 
     await session.withTransaction(async () => {
       const items = []
 
+      // Secuencial a propósito: una sesión de MongoDB no admite operaciones
+      // concurrentes dentro de la misma transacción.
       for (const item of productos) {
-        items.push(await reserveProduct(item, session))
+        items.push(await reserveProduct(item, session)) // NOSONAR
       }
 
       const total = items.reduce((sum, item) => sum + item.subtotal, 0)

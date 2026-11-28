@@ -10,7 +10,7 @@ export const cartCouponStyles = {
   remove:
     "mt-3 inline-flex items-center gap-1 text-xs font-medium text-error transition-colors hover:text-ink",
   removeIcon: "h-3.5 w-3.5",
-  error: "mt-2 text-xs leading-5 text-error",
-  success: "mt-2 text-xs leading-5 text-salvia",
+  error: "mt-2 block text-xs leading-5 text-error",
+  success: "mt-2 block text-xs leading-5 text-salvia",
   codes: "mt-3 space-y-1 text-xs leading-5 text-ink-soft",
 }

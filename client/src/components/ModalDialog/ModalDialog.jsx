@@ -3,12 +3,24 @@ import { modalDialogStyles as styles } from "./ModalDialogStyles"
 
 export function ModalDialog({ labelledBy, onClose, children }) {
   const dialogRef = useRef(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   useEffect(() => {
     const dialog = dialogRef.current
     if (!dialog.open) dialog.showModal()
 
+    // Un click fuera del contenido cae sobre el propio <dialog> (su backdrop).
+    const handleBackdropMouseDown = (event) => {
+      if (event.target === dialog) onCloseRef.current()
+    }
+    dialog.addEventListener("mousedown", handleBackdropMouseDown)
+
     return () => {
+      dialog.removeEventListener("mousedown", handleBackdropMouseDown)
       if (dialog.open) dialog.close()
     }
   }, [])
@@ -18,17 +30,12 @@ export function ModalDialog({ labelledBy, onClose, children }) {
     onClose()
   }
 
-  const handleBackdropMouseDown = (event) => {
-    if (event.target === event.currentTarget) onClose()
-  }
-
   return (
     <dialog
       ref={dialogRef}
       aria-labelledby={labelledBy}
       className={styles.dialog}
       onCancel={handleCancel}
-      onMouseDown={handleBackdropMouseDown}
     >
       <div className={styles.content}>{children}</div>
     </dialog>

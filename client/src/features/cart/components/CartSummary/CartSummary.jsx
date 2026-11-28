@@ -33,19 +33,12 @@ export const CartSummary = ({
             : `Te faltan ${formatCartCurrency.format(summary.freeShippingRemaining)} para obtener envío gratis.`}
         </span>
       </p>
-      <div
-        className={s.progressTrack}
-        role="progressbar"
+      <progress
+        className={s.progress}
         aria-label="Progreso para obtener envío gratis"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(summary.freeShippingProgress)}
-      >
-        <div
-          className={s.progressFill}
-          style={{ width: `${summary.freeShippingProgress}%` }}
-        />
-      </div>
+        max={100}
+        value={Math.round(summary.freeShippingProgress)}
+      />
     </div>
 
     <dl className={s.rows}>

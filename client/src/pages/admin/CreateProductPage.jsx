@@ -102,7 +102,7 @@ export default function CreateProductPage() {
         toast.success("Producto creado correctamente.")
       }
       setPendingPayload(null)
-      navigate(productsListPath)
+      void navigate(productsListPath)
     } catch (error) {
       toast.error(
         error.message ||
