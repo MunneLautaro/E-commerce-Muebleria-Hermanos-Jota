@@ -1,6 +1,7 @@
 import { randomInt } from "node:crypto"
 import mongoose from "mongoose"
 import Product from "../models/product.model.js"
+import { escapeRegex } from "../utils/escapeRegex.js"
 
 const SKU_GENERATION_ATTEMPTS = 5
 
@@ -61,9 +62,6 @@ const createWithUniqueSku = async (productData, attemptsLeft) => {
 
 export const createProductService = (productData) =>
   createWithUniqueSku(productData, SKU_GENERATION_ATTEMPTS)
-
-const escapeRegex = (value) =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`)
 
 const SORT_OPTIONS = {
   name_asc: { nombre: 1, _id: 1 },
