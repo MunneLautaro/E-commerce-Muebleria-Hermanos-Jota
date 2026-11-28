@@ -679,7 +679,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": {{orderQuantity}}\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": {{orderQuantity}}\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -736,7 +736,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -783,7 +783,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -830,7 +830,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": []\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": []\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -880,7 +880,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 0\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 0\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -930,7 +930,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1.5\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1.5\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -980,7 +980,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"no-es-un-id\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"no-es-un-id\",\n      \"cantidad\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1030,7 +1030,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"000000000000000000000000\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"000000000000000000000000\",\n      \"cantidad\": 1\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -1078,7 +1078,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 999999\n    }\n  ]\n}",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 999999\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
