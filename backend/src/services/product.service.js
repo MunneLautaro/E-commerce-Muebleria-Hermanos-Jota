@@ -67,18 +67,21 @@ const SORT_OPTIONS = {
   name_asc: { nombre: 1, _id: 1 },
 }
 
-const getProducts = async ({
-  page = 1,
-  limit = 12,
-  order = "name_asc",
-  q,
-  minPrice,
-  maxPrice,
-} = {}, includeInactive = false) => {
-  const filter = includeInactive ? {} : { isActive: true }
+const ADMIN_STATUS_FILTERS = {
+  todos: {},
+  activos: { isActive: true },
+  inactivos: { isActive: false },
+}
+
+const getProducts = async (
+  { page = 1, limit = 12, order = "name_asc", q, minPrice, maxPrice } = {},
+  { baseFilter = { isActive: true }, searchFields = ["nombre"] } = {},
+) => {
+  const filter = { ...baseFilter }
 
   if (q) {
-    filter.nombre = { $regex: escapeRegex(q), $options: "i" }
+    const pattern = { $regex: escapeRegex(q), $options: "i" }
+    filter.$or = searchFields.map((field) => ({ [field]: pattern }))
   }
 
   if (minPrice !== undefined || maxPrice !== undefined) {
@@ -107,7 +110,11 @@ const getProducts = async ({
 
 export const getProductsService = (params) => getProducts(params)
 
-export const getAdminProductsService = (params) => getProducts(params, true)
+export const getAdminProductsService = ({ estado = "todos", ...params } = {}) =>
+  getProducts(params, {
+    baseFilter: ADMIN_STATUS_FILTERS[estado] ?? ADMIN_STATUS_FILTERS.todos,
+    searchFields: ["nombre", "sku"],
+  })
 
 const getProductById = async (id, includeInactive = false) => {
   if (!mongoose.isValidObjectId(id)) {

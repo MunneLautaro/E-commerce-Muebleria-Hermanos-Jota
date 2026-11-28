@@ -105,6 +105,25 @@ describe("GET /api/products", () => {
     expect(res.body.items.map((p) => p.nombre)).toEqual(["Barato", "Medio"])
   })
 
+  it("no busca por SKU en el catálogo público", async () => {
+    await createProduct({ nombre: "Mesa Palermo", sku: "HJ-123456" })
+
+    const res = await request(app).get("/api/products?q=HJ-123456")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items).toEqual([])
+  })
+
+  it("ignora el filtro de estado del admin y sigue mostrando solo los activos", async () => {
+    await createProduct({ nombre: "Activo" })
+    await createProduct({ nombre: "Inactivo", isActive: false })
+
+    const res = await request(app).get("/api/products?estado=inactivos")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(["Activo"])
+  })
+
   it("también responde en la ruta /api/productos", async () => {
     await createProduct()
 
@@ -235,12 +254,60 @@ describe("GET /api/products/admin", () => {
     ])
   })
 
-  it("devuelve 400 con parámetros inválidos", async () => {
-    const res = await adminApi().get("/api/products/admin?limit=100")
+  it.each([
+    ["activos", ["Activo"]],
+    ["inactivos", ["Inactivo"]],
+    ["todos", ["Activo", "Inactivo"]],
+  ])("filtra por estado=%s", async (estado, esperados) => {
+    await createProduct({ nombre: "Activo" })
+    await createProduct({ nombre: "Inactivo", isActive: false })
+
+    const res = await adminApi().get(`/api/products/admin?estado=${estado}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(esperados)
+    expect(res.body.pagination.total).toBe(esperados.length)
+  })
+
+  it("busca por SKU sin distinguir mayúsculas", async () => {
+    await createProduct({ nombre: "Mesa Palermo", sku: "HJ-123456" })
+    await createProduct({ nombre: "Silla", sku: "HJ-654321" })
+
+    const res = await adminApi().get("/api/products/admin?q=hj-1234")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(["Mesa Palermo"])
+  })
+
+  it("busca por nombre o SKU y combina la búsqueda con el estado", async () => {
+    await createProduct({ nombre: "Mesa HJ-1", sku: "HJ-000900" })
+    await createProduct({ nombre: "Silla", sku: "HJ-100001", isActive: false })
+    await createProduct({ nombre: "Sillón", sku: "HJ-100002" })
+    await createProduct({ nombre: "Aparador", sku: "HJ-200000" })
+
+    const todos = await adminApi().get("/api/products/admin?q=HJ-1")
+    const inactivos = await adminApi().get(
+      "/api/products/admin?q=HJ-1&estado=inactivos",
+    )
+
+    expect(todos.body.items.map((p) => p.nombre)).toEqual([
+      "Mesa HJ-1",
+      "Silla",
+      "Sillón",
+    ])
+    expect(inactivos.body.items.map((p) => p.nombre)).toEqual(["Silla"])
+  })
+
+  it.each([
+    ["limit=100", "limit debe ser 12, 15 o 20"],
+    ["estado=borrados", "estado debe ser todos, activos o inactivos"],
+    ["minPrice=500&maxPrice=100", "minPrice no puede superar maxPrice"],
+  ])("devuelve 400 con %s", async (query, mensaje) => {
+    const res = await adminApi().get(`/api/products/admin?${query}`)
 
     expect(res.status).toBe(400)
     expect(res.body.error).toBe("Parámetros inválidos")
-    expect(res.body.details).toContain("limit debe ser 12, 15 o 20")
+    expect(res.body.details).toContain(mensaje)
   })
 })
 

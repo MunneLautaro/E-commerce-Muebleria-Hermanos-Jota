@@ -15,7 +15,10 @@ import {
   createProductSchema,
   updateProductSchema,
 } from "../schemas/product.schema.js"
-import { productQuerySchema } from "../schemas/product.query.schema.js"
+import {
+  adminProductQuerySchema,
+  productQuerySchema,
+} from "../schemas/product.query.schema.js"
 
 const router = Router()
 
@@ -32,7 +35,7 @@ router.get(
   "/admin",
   requireAuth,
   requireAdmin,
-  validateQuery(productQuerySchema),
+  validateQuery(adminProductQuerySchema),
   getAdminProducts,
 )
 router.get(

@@ -46,3 +46,12 @@ export const productQuerySchema = yup.object({
     value?.maxPrice === undefined ||
     value.minPrice <= value.maxPrice,
 )
+
+export const ADMIN_PRODUCT_STATUSES = ["todos", "activos", "inactivos"]
+
+export const adminProductQuerySchema = productQuerySchema.shape({
+  estado: yup
+    .string()
+    .oneOf(ADMIN_PRODUCT_STATUSES, "estado debe ser todos, activos o inactivos")
+    .default("todos"),
+})
