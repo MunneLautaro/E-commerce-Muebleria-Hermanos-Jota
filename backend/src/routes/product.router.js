@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
   createProduct,
   getProducts,
+  getFeaturedProducts,
   getAdminProducts,
   getProductById,
   getAdminProductById,
@@ -31,6 +32,7 @@ router.post(
   createProduct,
 )
 router.get("/", validateQuery(productQuerySchema), getProducts)
+router.get("/destacados", getFeaturedProducts)
 router.get(
   "/admin",
   requireAuth,

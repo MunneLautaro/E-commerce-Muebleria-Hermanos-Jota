@@ -2,9 +2,11 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { ProductList } from "../../features/products/components/ProductList/ProductList"
-import { ProductListSkeleton } from "../../features/products/components/ProductListSkeleton/ProductListSkeleton"
-import { fetchApi } from "../../services/api"
+import {
+  ProductList,
+  ProductListSkeleton,
+  productService,
+} from "../../features/products"
 import { homeStyles } from "./HomeStyles"
 
 const homeDescription =
@@ -36,14 +38,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const response = await fetchApi("/products?limit=12&order=name_asc")
-        const products = response.items
+        const { items } = await productService.getFeaturedProducts()
 
-        const sortedProducts = [...products].sort(
-          (a, b) => (b.vendidos ?? 0) - (a.vendidos ?? 0),
-        )
-
-        setFeaturedProducts(sortedProducts.slice(0, 4))
+        setFeaturedProducts(items)
       } catch (err) {
         console.error(err)
         setError("No se pudieron cargar los productos destacados.")

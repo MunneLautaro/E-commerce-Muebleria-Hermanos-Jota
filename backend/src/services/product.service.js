@@ -1,7 +1,10 @@
 import { randomInt } from "node:crypto"
 import mongoose from "mongoose"
 import Product from "../models/product.model.js"
+import PurchaseOrder from "../models/purchaseOrder.model.js"
 import { escapeRegex } from "../utils/escapeRegex.js"
+
+export const BEST_SELLERS_LIMIT = 3
 
 const SKU_GENERATION_ATTEMPTS = 5
 
@@ -108,7 +111,82 @@ const getProducts = async (
   }
 }
 
-export const getProductsService = (params) => getProducts(params)
+const getBestSellerIds = async (limit = BEST_SELLERS_LIMIT) => {
+  const rows = await PurchaseOrder.aggregate([
+    { $match: { estado: "aceptada" } },
+    { $unwind: "$productos" },
+    {
+      $group: {
+        _id: "$productos.producto",
+        vendidos: { $sum: "$productos.cantidad" },
+      },
+    },
+    {
+      $lookup: {
+        from: Product.collection.name,
+        localField: "_id",
+        foreignField: "_id",
+        pipeline: [{ $match: { isActive: true } }, { $project: { _id: 1 } }],
+        as: "producto",
+      },
+    },
+    { $match: { "producto.0": { $exists: true } } },
+    { $sort: { vendidos: -1, _id: 1 } },
+    { $limit: limit },
+    { $project: { _id: 1 } },
+  ])
+
+  return rows.map(({ _id }) => _id)
+}
+
+export const getProductsService = async (params) => {
+  const [result, bestSellers] = await Promise.all([
+    getProducts(params),
+    getBestSellerIds(),
+  ])
+  const bestSellerIds = new Set(bestSellers.map((id) => id.toString()))
+
+  return {
+    ...result,
+    items: result.items.map((product) => ({
+      ...product,
+      masVendido: bestSellerIds.has(product._id.toString()),
+    })),
+  }
+}
+
+export const FEATURED_PRODUCTS_LIMIT = 4
+
+export const getFeaturedProductsService = async () => {
+  const rankedIds = await getBestSellerIds(FEATURED_PRODUCTS_LIMIT)
+  const missing = FEATURED_PRODUCTS_LIMIT - rankedIds.length
+  const [bestSellers, others] = await Promise.all([
+    Product.find({ _id: { $in: rankedIds }, isActive: true }).lean(),
+    missing > 0
+      ? Product.find({ _id: { $nin: rankedIds }, isActive: true })
+          .sort(SORT_OPTIONS.name_asc)
+          .limit(missing)
+          .lean()
+      : [],
+  ])
+  const byId = new Map(
+    bestSellers.map((product) => [product._id.toString(), product]),
+  )
+  const ranked = rankedIds
+    .map((id) => byId.get(id.toString()))
+    .filter(Boolean)
+    .map((product, index) => ({
+      ...product,
+      masVendido: index < BEST_SELLERS_LIMIT,
+    }))
+
+  return {
+    items: [
+      ...ranked,
+      ...others.map((product) => ({ ...product, masVendido: false })),
+    ].slice(0, FEATURED_PRODUCTS_LIMIT),
+  }
+}
 
 export const getAdminProductsService = ({ estado = "todos", ...params } = {}) =>
   getProducts(params, {
