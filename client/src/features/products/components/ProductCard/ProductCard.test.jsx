@@ -189,6 +189,57 @@ describe("ProductCard", () => {
     })
   })
 
+  describe("leyendas de más vendido y sin stock", () => {
+    test("muestra 'Lo más elegido' en los más vendidos", () => {
+      renderCard({ masVendido: true, stock: 4 })
+
+      expect(screen.getByText("Lo más elegido")).toBeInTheDocument()
+      expect(
+        screen.getByRole("link", {
+          name: "Ver detalle del producto Mesa Roble, uno de los más vendidos",
+        }),
+      ).toBeInTheDocument()
+    })
+
+    test("muestra 'Agotado' y atenúa la imagen cuando no hay stock", () => {
+      renderCard({ stock: 0 })
+
+      expect(screen.getByText("Agotado")).toBeInTheDocument()
+      expect(screen.getByRole("img")).toHaveClass("grayscale-[70%]")
+      expect(
+        screen.getByRole("link", {
+          name: "Ver detalle del producto Mesa Roble, sin stock",
+        }),
+      ).toHaveAttribute("href", "/productos/abc123")
+    })
+
+    test("si un más vendido se agota, prioriza 'Agotado'", () => {
+      renderCard({ masVendido: true, stock: 0 })
+
+      expect(screen.getByText("Agotado")).toBeInTheDocument()
+      expect(screen.queryByText("Lo más elegido")).not.toBeInTheDocument()
+    })
+
+    test("no muestra leyendas en productos comunes con stock", () => {
+      renderCard({ masVendido: false, stock: 3 })
+
+      expect(screen.queryByText("Agotado")).not.toBeInTheDocument()
+      expect(screen.queryByText("Lo más elegido")).not.toBeInTheDocument()
+      expect(screen.getByRole("img")).not.toHaveClass("grayscale-[70%]")
+    })
+
+    test("no muestra 'Agotado' si el stock no viene informado", () => {
+      renderCard({ stock: undefined })
+
+      expect(screen.queryByText("Agotado")).not.toBeInTheDocument()
+    })
+
+    test("no muestra leyendas en modo compact", () => {
+      renderCard({ masVendido: true }, { compact: true })
+      expect(screen.queryByText("Lo más elegido")).not.toBeInTheDocument()
+    })
+  })
+
   describe("modo compact", () => {
     const full = {
       materiales: "Roble",
