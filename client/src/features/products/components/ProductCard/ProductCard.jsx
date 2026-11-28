@@ -1,3 +1,4 @@
+import { Star } from "lucide-react"
 import { Link } from "react-router-dom"
 import { productOptionalFields } from "../../constants/productFields"
 import { productCardStyles } from "./ProductCardStyles"
@@ -8,25 +9,60 @@ const formatPrice = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 })
 
+const getBadge = (product) => {
+  if (typeof product.stock === "number" && product.stock <= 0) {
+    return { label: "Agotado", ariaLabel: "sin stock", variant: "soldOut" }
+  }
+
+  if (product.masVendido) {
+    return {
+      label: "Lo más elegido",
+      ariaLabel: "uno de los más vendidos",
+      variant: "bestSeller",
+    }
+  }
+
+  return null
+}
+
 export const ProductCard = ({ product, compact = false }) => {
   const price = Number(product.precio)
+  const badge = compact ? null : getBadge(product)
+  const soldOut = badge?.variant === "soldOut"
 
   return (
     <Link
       to={`/productos/${product._id}`}
       className={productCardStyles.link}
-      aria-label={`Ver detalle del producto ${product.nombre}`}
+      aria-label={`Ver detalle del producto ${product.nombre}${
+        badge ? `, ${badge.ariaLabel}` : ""
+      }`}
     >
       <article className={productCardStyles.card}>
-        <img
-          src={product.imagenUrl}
-          alt={product.nombre}
-          width={800}
-          height={800}
-          loading="lazy"
-          decoding="async"
-          className={productCardStyles.image(compact)}
-        />
+        <div className={productCardStyles.media}>
+          <img
+            src={product.imagenUrl}
+            alt={product.nombre}
+            width={800}
+            height={800}
+            loading="lazy"
+            decoding="async"
+            className={productCardStyles.image(compact, soldOut)}
+          />
+          {badge && (
+            <span className={productCardStyles.badge(badge.variant)}>
+              {badge.variant === "bestSeller" && (
+                <Star
+                  size={12}
+                  fill="currentColor"
+                  strokeWidth={0}
+                  aria-hidden="true"
+                />
+              )}
+              {badge.label}
+            </span>
+          )}
+        </div>
 
         <div className={productCardStyles.content(compact)}>
           <h2 className={productCardStyles.title(compact)}>{product.nombre}</h2>

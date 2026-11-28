@@ -6,6 +6,7 @@ import Product from "../src/models/product.model.js"
 import User from "../src/models/user.model.js"
 import {
   createProduct,
+  createPurchaseOrder,
   createUser,
   tokenFor,
   validProductBody,
@@ -105,6 +106,25 @@ describe("GET /api/products", () => {
     expect(res.body.items.map((p) => p.nombre)).toEqual(["Barato", "Medio"])
   })
 
+  it("no busca por SKU en el catálogo público", async () => {
+    await createProduct({ nombre: "Mesa Palermo", sku: "HJ-123456" })
+
+    const res = await request(app).get("/api/products?q=HJ-123456")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items).toEqual([])
+  })
+
+  it("ignora el filtro de estado del admin y sigue mostrando solo los activos", async () => {
+    await createProduct({ nombre: "Activo" })
+    await createProduct({ nombre: "Inactivo", isActive: false })
+
+    const res = await request(app).get("/api/products?estado=inactivos")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(["Activo"])
+  })
+
   it("también responde en la ruta /api/productos", async () => {
     await createProduct()
 
@@ -127,6 +147,166 @@ describe("GET /api/products", () => {
     expect(res.status).toBe(400)
     expect(res.body.error).toBe("Parámetros inválidos")
     expect(res.body.details).toContain(mensaje)
+  })
+})
+
+describe("GET /api/products · más vendidos", () => {
+  const sell = (comprador, items, estado = "aceptada") =>
+    createPurchaseOrder(comprador, {
+      estado,
+      productos: items.map(([producto, cantidad]) => ({
+        producto: producto._id,
+        cantidad,
+        subtotal: 1000 * cantidad,
+      })),
+    })
+
+  const bestSellerNames = (res) =>
+    res.body.items
+      .filter((product) => product.masVendido)
+      .map((product) => product.nombre)
+
+  it("marca los 3 productos con más unidades vendidas", async () => {
+    const [a, b, c, d] = await Promise.all(
+      ["A", "B", "C", "D"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [
+      [a, 1],
+      [b, 5],
+    ])
+    await sell(admin, [
+      [c, 3],
+      [d, 2],
+      [a, 3],
+    ])
+
+    const res = await request(app).get("/api/products")
+
+    expect(res.status).toBe(200)
+    expect(bestSellerNames(res)).toEqual(["A", "B", "C"])
+    expect(res.body.items.find((p) => p.nombre === "D").masVendido).toBe(false)
+  })
+
+  it("no cuenta órdenes pendientes ni rechazadas", async () => {
+    const [a, b] = await Promise.all(
+      ["A", "B"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [[a, 1]])
+    await sell(admin, [[b, 10]], "pendiente")
+    await sell(admin, [[b, 10]], "rechazada")
+
+    const res = await request(app).get("/api/products")
+
+    expect(bestSellerNames(res)).toEqual(["A"])
+  })
+
+  it("ignora productos inactivos al armar el ranking", async () => {
+    const products = await Promise.all(
+      ["A", "B", "C", "D"].map((nombre) => createProduct({ nombre })),
+    )
+    const inactive = await createProduct({ nombre: "Z", isActive: false })
+    await sell(admin, [
+      [inactive, 50],
+      ...products.map((product, index) => [product, index + 1]),
+    ])
+
+    const res = await request(app).get("/api/products")
+
+    expect(bestSellerNames(res)).toEqual(["B", "C", "D"])
+  })
+
+  it("no marca nada si todavía no hay ventas", async () => {
+    await createProduct()
+
+    const res = await request(app).get("/api/products")
+
+    expect(res.body.items[0].masVendido).toBe(false)
+  })
+})
+
+describe("GET /api/products/destacados", () => {
+  const sell = (comprador, items, estado = "aceptada") =>
+    createPurchaseOrder(comprador, {
+      estado,
+      productos: items.map(([producto, cantidad]) => ({
+        producto: producto._id,
+        cantidad,
+        subtotal: 1000 * cantidad,
+      })),
+    })
+
+  const names = (res) => res.body.items.map((product) => product.nombre)
+
+  it("devuelve los 4 más vendidos ordenados por unidades vendidas", async () => {
+    const [a, b, c, d, e] = await Promise.all(
+      ["A", "B", "C", "D", "E"].map((nombre) => createProduct({ nombre })),
+    )
+    await sell(admin, [
+      [a, 1],
+      [b, 5],
+      [c, 2],
+      [d, 4],
+      [e, 3],
+    ])
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(res.status).toBe(200)
+    expect(names(res)).toEqual(["B", "D", "E", "C"])
+    expect(res.body.items.map((product) => product.masVendido)).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ])
+  })
+
+  it("completa con otros productos por nombre si hay pocas ventas", async () => {
+    const [, , mesa] = await Promise.all(
+      ["Aparador", "Banco", "Mesa", "Sillón", "Biblioteca"].map((nombre) =>
+        createProduct({ nombre }),
+      ),
+    )
+    await sell(admin, [[mesa, 2]])
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(names(res)).toEqual(["Mesa", "Aparador", "Banco", "Biblioteca"])
+    expect(res.body.items[0].masVendido).toBe(true)
+    expect(res.body.items.slice(1).every((p) => !p.masVendido)).toBe(true)
+  })
+
+  it("devuelve los primeros por nombre si todavía no hay ventas", async () => {
+    await Promise.all(
+      ["Sillón", "Mesa", "Aparador"].map((nombre) => createProduct({ nombre })),
+    )
+
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(names(res)).toEqual(["Aparador", "Mesa", "Sillón"])
+  })
+
+  it("no incluye productos inactivos ni ventas no aceptadas", async () => {
+    const [activo, otro] = await Promise.all(
+      ["Activo", "Otro"].map((nombre) => createProduct({ nombre })),
+    )
+    const inactivo = await createProduct({ nombre: "Inactivo", isActive: false })
+    await sell(admin, [[inactivo, 20]])
+    await sell(admin, [[otro, 10]], "rechazada")
+    await sell(admin, [[activo, 1]])
+
+    const res = await request(app).get("/api/productos/destacados")
+
+    expect(res.status).toBe(200)
+    expect(names(res)).toEqual(["Activo", "Otro"])
+    expect(res.body.items[1].masVendido).toBe(false)
+  })
+
+  it("devuelve una lista vacía si no hay productos", async () => {
+    const res = await request(app).get("/api/products/destacados")
+
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ items: [] })
   })
 })
 
@@ -235,12 +415,60 @@ describe("GET /api/products/admin", () => {
     ])
   })
 
-  it("devuelve 400 con parámetros inválidos", async () => {
-    const res = await adminApi().get("/api/products/admin?limit=100")
+  it.each([
+    ["activos", ["Activo"]],
+    ["inactivos", ["Inactivo"]],
+    ["todos", ["Activo", "Inactivo"]],
+  ])("filtra por estado=%s", async (estado, esperados) => {
+    await createProduct({ nombre: "Activo" })
+    await createProduct({ nombre: "Inactivo", isActive: false })
+
+    const res = await adminApi().get(`/api/products/admin?estado=${estado}`)
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(esperados)
+    expect(res.body.pagination.total).toBe(esperados.length)
+  })
+
+  it("busca por SKU sin distinguir mayúsculas", async () => {
+    await createProduct({ nombre: "Mesa Palermo", sku: "HJ-123456" })
+    await createProduct({ nombre: "Silla", sku: "HJ-654321" })
+
+    const res = await adminApi().get("/api/products/admin?q=hj-1234")
+
+    expect(res.status).toBe(200)
+    expect(res.body.items.map((p) => p.nombre)).toEqual(["Mesa Palermo"])
+  })
+
+  it("busca por nombre o SKU y combina la búsqueda con el estado", async () => {
+    await createProduct({ nombre: "Mesa HJ-1", sku: "HJ-000900" })
+    await createProduct({ nombre: "Silla", sku: "HJ-100001", isActive: false })
+    await createProduct({ nombre: "Sillón", sku: "HJ-100002" })
+    await createProduct({ nombre: "Aparador", sku: "HJ-200000" })
+
+    const todos = await adminApi().get("/api/products/admin?q=HJ-1")
+    const inactivos = await adminApi().get(
+      "/api/products/admin?q=HJ-1&estado=inactivos",
+    )
+
+    expect(todos.body.items.map((p) => p.nombre)).toEqual([
+      "Mesa HJ-1",
+      "Silla",
+      "Sillón",
+    ])
+    expect(inactivos.body.items.map((p) => p.nombre)).toEqual(["Silla"])
+  })
+
+  it.each([
+    ["limit=100", "limit debe ser 12, 15 o 20"],
+    ["estado=borrados", "estado debe ser todos, activos o inactivos"],
+    ["minPrice=500&maxPrice=100", "minPrice no puede superar maxPrice"],
+  ])("devuelve 400 con %s", async (query, mensaje) => {
+    const res = await adminApi().get(`/api/products/admin?${query}`)
 
     expect(res.status).toBe(400)
     expect(res.body.error).toBe("Parámetros inválidos")
-    expect(res.body.details).toContain("limit debe ser 12, 15 o 20")
+    expect(res.body.details).toContain(mensaje)
   })
 })
 

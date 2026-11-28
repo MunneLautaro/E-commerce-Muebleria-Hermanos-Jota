@@ -1,13 +1,15 @@
 import { useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { useAuth } from "./useAuth"
 import { registerSchema } from "../schemas/auth.schema"
+import { getRedirectState } from "../utils/redirect"
 
 export const useRegisterForm = () => {
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const {
     register,
@@ -38,7 +40,10 @@ export const useRegisterForm = () => {
       })
 
       toast.success("¡Cuenta creada! Ingresá con tu email y contraseña.")
-      void navigate("/login", { replace: true, state: { email } })
+      void navigate("/login", {
+        replace: true,
+        state: { ...getRedirectState(location.state), email },
+      })
     } catch (error) {
       const mensaje = error.message || "Error al crear la cuenta."
       setError("root", { type: "server", message: mensaje })

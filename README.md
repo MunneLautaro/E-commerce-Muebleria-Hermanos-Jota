@@ -261,6 +261,8 @@ La API utiliza el prefijo `/api`.
 | Método   | Ruta                 | Descripción                                                                                                                                                                                                      |
 | -------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`    | `/api/productos`     | Devuelve el listado completo de productos.                                                                                                                                                                       |
+| `GET`    | `/api/productos/destacados` | Devuelve los 4 productos activos más vendidos según las órdenes aceptadas, ordenados por unidades vendidas. Si hay menos de 4 con ventas, completa con otros productos activos por nombre. Los 3 primeros vienen con `masVendido: true`. Es público y lo usa el Home. |
+| `GET`    | `/api/productos/admin` | Lista todos los productos, activos e inactivos, con la misma paginación que el catálogo. Acepta `estado` (`todos`, `activos` o `inactivos`; por defecto `todos`) y `q`, que busca por nombre o SKU. Solo admin. |
 | `GET`    | `/api/productos/:id` | Devuelve un producto por su identificador.                                                                                                                                                                       |
 | `POST`   | `/api/productos`     | Crea un producto con nombre, precio, stock, descripción, medidas, URL de imagen y atributos personalizados. El SKU se genera automáticamente con prefijo `HJ-`. La protección por rol está temporalmente desactivada. |
 | `PUT`    | `/api/productos/:id` | Actualiza un producto. La protección por rol está temporalmente desactivada.                                                                                                                                        |
@@ -271,6 +273,9 @@ La API utiliza el prefijo `/api`.
 | `POST`   | `/api/chat`          | Envía un mensaje al workflow de n8n y devuelve la respuesta del asistente.                                                                                                                                       |
 | `GET`    | `/api/auth/me`       | Devuelve el usuario autenticado. Requiere `Authorization: Bearer <token>`.                                                                                                                                       |
 | `POST`   | `/api/auth/logout`   | Confirma el cierre de sesión. La sesión es stateless: el cliente elimina el token de `localStorage`.                                                                                                             |
+| `POST`   | `/api/ordenes`       | Crea una orden de compra con `{ productos: [{ producto, cantidad }], envio: { nombreCompleto, telefono, direccion, altura, ciudad, codigoPostal } }`. Todos los datos de envío son obligatorios y quedan guardados en la orden. Toma los precios de la base, calcula subtotales y total y descuenta el stock en una transacción: si un producto no está disponible o no tiene stock, no se descuenta nada. Requiere un usuario autenticado y activo. |
+| `GET`    | `/api/ordenes`       | Lista todas las órdenes, de la más nueva a la más vieja, con comprador y productos populados. Acepta `page` y `limit` (12, 15 o 20) y los filtros opcionales y combinables `estado` (`pendiente`, `aceptada` o `rechazada`), `desde` y `hasta` (`AAAA-MM-DD`, en la hora de Argentina; `hasta` incluye el día completo) y `q`, que busca por número de orden exacto o por nombre o email del comprador. Solo admin.                                                                  |
+| `GET`    | `/api/ordenes/usuario/:compradorId` | Lista las órdenes de un usuario con la misma paginación. De la más nueva a la más vieja y sin filtros. Cada usuario ve solo las suyas; un admin puede ver las de cualquiera.                                                                           |
 
 Para habilitar el panel de carga, registrá primero el usuario y asignale el rol `admin` directamente en MongoDB:
 
@@ -335,7 +340,7 @@ El backend sigue una separación por responsabilidades:
   registro de peticiones y manejo de errores.
 - **Config** contiene la configuración de CORS.
 
-MongoDB Atlas almacena usuarios, productos y consultas de contacto. El chatbot
+MongoDB Atlas almacena usuarios, productos, órdenes de compra y consultas de contacto. El chatbot
 se integra mediante n8n; la persistencia de sus mensajes la realiza el
 workflow en MongoDB Atlas.
 

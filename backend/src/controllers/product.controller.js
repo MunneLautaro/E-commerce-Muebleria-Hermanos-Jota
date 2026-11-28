@@ -1,6 +1,7 @@
 import {
   createProductService,
   getProductsService,
+  getFeaturedProductsService,
   getAdminProductsService,
   getProductByIdService,
   getAdminProductByIdService,
@@ -20,6 +21,15 @@ export const createProduct = async (req, res, next) => {
 export const getProducts = async (req, res, next) => {
   try {
     const products = await getProductsService(req.validatedQuery)
+    return res.json(products)
+  } catch (error) {
+    return next(error)
+  }
+}
+
+export const getFeaturedProducts = async (req, res, next) => {
+  try {
+    const products = await getFeaturedProductsService()
     return res.json(products)
   } catch (error) {
     return next(error)

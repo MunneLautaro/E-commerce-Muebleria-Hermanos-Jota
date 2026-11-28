@@ -1,7 +1,9 @@
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import mongoose from "mongoose"
 import User from "../src/models/user.model.js"
 import Product from "../src/models/product.model.js"
+import PurchaseOrder from "../src/models/purchaseOrder.model.js"
 
 export const DEFAULT_PASSWORD = "password123"
 
@@ -50,3 +52,37 @@ export const createProduct = (overrides = {}) => {
     ...overrides,
   })
 }
+
+export const validShippingBody = (overrides = {}) => ({
+  nombreCompleto: "Ana Pérez",
+  telefono: "11 5555-1234",
+  direccion: "Av. Corrientes",
+  altura: "1234",
+  ciudad: "Buenos Aires",
+  codigoPostal: "1043",
+  ...overrides,
+})
+
+export const createPurchaseOrderAt = async (comprador, createdAt, overrides = {}) => {
+  const order = await createPurchaseOrder(comprador, overrides)
+  await PurchaseOrder.collection.updateOne(
+    { _id: order._id },
+    { $set: { createdAt: new Date(createdAt) } },
+  )
+  return order
+}
+
+export const createPurchaseOrder = (comprador, overrides = {}) =>
+  PurchaseOrder.create({
+    envio: validShippingBody(),
+    productos: [
+      {
+        producto: new mongoose.Types.ObjectId(),
+        cantidad: 1,
+        subtotal: 1000,
+      },
+    ],
+    total: 1000,
+    comprador: comprador._id,
+    ...overrides,
+  })

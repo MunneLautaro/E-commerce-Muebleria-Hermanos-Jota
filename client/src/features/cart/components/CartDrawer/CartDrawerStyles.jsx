@@ -16,6 +16,9 @@ export const cartDrawerStyles = {
   closeButton:
     "inline-flex h-9 w-9 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro",
   content: "flex-1 overflow-y-auto px-5 py-5",
+  footer: "border-t border-linea px-5 py-4",
+  viewCartButton:
+    "inline-flex w-full items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
   loadingText: "text-sm text-ink-soft",
   errorText: "text-sm text-error",
   emptyContainer:
@@ -33,8 +36,10 @@ export const cartDrawerStyles = {
   itemName: "truncate font-medium text-ink",
   quantityControls: "mt-2 flex items-center gap-2",
   quantityButton:
-    "inline-flex h-8 w-8 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro",
+    "inline-flex h-8 w-8 items-center justify-center rounded-full border border-linea text-siena transition-colors hover:bg-alabastro disabled:cursor-not-allowed disabled:opacity-40",
+  quantityIcon: "h-4 w-4",
   quantityText: "min-w-9 text-center text-sm font-medium text-ink-soft",
+  stockText: "mt-1 text-xs text-ink-soft",
   removeButton:
     "inline-flex h-10 w-10 items-center justify-center rounded-full border border-linea text-error transition-colors hover:bg-error-bg",
 }

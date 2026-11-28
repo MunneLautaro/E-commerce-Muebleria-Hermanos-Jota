@@ -37,6 +37,34 @@
     {
       "key": "sessionId",
       "value": "postman-test-session"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@example.com"
+    },
+    {
+      "key": "adminPassword",
+      "value": "PEGAR_PASSWORD_DEL_ADMIN"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "adminUserId",
+      "value": ""
+    },
+    {
+      "key": "purchaseOrderId",
+      "value": ""
+    },
+    {
+      "key": "orderQuantity",
+      "value": "1"
     }
   ],
   "item": [
@@ -167,7 +195,63 @@
                   "pm.test('Login exitoso', function () {",
                   "    pm.response.to.have.status(200);",
                   "});",
-                  "pm.collectionVariables.set('token', pm.response.json().token);"
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('token', data.token);",
+                  "    pm.collectionVariables.set('userId', data.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login admin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login de admin exitoso', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.test('El usuario tiene rol admin', function () {",
+                  "        pm.expect(data.user.role).to.eql('admin');",
+                  "    });",
+                  "    pm.collectionVariables.set('adminToken', data.token);",
+                  "    pm.collectionVariables.set('adminUserId', data.user.id);",
+                  "}"
                 ]
               }
             }
@@ -356,7 +440,7 @@
     },
     {
       "name": "Admin products",
-      "description": "Rutas administrativas disponibles sin token mientras los middlewares de autenticación están comentados.",
+      "description": "Rutas administrativas: requieren el token de un usuario admin (ejecutar antes Auth > Login admin).",
       "item": [
         {
           "name": "List all products",
@@ -385,7 +469,13 @@
                   "value": "name_asc"
                 }
               ]
-            }
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ]
           }
         },
         {
@@ -402,7 +492,13 @@
                 "admin",
                 "{{productId}}"
               ]
-            }
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ]
           }
         },
         {
@@ -413,6 +509,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "body": {
@@ -456,6 +556,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
               }
             ],
             "body": {
@@ -492,8 +596,952 @@
                 "products",
                 "{{productId}}"
               ]
-            }
+            },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ]
           }
+        },
+        {
+          "name": "Reactivate product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "products",
+                "{{productId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Producto reactivado\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pm.response.json().isActive).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Órdenes de compra",
+      "description": "Órdenes de compra (/api/ordenes). Antes de correr la carpeta: Auth > Login (cliente), Auth > Login admin y tener en {{productId}} un producto activo con stock (se puede crear con Admin products > Create product). Crear una orden descuenta stock del producto.",
+      "item": [
+        {
+          "name": "Crear orden",
+          "item": [
+            {
+              "name": "Create purchase order",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": {{orderQuantity}}\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Orden creada', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "if (pm.response.code === 201) {",
+                      "    const order = pm.response.json();",
+                      "    const quantity = Number(pm.collectionVariables.get('orderQuantity'));",
+                      "    pm.test('La orden queda aceptada y pertenece al usuario logueado', function () {",
+                      "        pm.expect(order.estado).to.eql('aceptada');",
+                      "        pm.expect(order.comprador).to.eql(pm.collectionVariables.get('userId'));",
+                      "    });",
+                      "    pm.test('El total coincide con la suma de los subtotales', function () {",
+                      "        const sum = order.productos.reduce((acc, p) => acc + p.subtotal, 0);",
+                      "        pm.expect(order.total).to.eql(sum);",
+                      "        pm.expect(order.productos[0].cantidad).to.eql(quantity);",
+                      "    });",
+                      "    pm.collectionVariables.set('purchaseOrderId', order._id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order without token (401)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Sin token responde 401', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order with invalid token (401)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer token-invalido"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Token inválido responde 401', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order without products (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Responde 400 con el detalle de la validación', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.error).to.eql('Datos inválidos');",
+                      "    pm.expect(data.details).to.include(\"La compra debe contener al menos un producto\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order with invalid quantity (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 0\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Responde 400 con el detalle de la validación', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.error).to.eql('Datos inválidos');",
+                      "    pm.expect(data.details).to.include(\"La cantidad debe ser al menos 1\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order with decimal quantity (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 1.5\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Responde 400 con el detalle de la validación', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.error).to.eql('Datos inválidos');",
+                      "    pm.expect(data.details).to.include(\"La cantidad debe ser un número entero\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order with invalid product id (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"no-es-un-id\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Responde 400 con el detalle de la validación', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.error).to.eql('Datos inválidos');",
+                      "    pm.expect(data.details).to.include(\"El ID del producto no es válido\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order with nonexistent product (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"000000000000000000000000\",\n      \"cantidad\": 1\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Producto inexistente responde 400', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    pm.expect(pm.response.json().error).to.include(\"Uno de los productos ya no está disponible\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create purchase order without stock (400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"envio\": {\n    \"nombreCompleto\": \"Ana Pérez\",\n    \"telefono\": \"11 5555-1234\",\n    \"direccion\": \"Av. Corrientes\",\n    \"altura\": \"1234\",\n    \"ciudad\": \"Buenos Aires\",\n    \"codigoPostal\": \"1043\"\n  },\n  \"productos\": [\n    {\n      \"producto\": \"{{productId}}\",\n      \"cantidad\": 999999\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Stock insuficiente responde 400', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "    pm.expect(pm.response.json().error).to.include(\"No hay stock suficiente de\");",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Órdenes por comprador",
+          "item": [
+            {
+              "name": "Get my purchase orders",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{userId}}?page=1&limit=12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{userId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "12"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('El cliente ve sus órdenes', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Devuelve órdenes y paginación', function () {",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.items).to.be.an('array');",
+                      "    pm.expect(data.pagination).to.include.keys('total', 'page', 'limit', 'totalPages');",
+                      "    pm.expect(data.pagination.limit).to.eql(12);",
+                      "});",
+                      "pm.test('Todas las órdenes son del usuario logueado', function () {",
+                      "    const userId = pm.collectionVariables.get('userId');",
+                      "    pm.response.json().items.forEach(function (order) {",
+                      "        pm.expect(order.comprador._id).to.eql(userId);",
+                      "    });",
+                      "});",
+                      "pm.test('La orden recién creada aparece en el listado', function () {",
+                      "    const id = pm.collectionVariables.get('purchaseOrderId');",
+                      "    const ids = pm.response.json().items.map(function (o) { return o._id; });",
+                      "    pm.expect(ids).to.include(id);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get my purchase orders page 2",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{userId}}?page=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{userId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "2"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('La página 2 responde 200', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Informa la página pedida', function () {",
+                      "    pm.expect(pm.response.json().pagination.page).to.eql(2);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get my purchase orders with invalid page (400)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{userId}}?page=0",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{userId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('page=0 responde 400', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get another user's purchase orders as client (403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{adminUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{adminUserId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Un cliente no ve órdenes ajenas', function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get purchase orders by buyer without token (401)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{userId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Sin token responde 401', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get purchase orders by buyer as admin",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/{{userId}}?page=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "{{userId}}"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('El admin ve las órdenes de cualquier usuario', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Devuelve órdenes y paginación', function () {",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.items).to.be.an('array');",
+                      "    pm.expect(data.pagination).to.include.keys('total', 'page', 'limit', 'totalPages');",
+                      "    pm.expect(data.pagination.limit).to.eql(12);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get purchase orders by invalid buyer id as admin (400)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes/usuario/no-es-un-id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes",
+                    "usuario",
+                    "no-es-un-id"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('ID de comprador inválido responde 400', function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test('Explica el error', function () {",
+                      "    pm.expect(pm.response.json().error).to.eql('El ID del comprador no es válido');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Todas las órdenes (admin)",
+          "item": [
+            {
+              "name": "Get all purchase orders as admin",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes?page=1&limit=12",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "12"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('El admin ve todas las órdenes', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test('Devuelve órdenes y paginación', function () {",
+                      "    const data = pm.response.json();",
+                      "    pm.expect(data.items).to.be.an('array');",
+                      "    pm.expect(data.pagination).to.include.keys('total', 'page', 'limit', 'totalPages');",
+                      "    pm.expect(data.pagination.limit).to.eql(12);",
+                      "});",
+                      "pm.test('Las órdenes traen el comprador populado sin password', function () {",
+                      "    const items = pm.response.json().items;",
+                      "    if (items.length === 0) return;",
+                      "    pm.expect(items[0].comprador).to.have.property('email');",
+                      "    pm.expect(items[0].comprador).to.not.have.property('password');",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get all purchase orders as client (403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Un cliente no puede listar todas las órdenes', function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get all purchase orders without token (401)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/ordenes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ordenes"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Sin token responde 401', function () {",
+                      "    pm.response.to.have.status(401);",
+                      "});"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },

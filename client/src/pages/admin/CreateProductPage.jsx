@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
+import {
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { useAuth } from "../../features/auth"
+import { getRedirectPath, useAuth } from "../../features/auth"
 import {
   ProductConfirmationModal,
   ProductForm,
@@ -22,10 +28,21 @@ const initialProduct = {
   atributos: [],
 }
 
+const PRODUCTS_LIST_PATH = "/admin/productos"
+
+const getProductsListPath = (state) => {
+  const from = getRedirectPath(state, PRODUCTS_LIST_PATH)
+  return from === PRODUCTS_LIST_PATH || from.startsWith(`${PRODUCTS_LIST_PATH}?`)
+    ? from
+    : PRODUCTS_LIST_PATH
+}
+
 export default function CreateProductPage() {
   const { user, loading } = useAuth()
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const productsListPath = getProductsListPath(location.state)
   const isEditing = Boolean(id)
   const [initialValues, setInitialValues] = useState(initialProduct)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -85,7 +102,7 @@ export default function CreateProductPage() {
         toast.success("Producto creado correctamente.")
       }
       setPendingPayload(null)
-      navigate("/admin")
+      navigate(productsListPath)
     } catch (error) {
       toast.error(
         error.message ||
@@ -113,7 +130,7 @@ export default function CreateProductPage() {
   return (
     <section className={styles.container}>
       <PageMeta title={pageTitle} noIndex />
-      <Link to="/admin" className={styles.backLink}>
+      <Link to={productsListPath} className={styles.backLink}>
         <ArrowLeft size={17} aria-hidden="true" />
         Volver al panel
       </Link>
@@ -133,6 +150,7 @@ export default function CreateProductPage() {
         isEditing={isEditing}
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
+        cancelTo={productsListPath}
       />
 
       <ProductConfirmationModal

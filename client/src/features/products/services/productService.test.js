@@ -73,6 +73,20 @@ describe("productService", () => {
     })
   })
 
+  describe("getFeaturedProducts", () => {
+    test("pide /products/destacados y devuelve la respuesta", async () => {
+      const response = { items: [{ _id: "1", nombre: "Mesa", masVendido: true }] }
+      const request = captureRequest("get", "/products/destacados", response)
+
+      await expect(productService.getFeaturedProducts()).resolves.toEqual(
+        response,
+      )
+      expect(request.method).toBe("GET")
+      expect(request.pathname).toBe("/api/products/destacados")
+      expect(request.search).toBe("")
+    })
+  })
+
   describe("getProductById", () => {
     test("pide el producto por id", async () => {
       const request = captureRequest("get", "/products/:id", { _id: "abc" })

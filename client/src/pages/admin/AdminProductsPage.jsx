@@ -1,61 +1,70 @@
 import { useCallback, useEffect, useState } from "react"
-import { Link, Navigate } from "react-router-dom"
+import { Link, Navigate, useLocation } from "react-router-dom"
 import { toast } from "react-toastify"
+import { Plus, RefreshCw } from "lucide-react"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
+import { Pagination } from "../../components/Pagination/Pagination"
 import { useAuth } from "../../features/auth"
 import { productService } from "../../features/products"
 import {
   AdminPageHeader,
-  AdminPagination,
+  AdminProductFilters,
   AdminProductTable,
   DeleteProductModal,
+  PAGE_SIZE_OPTIONS,
+  PRODUCT_LIST_DEFAULTS,
+  parseProductListParams,
+  useDebouncedSearch,
+  useListSearchParams,
 } from "../../features/admin"
-import { adminProductsPageStyles as styles } from "../../features/admin/styles/AdminProductsPageStyles"
-import { RefreshCw } from "lucide-react"
+import { adminListPageStyles as styles } from "../../features/admin/styles/AdminListPageStyles"
+import { useRequest } from "../../hooks/useRequest"
 
-const initialPagination = {
-  page: 1,
-  limit: 20,
-  total: 0,
-  totalPages: 0,
-}
+const productsMeta = { title: "Panel de productos", noIndex: true }
+const CLEARED_FILTERS = { estado: "todos", q: "" }
 
 export default function AdminProductsPage() {
   const { user, loading } = useAuth()
-  const [products, setProducts] = useState([])
-  const [pagination, setPagination] = useState(initialPagination)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+  const location = useLocation()
+  const { params, updateParams } = useListSearchParams(
+    parseProductListParams,
+    PRODUCT_LIST_DEFAULTS,
+  )
+  const { page, limit, estado, q } = params
   const [productToDelete, setProductToDelete] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const isAdmin = user?.role === "admin"
 
-  const loadProducts = useCallback(async () => {
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const data = await productService.getAdminProducts({
-        page: currentPage,
-        limit: 20,
+  const request = useCallback(
+    () =>
+      productService.getAdminProducts({
+        page,
+        limit,
         order: "name_asc",
-      })
-      setProducts(data.items)
-      setPagination(data.pagination)
-    } catch (requestError) {
-      setError("No se pudieron cargar los productos.")
-      toast.error(requestError.message || "No se pudieron cargar los productos.")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [currentPage])
+        estado,
+        q,
+      }),
+    [page, limit, estado, q],
+  )
+  const { data, error, isLoading, reload } = useRequest(request, {
+    enabled: isAdmin,
+    errorMessage: "No se pudieron cargar los productos.",
+  })
+
+  const commitSearch = useCallback(
+    (value) => updateParams({ q: value }),
+    [updateParams],
+  )
+  const [searchTerm, setSearchTerm] = useDebouncedSearch(q, commitSearch)
+
+  const isPageOutOfRange =
+    !isLoading && data?.items.length === 0 && data.pagination.total > 0 && page > 1
 
   useEffect(() => {
-    if (user?.role !== "admin") return undefined
+    if (isPageOutOfRange) updateParams({ page: 1 })
+  }, [isPageOutOfRange, updateParams])
 
-    const timeoutId = setTimeout(loadProducts, 0)
-    return () => clearTimeout(timeoutId)
-  }, [user, loadProducts])
+  const products = data?.items ?? []
 
   const handleDelete = async () => {
     if (!productToDelete || isDeleting) return
@@ -66,10 +75,10 @@ export default function AdminProductsPage() {
       toast.success("Producto eliminado del catálogo.")
       setProductToDelete(null)
 
-      if (products.length === 1 && currentPage > 1) {
-        setCurrentPage((page) => page - 1)
+      if (products.length === 1 && page > 1) {
+        updateParams({ page: page - 1 })
       } else {
-        await loadProducts()
+        reload()
       }
     } catch (requestError) {
       toast.error(requestError.message || "No se pudo eliminar el producto.")
@@ -81,14 +90,23 @@ export default function AdminProductsPage() {
   if (loading) {
     return (
       <section className={styles.loadingSection} aria-busy="true">
-        <PageMeta title="Panel de productos" noIndex />
+        <PageMeta {...productsMeta} />
         <p className={styles.loadingText}>Verificando permisos...</p>
       </section>
     )
   }
 
   if (!user) return <Navigate to="/login" replace />
-  if (user.role !== "admin") return <Navigate to="/" replace />
+  if (!isAdmin) return <Navigate to="/" replace />
+
+  const pagination = data?.pagination ?? { page, limit, total: 0, totalPages: 0 }
+  const hasActiveFilters = estado !== PRODUCT_LIST_DEFAULTS.estado || q !== ""
+  const editState = { from: `${location.pathname}${location.search}` }
+
+  const clearFilters = () => {
+    setSearchTerm("")
+    updateParams(CLEARED_FILTERS)
+  }
 
   const renderCatalog = () => {
     if (isLoading) {
@@ -99,11 +117,7 @@ export default function AdminProductsPage() {
       return (
         <div className={styles.errorFeedback}>
           <p className={styles.errorText}>{error}</p>
-          <button
-            type="button"
-            onClick={loadProducts}
-            className={styles.retryButton}
-          >
+          <button type="button" onClick={reload} className={styles.retryButton}>
             Intentar nuevamente
           </button>
         </div>
@@ -111,9 +125,16 @@ export default function AdminProductsPage() {
     }
 
     if (products.length === 0) {
-      return (
+      return hasActiveFilters ? (
         <div className={styles.feedback}>
-          <p>Todavía no hay productos activos.</p>
+          <p>No hay productos que coincidan con los filtros.</p>
+          <button type="button" onClick={clearFilters} className={styles.emptyButton}>
+            Limpiar filtros
+          </button>
+        </div>
+      ) : (
+        <div className={styles.feedback}>
+          <p>Todavía no hay productos cargados.</p>
           <Link to="/admin/crear-producto" className={styles.emptyButton}>
             Crear el primero
           </Link>
@@ -122,19 +143,34 @@ export default function AdminProductsPage() {
     }
 
     return (
-      <AdminProductTable products={products} onDelete={setProductToDelete} />
+      <AdminProductTable
+        products={products}
+        onDelete={setProductToDelete}
+        editState={editState}
+      />
     )
   }
 
   return (
     <div className={styles.container}>
-      <PageMeta title="Panel de productos" noIndex />
-      <AdminPageHeader />
+      <PageMeta {...productsMeta} />
+      <AdminPageHeader
+        title="Gestionar productos"
+        description="Consultá el catálogo y actualizá rápidamente la información de cada producto."
+        action={
+          <Link to="/admin/crear-producto" className={styles.createLink}>
+            <Plus size={18} aria-hidden="true" />
+            Nuevo producto
+          </Link>
+        }
+      />
 
-      <section className={styles.catalog}>
+      <section className={styles.catalog} aria-labelledby="admin-products-title">
         <div className={styles.catalogHeader}>
           <div>
-            <h2 className={styles.catalogTitle}>Catálogo completo</h2>
+            <h2 id="admin-products-title" className={styles.catalogTitle}>
+              Catálogo completo
+            </h2>
             <p className={styles.catalogCount}>
               {pagination.total}{" "}
               {pagination.total === 1 ? "producto" : "productos"}
@@ -142,7 +178,7 @@ export default function AdminProductsPage() {
           </div>
           <button
             type="button"
-            onClick={loadProducts}
+            onClick={reload}
             disabled={isLoading}
             className={styles.refreshButton}
           >
@@ -151,14 +187,26 @@ export default function AdminProductsPage() {
           </button>
         </div>
 
+        <AdminProductFilters
+          estado={estado}
+          searchTerm={searchTerm}
+          hasFilters={hasActiveFilters || searchTerm.trim() !== ""}
+          onEstadoChange={(value) => updateParams({ estado: value })}
+          onSearchChange={setSearchTerm}
+          onClear={clearFilters}
+        />
+
         {renderCatalog()}
 
-        {!isLoading && !error && (
-          <AdminPagination
+        {!isLoading && !error && products.length > 0 && (
+          <Pagination
+            label="Paginación de productos"
             pagination={pagination}
-            currentPage={currentPage}
+            currentPage={page}
             isLoading={isLoading}
-            onPageChange={setCurrentPage}
+            onPageChange={(nextPage) => updateParams({ page: nextPage })}
+            limitOptions={PAGE_SIZE_OPTIONS}
+            onLimitChange={(nextLimit) => updateParams({ limit: nextLimit })}
           />
         )}
       </section>

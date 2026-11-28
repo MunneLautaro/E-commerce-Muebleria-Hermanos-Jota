@@ -1,14 +1,9 @@
 import { Pencil, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { formatPrice } from "../../../../utils/formatPrice"
 import { adminProductTableStyles as styles } from "./AdminProductTableStyles"
 
-const formatPrice = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-})
-
-export function AdminProductTable({ products, onDelete }) {
+export function AdminProductTable({ products, onDelete, editState }) {
   return (
     <div className={styles.wrapper}>
       <table className={styles.table}>
@@ -41,7 +36,7 @@ export function AdminProductTable({ products, onDelete }) {
                 </div>
               </td>
               <td className={styles.priceCell}>
-                {formatPrice.format(Number(product.precio) || 0)}
+                {formatPrice(product.precio)}
               </td>
               <td className={styles.statusCell}>
                 <span
@@ -57,6 +52,7 @@ export function AdminProductTable({ products, onDelete }) {
               <td className={styles.actionCell}>
                 <Link
                   to={`/admin/editar-producto/${product._id}`}
+                  state={editState}
                   className={styles.editButton}
                 >
                   <Pencil size={15} aria-hidden="true" />

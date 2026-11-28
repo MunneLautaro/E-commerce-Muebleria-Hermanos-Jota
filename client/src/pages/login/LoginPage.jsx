@@ -1,13 +1,19 @@
-import { Navigate } from "react-router-dom"
+import { Navigate, useLocation } from "react-router-dom"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
-import { GoogleAuthProvider, LoginForm, useAuth } from "../../features/auth"
+import {
+  GoogleAuthProvider,
+  LoginForm,
+  getRedirectPath,
+  useAuth,
+} from "../../features/auth"
 import { loginPageStyles as s } from "./LoginPageStyles"
 
 export default function LoginPage() {
   const { isAuthenticated } = useAuth()
+  const location = useLocation()
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />
+    return <Navigate to={getRedirectPath(location.state)} replace />
   }
 
   return (

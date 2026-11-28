@@ -61,6 +61,12 @@ export const Header = () => {
               </NavLink>
             ))}
 
+            {isAuthenticated && (
+              <NavLink to="/mis-ordenes" className={desktopLinkClass}>
+                Mis órdenes
+              </NavLink>
+            )}
+
             {user?.role === "admin" && (
               <NavLink
                 to="/admin"
@@ -147,6 +153,16 @@ export const Header = () => {
                   {label}
                 </NavLink>
               ))}
+
+              {isAuthenticated && (
+                <NavLink
+                  to="/mis-ordenes"
+                  className={mobileLinkClass}
+                  onClick={closeMenu}
+                >
+                  Mis órdenes
+                </NavLink>
+              )}
 
               {user?.role === "admin" && (
                 <NavLink

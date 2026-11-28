@@ -1,4 +1,5 @@
 import { screen } from "@testing-library/react"
+import { useLocation } from "react-router-dom"
 import { toast } from "react-toastify"
 import { renderWithProviders } from "../../../../test/renderWithProviders"
 import { LoginForm } from "./LoginForm"
@@ -60,6 +61,48 @@ describe("LoginForm", () => {
       "Credenciales inválidas",
     )
     expect(toast.error).toHaveBeenCalledWith("Credenciales inválidas")
+  })
+
+  test("vuelve a la página de origen después de iniciar sesión", async () => {
+    const PathnameProbe = () => (
+      <span data-testid="pathname">{useLocation().pathname}</span>
+    )
+    const { user } = renderWithProviders(
+      <>
+        <LoginForm />
+        <PathnameProbe />
+      </>,
+      {
+        route: "/login",
+        routeState: { from: "/carrito" },
+        auth: { login: vi.fn().mockResolvedValue() },
+      },
+    )
+
+    await user.type(screen.getByLabelText("Correo electrónico"), "a@b.com")
+    await user.type(screen.getByLabelText("Contraseña"), "secreta123")
+    await submit(user)
+
+    expect(await screen.findByTestId("pathname")).toHaveTextContent("/carrito")
+  })
+
+  test("el enlace al registro conserva la página de origen", async () => {
+    const StateProbe = () => (
+      <span data-testid="state">{JSON.stringify(useLocation().state ?? null)}</span>
+    )
+    const { user } = renderWithProviders(
+      <>
+        <LoginForm />
+        <StateProbe />
+      </>,
+      { route: "/login", routeState: { from: "/carrito", email: "a@b.com" } },
+    )
+
+    await user.click(screen.getByRole("link", { name: "Registrate acá" }))
+
+    expect(JSON.parse(screen.getByTestId("state").textContent)).toEqual({
+      from: "/carrito",
+    })
   })
 
   test("precarga el email recibido por location.state", () => {

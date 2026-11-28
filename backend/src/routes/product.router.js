@@ -2,6 +2,7 @@ import { Router } from "express"
 import {
   createProduct,
   getProducts,
+  getFeaturedProducts,
   getAdminProducts,
   getProductById,
   getAdminProductById,
@@ -15,7 +16,10 @@ import {
   createProductSchema,
   updateProductSchema,
 } from "../schemas/product.schema.js"
-import { productQuerySchema } from "../schemas/product.query.schema.js"
+import {
+  adminProductQuerySchema,
+  productQuerySchema,
+} from "../schemas/product.query.schema.js"
 
 const router = Router()
 
@@ -28,11 +32,12 @@ router.post(
   createProduct,
 )
 router.get("/", validateQuery(productQuerySchema), getProducts)
+router.get("/destacados", getFeaturedProducts)
 router.get(
   "/admin",
   requireAuth,
   requireAdmin,
-  validateQuery(productQuerySchema),
+  validateQuery(adminProductQuerySchema),
   getAdminProducts,
 )
 router.get(
