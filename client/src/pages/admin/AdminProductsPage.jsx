@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "react"
 import { Link, Navigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import { PageMeta } from "../../components/PageMeta/PageMeta"
+import { Pagination } from "../../components/Pagination/Pagination"
 import { useAuth } from "../../features/auth"
 import { productService } from "../../features/products"
 import {
   AdminPageHeader,
-  AdminPagination,
   AdminProductTable,
   DeleteProductModal,
 } from "../../features/admin"
@@ -154,7 +154,8 @@ export default function AdminProductsPage() {
         {renderCatalog()}
 
         {!isLoading && !error && (
-          <AdminPagination
+          <Pagination
+            label="Paginación de productos"
             pagination={pagination}
             currentPage={currentPage}
             isLoading={isLoading}

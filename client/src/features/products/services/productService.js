@@ -1,9 +1,5 @@
 import { fetchApi } from "../../../services/api"
-
-const withQuery = (path, params) => {
-  const query = new URLSearchParams(params).toString()
-  return query ? `${path}?${query}` : path
-}
+import { withQuery } from "../../../services/withQuery"
 
 export const productService = {
   async getProducts(params = {}) {

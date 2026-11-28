@@ -1,12 +1,7 @@
 import { Pencil, Trash2 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { formatPrice } from "../../../../utils/formatPrice"
 import { adminProductTableStyles as styles } from "./AdminProductTableStyles"
-
-const formatPrice = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  maximumFractionDigits: 0,
-})
 
 export function AdminProductTable({ products, onDelete }) {
   return (
@@ -41,7 +36,7 @@ export function AdminProductTable({ products, onDelete }) {
                 </div>
               </td>
               <td className={styles.priceCell}>
-                {formatPrice.format(Number(product.precio) || 0)}
+                {formatPrice(product.precio)}
               </td>
               <td className={styles.statusCell}>
                 <span
