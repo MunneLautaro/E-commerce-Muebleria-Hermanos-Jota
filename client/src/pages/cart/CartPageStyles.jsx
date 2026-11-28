@@ -20,46 +20,7 @@ export const cartPageStyles = {
   emptyText: "mt-3 text-sm text-ink-soft",
   primaryLink:
     "mt-6 inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
-  progress:
-    "mb-4 grid grid-cols-3 rounded-marca border border-linea bg-crema p-2",
-  progressStep:
-    "flex items-center justify-center gap-2 px-2 py-2 text-ink-soft",
-  progressStepActive: "rounded-marca bg-alabastro text-siena",
-  progressNumber:
-    "flex h-7 w-7 items-center justify-center rounded-full border border-linea bg-white text-xs font-medium",
-  progressLabel: "hidden text-xs font-medium sm:inline",
-  stepText: "mb-6 text-xs font-medium uppercase tracking-caption text-salvia",
   actions: "mt-6 flex justify-end",
   checkoutButton:
     "inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:opacity-50",
-  secondaryButton:
-    "inline-flex items-center justify-center rounded-marca border border-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-siena transition-colors hover:bg-alabastro",
-  addressForm:
-    "mt-8 rounded-marca border border-linea bg-white p-5 shadow-tarjeta sm:p-8",
-  addressGrid:
-    "grid gap-5 sm:grid-cols-2",
-  addressField: "flex flex-col",
-  addressLabel: "mb-2 text-sm font-medium text-ink",
-  addressInput: (invalid) =>
-    `rounded-marca border px-3 py-3 text-sm outline-none ${invalid ? "border-error bg-error-bg" : "border-linea bg-white focus:border-siena"}`,
-  addressError: "mt-1 text-xs text-error",
-  saveAddress:
-    "mt-6 flex items-center gap-3 text-sm font-medium text-ink",
-  addressActions:
-    "mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end",
-  paymentLayout:
-    "mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]",
-  paymentList:
-    "space-y-3 rounded-marca border border-linea bg-white p-5 shadow-tarjeta",
-  paymentItem:
-    "flex items-center justify-between gap-4 border-b border-linea py-3 text-sm text-ink last:border-b-0",
-  paymentSummary:
-    "rounded-marca bg-crema p-5 shadow-tarjeta",
-  paymentTotal:
-    "mt-3 flex items-center justify-between border-t border-linea pt-3 font-medium text-siena",
-  modalContent: "min-w-[18rem] sm:min-w-[26rem]",
-  modalEyebrow: "text-xs font-medium uppercase tracking-title text-salvia",
-  modalTitle: "mt-2",
-  modalDescription: "mt-4 text-sm leading-7 text-ink-soft",
-  modalActions: "mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end",
 }
