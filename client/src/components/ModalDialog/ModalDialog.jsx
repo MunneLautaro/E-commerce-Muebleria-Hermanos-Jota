@@ -13,7 +13,6 @@ export function ModalDialog({ labelledBy, onClose, children }) {
     const dialog = dialogRef.current
     if (!dialog.open) dialog.showModal()
 
-    // Un click fuera del contenido cae sobre el propio <dialog> (su backdrop).
     const handleBackdropMouseDown = (event) => {
       if (event.target === dialog) onCloseRef.current()
     }
