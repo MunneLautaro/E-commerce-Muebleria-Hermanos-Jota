@@ -20,4 +20,7 @@ export const cartPageStyles = {
   emptyText: "mt-3 text-sm text-ink-soft",
   primaryLink:
     "mt-6 inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink",
+  actions: "mt-6 flex justify-end",
+  checkoutButton:
+    "inline-flex items-center justify-center rounded-marca bg-siena px-6 py-3 text-sm font-medium uppercase tracking-cta text-white transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:opacity-50",
 }

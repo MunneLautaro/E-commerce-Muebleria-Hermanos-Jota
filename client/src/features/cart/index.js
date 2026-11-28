@@ -12,6 +12,18 @@ export { CartItem } from "./components/CartItem/CartItem"
 export { CartSummary } from "./components/CartSummary/CartSummary"
 export { CartRecommendations } from "./components/CartRecommendations/CartRecommendations"
 export { CartProductModal } from "./components/CartProductModal/CartProductModal"
+export { CheckoutProgress } from "./components/CheckoutProgress/CheckoutProgress"
+export { CheckoutAddressForm } from "./components/CheckoutAddressForm/CheckoutAddressForm"
+export { CheckoutPayment } from "./components/CheckoutPayment/CheckoutPayment"
+export { ConfirmPurchaseModal } from "./components/ConfirmPurchaseModal/ConfirmPurchaseModal"
+export {
+  CHECKOUT_ADDRESS_STORAGE_KEY,
+  hasAddressErrors,
+  loadCheckoutAddress,
+  persistCheckoutAddress,
+  toShippingData,
+  validateCheckoutAddress,
+} from "./utils/checkoutAddress"
 export { CART_BUSINESS_RULES, CART_COUPONS } from "./constants/cartBusinessRules"
 export {
   calculateCartSummary,

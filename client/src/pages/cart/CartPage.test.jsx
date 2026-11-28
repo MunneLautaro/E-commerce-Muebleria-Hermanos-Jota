@@ -1,7 +1,13 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse } from "msw"
+import { useLocation } from "react-router-dom"
 import { toast } from "react-toastify"
-import { CART_STORAGE_KEY, CartProvider } from "../../features/cart"
+import {
+  CART_STORAGE_KEY,
+  CHECKOUT_ADDRESS_STORAGE_KEY,
+  CartProvider,
+  useCart,
+} from "../../features/cart"
 import { apiUrl } from "../../test/msw/handlers"
 import { server } from "../../test/msw/server"
 import { renderWithProviders } from "../../test/renderWithProviders"
@@ -67,12 +73,40 @@ const respondWithProducts = ({
   return detailRequests
 }
 
-const renderCart = () =>
+const signedInAuth = {
+  user: { _id: "user-1", email: "ana@mail.com", role: "user" },
+  isAuthenticated: true,
+}
+
+const guestAuth = { user: null, isAuthenticated: false }
+
+const LocationProbe = () => {
+  const { pathname, state } = useLocation()
+  return (
+    <>
+      <span data-testid="location">{pathname}</span>
+      <span data-testid="location-state">{JSON.stringify(state ?? null)}</span>
+    </>
+  )
+}
+
+const EmptyCartButton = () => {
+  const { clearCart } = useCart()
+  return (
+    <button type="button" onClick={clearCart}>
+      Vaciar desde otra pestaña
+    </button>
+  )
+}
+
+const renderCart = ({ auth = signedInAuth, withEmptyCartButton = false } = {}) =>
   renderWithProviders(
     <CartProvider>
       <CartPage />
+      <LocationProbe />
+      {withEmptyCartButton && <EmptyCartButton />}
     </CartProvider>,
-    { route: "/carrito" },
+    { route: "/carrito", auth },
   )
 
 const summaryValue = (label) =>
@@ -348,5 +382,274 @@ describe("CartPage", () => {
     expect(
       screen.getByRole("button", { name: "Ver detalle de Mesa Roble" }),
     ).toBeInTheDocument()
+  })
+
+  describe("checkout", () => {
+    const address = {
+      nombreCompleto: "Ana Pérez",
+      telefono: "11 5555-1234",
+      direccion: "Av. Corrientes",
+      altura: "1234",
+      ciudad: "Buenos Aires",
+      codigoPostal: "1043",
+    }
+
+    const fillAddress = async (user) => {
+      await user.type(screen.getByLabelText("Nombre completo"), address.nombreCompleto)
+      await user.type(screen.getByLabelText("Teléfono"), address.telefono)
+      await user.type(screen.getByLabelText("Dirección"), address.direccion)
+      await user.type(screen.getByLabelText("Altura"), address.altura)
+      await user.type(screen.getByLabelText("Ciudad"), address.ciudad)
+      await user.type(screen.getByLabelText("Código postal"), address.codigoPostal)
+    }
+
+    const clickNext = async (user) =>
+      user.click(await screen.findByRole("button", { name: "Siguiente" }))
+
+    const goToPayment = async (user) => {
+      await clickNext(user)
+      await fillAddress(user)
+      await clickNext(user)
+    }
+
+    const respondWithOrder = (resolver) => {
+      const requests = []
+      server.use(
+        http.post(apiUrl("/ordenes"), async ({ request }) => {
+          requests.push(await request.json())
+          return resolver()
+        }),
+      )
+      return requests
+    }
+
+    test("pide iniciar sesión antes de cargar la dirección", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      respondWithProducts()
+      const infoToast = vi.spyOn(toast, "info")
+      const { user } = renderCart({ auth: guestAuth })
+
+      await clickNext(user)
+
+      expect(infoToast).toHaveBeenCalledWith(
+        "Iniciá sesión para continuar con tu compra.",
+      )
+      expect(screen.getByTestId("location")).toHaveTextContent("/login")
+      expect(screen.getByTestId("location-state")).toHaveTextContent(
+        JSON.stringify({ from: "/carrito" }),
+      )
+    })
+
+    test("avanza por el carrito y la ubicación hasta la información de pago", async () => {
+      storeCart([{ id: "mesa-1", quantity: 2 }])
+      respondWithProducts()
+      const { user } = renderCart()
+
+      expect(await screen.findByText("Paso 1 de 3")).toBeInTheDocument()
+
+      await clickNext(user)
+
+      expect(screen.getByText("Paso 2 de 3")).toBeInTheDocument()
+      expect(
+        screen.getByRole("heading", { name: "Datos de entrega" }),
+      ).toBeInTheDocument()
+
+      await fillAddress(user)
+      await user.click(
+        screen.getByRole("checkbox", { name: "Guardar para futuras compras" }),
+      )
+      await clickNext(user)
+
+      expect(screen.getByText("Paso 3 de 3")).toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: "Pago" })).toBeInTheDocument()
+      expect(screen.getByText("Mesa Roble")).toBeInTheDocument()
+      expect(screen.getAllByText("$ 300.000").length).toBeGreaterThanOrEqual(2)
+      expect(
+        within(screen.getByRole("region", { name: "Datos de entrega" })).getByText(
+          /Av\. Corrientes 1234, Buenos Aires/,
+        ),
+      ).toBeInTheDocument()
+      expect(
+        JSON.parse(window.localStorage.getItem(CHECKOUT_ADDRESS_STORAGE_KEY)),
+      ).toEqual(address)
+    })
+
+    test("carga los datos guardados y permite dejarlos de guardar", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      window.localStorage.setItem(CHECKOUT_ADDRESS_STORAGE_KEY, JSON.stringify(address))
+      respondWithProducts()
+      const { user } = renderCart()
+
+      await clickNext(user)
+
+      expect(screen.getByLabelText("Nombre completo")).toHaveValue("Ana Pérez")
+      expect(screen.getByLabelText("Teléfono")).toHaveValue("11 5555-1234")
+      expect(
+        screen.getByRole("checkbox", { name: "Guardar para futuras compras" }),
+      ).toBeChecked()
+
+      await user.clear(screen.getByLabelText("Nombre completo"))
+      await user.type(screen.getByLabelText("Nombre completo"), "Ana Modificada")
+      await user.click(
+        screen.getByRole("checkbox", { name: "Guardar para futuras compras" }),
+      )
+      await clickNext(user)
+
+      expect(window.localStorage.getItem(CHECKOUT_ADDRESS_STORAGE_KEY)).toBeNull()
+    })
+
+    test("valida la ubicación antes de avanzar al pago", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      respondWithProducts()
+      const { user } = renderCart()
+
+      await clickNext(user)
+      await clickNext(user)
+
+      expect(screen.getByText("Ingresá tu nombre completo.")).toBeInTheDocument()
+      expect(screen.getByText("Ingresá tu teléfono de contacto.")).toBeInTheDocument()
+      expect(screen.getByText("Ingresá tu dirección de entrega.")).toBeInTheDocument()
+      expect(screen.getByText("Ingresá el número de la dirección.")).toBeInTheDocument()
+      expect(screen.getByText("Ingresá tu ciudad.")).toBeInTheDocument()
+      expect(screen.getByText("Ingresá tu código postal.")).toBeInTheDocument()
+      expect(screen.getByLabelText("Nombre completo")).toHaveAccessibleDescription(
+        "Ingresá tu nombre completo.",
+      )
+      expect(screen.getByText("Paso 2 de 3")).toBeInTheDocument()
+    })
+
+    test("crea la orden en el backend, vacía el carrito y muestra la confirmación", async () => {
+      storeCart([{ id: "mesa-1", quantity: 2 }])
+      respondWithProducts()
+      const orderRequests = respondWithOrder(() =>
+        HttpResponse.json({ _id: "orden-1", total: 300000 }, { status: 201 }),
+      )
+      const { user } = renderCart()
+
+      await goToPayment(user)
+      await user.click(screen.getByRole("button", { name: "Comprar" }))
+
+      const modal = within(screen.getByRole("dialog", { name: "Confirmar compra" }))
+      await user.click(modal.getByRole("button", { name: "Rechazar" }))
+      expect(
+        screen.queryByRole("dialog", { name: "Confirmar compra" }),
+      ).not.toBeInTheDocument()
+      expect(orderRequests).toEqual([])
+
+      await user.click(screen.getByRole("button", { name: "Comprar" }))
+      await user.click(
+        within(screen.getByRole("dialog", { name: "Confirmar compra" })).getByRole(
+          "button",
+          { name: "Confirmar" },
+        ),
+      )
+
+      await waitFor(() =>
+        expect(screen.getByTestId("location")).toHaveTextContent("/compra-confirmada"),
+      )
+      expect(screen.getByTestId("location-state")).toHaveTextContent(
+        JSON.stringify({ orderId: "orden-1" }),
+      )
+      expect(orderRequests).toEqual([
+        { productos: [{ producto: "mesa-1", cantidad: 2 }], envio: address },
+      ])
+      expect(storedCart()).toEqual([])
+    })
+
+    test("conserva el carrito y muestra el error si el backend rechaza la orden", async () => {
+      storeCart([{ id: "mesa-1", quantity: 2 }])
+      respondWithProducts()
+      respondWithOrder(() =>
+        HttpResponse.json(
+          { error: 'No hay stock suficiente de "Mesa Roble". Queda 1 unidad' },
+          { status: 400 },
+        ),
+      )
+      const errorToast = vi.spyOn(toast, "error")
+      const { user } = renderCart()
+
+      await goToPayment(user)
+      await user.click(screen.getByRole("button", { name: "Comprar" }))
+      await user.click(
+        within(screen.getByRole("dialog", { name: "Confirmar compra" })).getByRole(
+          "button",
+          { name: "Confirmar" },
+        ),
+      )
+
+      await waitFor(() =>
+        expect(errorToast).toHaveBeenCalledWith(
+          'No hay stock suficiente de "Mesa Roble". Queda 1 unidad',
+        ),
+      )
+      expect(
+        screen.queryByRole("dialog", { name: "Confirmar compra" }),
+      ).not.toBeInTheDocument()
+      expect(screen.getByTestId("location")).toHaveTextContent("/carrito")
+      expect(storedCart()).toEqual([{ id: "mesa-1", quantity: 2 }])
+    })
+
+    test("el modal muestra el total sin envío ni descuentos", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      respondWithProducts()
+      const { user } = renderCart()
+
+      await goToPayment(user)
+      expect(screen.getByText("$ 165.000")).toBeInTheDocument()
+
+      await user.click(screen.getByRole("button", { name: "Comprar" }))
+
+      const modal = within(screen.getByRole("dialog", { name: "Confirmar compra" }))
+      expect(
+        modal.getByText("Estás a punto de confirmar un pago por $ 150.000."),
+      ).toBeInTheDocument()
+      expect(
+        modal.getByText(/El total no incluye envío ni descuentos/),
+      ).toBeInTheDocument()
+    })
+
+    test("manda a iniciar sesión si la sesión expiró al confirmar", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      respondWithProducts()
+      respondWithOrder(() =>
+        HttpResponse.json({ error: "Token inválido" }, { status: 401 }),
+      )
+      const infoToast = vi.spyOn(toast, "info")
+      const logout = vi.fn().mockResolvedValue()
+      const { user } = renderCart({ auth: { ...signedInAuth, logout } })
+
+      await goToPayment(user)
+      await user.click(screen.getByRole("button", { name: "Comprar" }))
+      await user.click(
+        within(screen.getByRole("dialog", { name: "Confirmar compra" })).getByRole(
+          "button",
+          { name: "Confirmar" },
+        ),
+      )
+
+      await waitFor(() =>
+        expect(screen.getByTestId("location")).toHaveTextContent("/login"),
+      )
+      expect(logout).toHaveBeenCalledTimes(1)
+      expect(infoToast).toHaveBeenCalledWith(
+        "Tu sesión expiró. Iniciá sesión para confirmar la compra.",
+      )
+      expect(storedCart()).toEqual([{ id: "mesa-1", quantity: 1 }])
+    })
+
+    test("vuelve al primer paso si el carrito se vacía durante el checkout", async () => {
+      storeCart([{ id: "mesa-1", quantity: 1 }])
+      respondWithProducts()
+      const { user } = renderCart({ withEmptyCartButton: true })
+
+      await goToPayment(user)
+      expect(screen.getByText("Paso 3 de 3")).toBeInTheDocument()
+
+      await user.click(screen.getByRole("button", { name: "Vaciar desde otra pestaña" }))
+
+      expect(await screen.findByText("Paso 1 de 3")).toBeInTheDocument()
+      expect(screen.getByRole("heading", { name: "Tu carrito está vacío" })).toBeInTheDocument()
+      expect(screen.queryByRole("button", { name: "Comprar" })).not.toBeInTheDocument()
+    })
   })
 })

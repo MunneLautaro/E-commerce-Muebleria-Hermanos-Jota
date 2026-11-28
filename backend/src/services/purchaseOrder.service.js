@@ -47,7 +47,7 @@ const reserveProduct = async ({ producto, cantidad }, session) => {
   }
 }
 
-export const createPurchaseOrderService = async (compradorId, productos) => {
+export const createPurchaseOrderService = async (compradorId, productos, envio) => {
   const session = await mongoose.startSession()
 
   try {
@@ -63,7 +63,7 @@ export const createPurchaseOrderService = async (compradorId, productos) => {
       const total = items.reduce((sum, item) => sum + item.subtotal, 0)
 
       const [created] = await PurchaseOrder.create(
-        [{ productos: items, total, comprador: compradorId }],
+        [{ productos: items, total, comprador: compradorId, envio }],
         { session },
       )
 

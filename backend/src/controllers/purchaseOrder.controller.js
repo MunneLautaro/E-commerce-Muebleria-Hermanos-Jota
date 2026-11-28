@@ -9,6 +9,7 @@ export const createPurchaseOrder = async (req, res, next) => {
     const purchaseOrder = await createPurchaseOrderService(
       req.user.sub,
       req.body.productos,
+      req.body.envio,
     )
 
     return res.status(201).json(purchaseOrder)

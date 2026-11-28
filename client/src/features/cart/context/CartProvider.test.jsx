@@ -10,6 +10,7 @@ const CartControls = () => {
     setItemQuantity,
     limitToStock,
     removeItem,
+    clearCart,
   } = useCart()
   const seeded = useRef(false)
 
@@ -37,6 +38,9 @@ const CartControls = () => {
       </button>
       <button type="button" onClick={() => removeItem("mesa-1")}>
         Quitar
+      </button>
+      <button type="button" onClick={() => clearCart()}>
+        Vaciar carrito
       </button>
     </div>
   )
@@ -84,5 +88,16 @@ describe("CartProvider", () => {
 
     await user.click(screen.getByRole("button", { name: "Sin stock" }))
     expect(await screen.findByText("vacío")).toBeInTheDocument()
+  })
+
+  test("vacía por completo el carrito al completar una compra", async () => {
+    const { user } = renderCart()
+
+    expect(await screen.findByText("mesa-1:2")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: "Vaciar carrito" }))
+
+    expect(await screen.findByText("vacío")).toBeInTheDocument()
+    expect(JSON.parse(window.localStorage.getItem(CART_STORAGE_KEY))).toEqual([])
   })
 })

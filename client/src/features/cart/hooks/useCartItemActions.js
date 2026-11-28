@@ -4,7 +4,13 @@ import { useCart } from "./useCart"
 
 export const hasStockFor = (product, quantity) => {
   const stock = Number(product.stock)
-  return Number.isFinite(stock) && quantity <= stock
+  const requestedQuantity = Number(quantity ?? product?.quantity ?? 1)
+  return (
+    Number.isFinite(stock) &&
+    Number.isInteger(requestedQuantity) &&
+    requestedQuantity >= 1 &&
+    requestedQuantity <= stock
+  )
 }
 
 export const useCartItemActions = () => {
