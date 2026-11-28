@@ -11,6 +11,7 @@ import {
   createUser,
   signToken,
   tokenFor,
+  validShippingBody,
 } from "./helpers.js"
 
 const missingId = () => new mongoose.Types.ObjectId().toString()
@@ -34,7 +35,7 @@ const postOrder = (body, token = clienteToken) =>
   request(app)
     .post("/api/ordenes")
     .set("Authorization", `Bearer ${token}`)
-    .send(body)
+    .send({ envio: validShippingBody(), ...body })
 
 const stockOf = async (product) => (await Product.findById(product._id).lean()).stock
 
@@ -80,6 +81,70 @@ describe("POST /api/ordenes", () => {
     expect(res.body.total).toBe(1000)
     expect(res.body.comprador).toBe(cliente._id.toString())
     expect(res.body.estado).toBe("aceptada")
+  })
+
+  it("guarda los datos de envío normalizados y descarta los campos desconocidos", async () => {
+    const mesa = await createProduct({ precio: 1000, stock: 5 })
+
+    const res = await postOrder({
+      productos: [{ producto: mesa._id.toString(), cantidad: 1 }],
+      envio: validShippingBody({
+        nombreCompleto: "  Ana Pérez  ",
+        ciudad: " Rosario ",
+        piso: "3B",
+      }),
+    })
+
+    const expected = validShippingBody({ ciudad: "Rosario" })
+    expect(res.status).toBe(201)
+    expect(res.body.envio).toEqual(expected)
+
+    const saved = await PurchaseOrder.findById(res.body._id).lean()
+    expect(saved.envio).toEqual(expected)
+  })
+
+  it("responde 400 si falta el envío y no descuenta stock", async () => {
+    const mesa = await createProduct({ stock: 5 })
+
+    const res = await postOrder({
+      productos: [{ producto: mesa._id.toString(), cantidad: 1 }],
+      envio: undefined,
+    })
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({
+      error: "Datos inválidos",
+      details: ["Indicá los datos de envío"],
+    })
+    expect(await stockOf(mesa)).toBe(5)
+    expect(await PurchaseOrder.countDocuments()).toBe(0)
+  })
+
+  it.each([
+    ["con el envío que no es un objeto", "Av. Corrientes 1234", "Los datos de envío no son válidos"],
+    ["sin el nombre completo", validShippingBody({ nombreCompleto: "   " }), "Ingresá el nombre completo de quien recibe"],
+    ["con un nombre demasiado largo", validShippingBody({ nombreCompleto: "a".repeat(101) }), "El nombre completo no puede superar los 100 caracteres"],
+    ["sin el teléfono", validShippingBody({ telefono: "" }), "Ingresá un teléfono de contacto"],
+    ["con un teléfono inválido", validShippingBody({ telefono: "llamame" }), "Ingresá un teléfono válido"],
+    ["sin la dirección", validShippingBody({ direccion: undefined }), "Ingresá la dirección de entrega"],
+    ["con una dirección demasiado larga", validShippingBody({ direccion: "a".repeat(121) }), "La dirección no puede superar los 120 caracteres"],
+    ["sin la altura", validShippingBody({ altura: "" }), "Ingresá la altura de la dirección"],
+    ["con una altura demasiado larga", validShippingBody({ altura: "1".repeat(11) }), "La altura no puede superar los 10 caracteres"],
+    ["sin la ciudad", validShippingBody({ ciudad: "" }), "Ingresá la ciudad"],
+    ["sin el código postal", validShippingBody({ codigoPostal: "" }), "Ingresá el código postal"],
+    ["con un código postal inválido", validShippingBody({ codigoPostal: "10-43" }), "Ingresá un código postal válido"],
+  ])("responde 400 %s", async (_, envio, message) => {
+    const mesa = await createProduct({ stock: 5 })
+
+    const res = await postOrder({
+      productos: [{ producto: mesa._id.toString(), cantidad: 1 }],
+      envio,
+    })
+
+    expect(res.status).toBe(400)
+    expect(res.body).toEqual({ error: "Datos inválidos", details: [message] })
+    expect(await stockOf(mesa)).toBe(5)
+    expect(await PurchaseOrder.countDocuments()).toBe(0)
   })
 
   it("suma las cantidades de un producto repetido al controlar el stock", async () => {

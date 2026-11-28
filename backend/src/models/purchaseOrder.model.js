@@ -27,8 +27,44 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false },
 )
 
+export const SHIPPING_LIMITS = {
+  nombreCompleto: 100,
+  telefono: 30,
+  direccion: 120,
+  altura: 10,
+  ciudad: 80,
+  codigoPostal: 8,
+}
+
+export const PHONE_PATTERN = /^[\d\s()+-]{6,30}$/
+export const POSTAL_CODE_PATTERN = /^[A-Za-z\d]{4,8}$/
+
+const shippingText = (name, extra = {}) => ({
+  type: String,
+  required: true,
+  trim: true,
+  maxlength: SHIPPING_LIMITS[name],
+  ...extra,
+})
+
+const shippingSchema = new mongoose.Schema(
+  {
+    nombreCompleto: shippingText("nombreCompleto"),
+    telefono: shippingText("telefono", { match: PHONE_PATTERN }),
+    direccion: shippingText("direccion"),
+    altura: shippingText("altura"),
+    ciudad: shippingText("ciudad"),
+    codigoPostal: shippingText("codigoPostal", { match: POSTAL_CODE_PATTERN }),
+  },
+  { _id: false },
+)
+
 const purchaseOrderSchema = new mongoose.Schema(
   {
+    envio: {
+      type: shippingSchema,
+      required: true,
+    },
     productos: {
       type: [orderItemSchema],
       validate: {

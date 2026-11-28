@@ -53,8 +53,19 @@ export const createProduct = (overrides = {}) => {
   })
 }
 
+export const validShippingBody = (overrides = {}) => ({
+  nombreCompleto: "Ana Pérez",
+  telefono: "11 5555-1234",
+  direccion: "Av. Corrientes",
+  altura: "1234",
+  ciudad: "Buenos Aires",
+  codigoPostal: "1043",
+  ...overrides,
+})
+
 export const createPurchaseOrder = (comprador, overrides = {}) =>
   PurchaseOrder.create({
+    envio: validShippingBody(),
     productos: [
       {
         producto: new mongoose.Types.ObjectId(),
