@@ -10,8 +10,8 @@ import {
   AdminProductTable,
   DeleteProductModal,
 } from "../../features/admin"
-import { adminProductsPageStyles as styles } from "../../features/admin/styles/AdminProductsPageStyles"
-import { RefreshCw } from "lucide-react"
+import { adminListPageStyles as styles } from "../../features/admin/styles/AdminListPageStyles"
+import { Plus, RefreshCw } from "lucide-react"
 
 const initialPagination = {
   page: 1,
@@ -129,7 +129,16 @@ export default function AdminProductsPage() {
   return (
     <div className={styles.container}>
       <PageMeta title="Panel de productos" noIndex />
-      <AdminPageHeader />
+      <AdminPageHeader
+        title="Gestionar productos"
+        description="Consultá el catálogo y actualizá rápidamente la información de cada producto."
+        action={
+          <Link to="/admin/crear-producto" className={styles.createLink}>
+            <Plus size={18} aria-hidden="true" />
+            Nuevo producto
+          </Link>
+        }
+      />
 
       <section className={styles.catalog}>
         <div className={styles.catalogHeader}>

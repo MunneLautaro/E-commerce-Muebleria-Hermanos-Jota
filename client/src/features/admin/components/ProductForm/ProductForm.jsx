@@ -22,6 +22,7 @@ export function ProductForm({
   isEditing,
   isSubmitting,
   onSubmit,
+  cancelTo = "/admin/productos",
 }) {
   const [imageErrorUrl, setImageErrorUrl] = useState("")
   const {
@@ -280,7 +281,7 @@ export function ProductForm({
       </section>
 
       <div className={styles.footer}>
-        <Link to="/admin" className={styles.cancelButton}>
+        <Link to={cancelTo} className={styles.cancelButton}>
           Cancelar
         </Link>
         <button

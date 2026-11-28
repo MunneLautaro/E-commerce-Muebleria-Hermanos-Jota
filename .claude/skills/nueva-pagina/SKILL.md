@@ -100,7 +100,7 @@ Seguí el patrón de `ProductDetail.jsx`:
 
 ### Formularios que crean o editan
 
-Cuando el guardado sale bien, mostrá `toast.success(...)` y redirigí con `useNavigate` a donde el usuario ve el resultado: el listado o panel del recurso (por ejemplo, `navigate("/admin")` después de crear o editar un producto). Si el usuario queda en el mismo formulario, no sabe si se guardó y puede reenviarlo por error. El `ToastContainer` vive en `App.jsx`, así que el toast sigue visible después de navegar.
+Cuando el guardado sale bien, mostrá `toast.success(...)` y redirigí con `useNavigate` a donde el usuario ve el resultado: el listado o panel del recurso (por ejemplo, `navigate("/admin/productos")` después de crear o editar un producto). Si el usuario queda en el mismo formulario, no sabe si se guardó y puede reenviarlo por error. El `ToastContainer` vive en `App.jsx`, así que el toast sigue visible después de navegar.
 
 No mandes al usuario a una página que podría no mostrar el recurso. Por ejemplo, el detalle público oculta los productos inactivos. Si el guardado falla, quedate en el formulario con los datos cargados y mostrá `toast.error(error.message || ...)` para que pueda corregir y reintentar.
 
@@ -137,7 +137,7 @@ Los tests van al lado del archivo (`<Nombre>Page.test.jsx`, `<feature>Service.te
 Casos mínimos:
 - Página: renderiza el `<h1>` y el contenido principal. Si carga datos: éxito, error del servidor (500 → mensaje de error) y 404 → `NotFoundPage`. Si está protegida: sin usuario redirige y con el rol correcto muestra la página.
 - Servicio: pide el path y los parámetros correctos y propaga el `status` del error. Copiá el helper `captureRequest` de `client/src/features/products/services/productService.test.js`.
-- Formulario: después de guardar con éxito redirige, y si falla se queda. Para comprobar la redirección, registrá la ruta destino en el test con un elemento simple (`<Route path="/admin" element={<h1>Panel</h1>} />`) y esperá ese heading. Referencia: `client/src/pages/admin/CreateProductPage.test.jsx`.
+- Formulario: después de guardar con éxito redirige, y si falla se queda. Para comprobar la redirección, registrá la ruta destino en el test con un elemento simple (`<Route path="/admin/productos" element={<h1>Panel</h1>} />`) y esperá ese heading. Referencia: `client/src/pages/admin/CreateProductPage.test.jsx`.
 - Ruta: si agregaste lógica especial de routing, un test en `client/src/app/router.test.jsx`.
 - Metadatos: `document.title` y, según corresponda, la `description` o el `noindex`, como indica el skill `seo-pagina`.
 

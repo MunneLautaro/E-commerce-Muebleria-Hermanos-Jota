@@ -85,7 +85,7 @@ export default function CreateProductPage() {
         toast.success("Producto creado correctamente.")
       }
       setPendingPayload(null)
-      navigate("/admin")
+      navigate("/admin/productos")
     } catch (error) {
       toast.error(
         error.message ||
@@ -113,7 +113,7 @@ export default function CreateProductPage() {
   return (
     <section className={styles.container}>
       <PageMeta title={pageTitle} noIndex />
-      <Link to="/admin" className={styles.backLink}>
+      <Link to="/admin/productos" className={styles.backLink}>
         <ArrowLeft size={17} aria-hidden="true" />
         Volver al panel
       </Link>

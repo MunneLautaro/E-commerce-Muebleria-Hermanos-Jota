@@ -1,5 +1,5 @@
 import { lazy } from "react"
-import { Routes, Route } from "react-router-dom"
+import { Navigate, Routes, Route } from "react-router-dom"
 import { Layout } from "../components/Layout/Layout"
 import HomePage from "../pages/home/Home"
 
@@ -28,7 +28,11 @@ export const AppRouter = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/carrito" element={<CartPage />} />
-        <Route path="/admin" element={<AdminProductsPage />} />
+        <Route
+          path="/admin"
+          element={<Navigate to="/admin/productos" replace />}
+        />
+        <Route path="/admin/productos" element={<AdminProductsPage />} />
         <Route path="/admin/crear-producto" element={<CreateProductPage />} />
         <Route
           path="/admin/editar-producto/:id"

@@ -23,7 +23,7 @@ const storedProduct = {
 const renderEditor = (route) =>
   renderWithProviders(
     <Routes>
-      <Route path="/admin" element={<h1>Panel de productos</h1>} />
+      <Route path="/admin/productos" element={<h1>Panel de productos</h1>} />
       <Route path="/admin/crear-producto" element={<CreateProductPage />} />
       <Route
         path="/admin/editar-producto/:id"

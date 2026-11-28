@@ -1,7 +1,9 @@
-export const adminProductsPageStyles = {
+export const adminListPageStyles = {
   loadingSection: "mx-auto max-w-6xl py-8",
   loadingText: "text-sm text-ink-soft",
   container: "mx-auto max-w-6xl",
+  createLink:
+    "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-siena px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#7f4222]",
   catalog:
     "overflow-hidden rounded-2xl border border-[#A0522D]/15 bg-white/90 shadow-marca",
   catalogHeader:
